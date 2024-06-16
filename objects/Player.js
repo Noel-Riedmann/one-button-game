@@ -12,7 +12,7 @@ class Player {
         }
         this.gravity = 0.5
         console.log("player created");
-        
+
         this.canvas = document.querySelector('canvas');
         this.c = this.canvas.getContext('2d');
     }
@@ -42,6 +42,10 @@ class Player {
 
     getHeight() {
         return this.height;
+    }
+
+    getVelocity() {
+        return this.velocity;
     }
 
     draw() {
