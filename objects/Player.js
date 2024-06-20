@@ -1,8 +1,8 @@
 class Player {
     constructor() {
         this.position = {
-            x: 0,
-            y: 0
+            x: 200,
+            y: innerHeight - 200 //get floor height + player
         };
         this.width = 100;
         this.height = 100;
@@ -12,6 +12,7 @@ class Player {
         }
         this.gravity = 0.5
         console.log("player created");
+        console.log("inner", innerHeight);
 
         this.canvas = document.querySelector('canvas');
         this.c = this.canvas.getContext('2d');
@@ -49,6 +50,7 @@ class Player {
     }
 
     draw() {
+        this.c.fillStyle = "Red"
         this.c.fillRect(this.position.x, this.position.y, this.width, this.height)
     }
 
@@ -59,6 +61,7 @@ class Player {
             this.velocity.y += this.gravity
         }
         else { this.velocity.y = 0 }
+
     }
 }
 
