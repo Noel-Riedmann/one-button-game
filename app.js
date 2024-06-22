@@ -1,5 +1,7 @@
 import Player from "./objects/Player.js"
 import Floor from "./objects/Floor.js"
+import Enemy from "./objects/Enemy.js"
+
 
 
 const canvas = document.querySelector('canvas')
@@ -8,16 +10,21 @@ const c = canvas.getContext('2d')
 canvas.width = innerWidth
 canvas.height = innerHeight
 
-const player = new Player()
-player.draw()
 
-const floor = new Floor()
+    let gameStarted = false
+const player = new Player();
+
+    const floor = new Floor();
+
+    const enemy = new Enemy();
+
 
 function animate() {
     requestAnimationFrame(animate)
     c.clearRect(0, 0, canvas.width, canvas.height)
     player.update()
     floor.draw()
+    enemy.draw()
 
     const collisionPointBelow = player.getCollisionPointBelow()
     const collisionPointAbove = player.getCollisionPointAbove()
@@ -29,23 +36,26 @@ function animate() {
         console.log("collision below");
     }
 
-    if (collisionPointAbove.y <= 600) {  
+    if (collisionPointAbove.y <= 0) {  
         player.velocity.y = 1 
         console.log("collision above");
     }
 
+    
 }
-animate()
 
+animate();
 
 document.addEventListener('keydown', (event) => {
-    // temporary solution 
-    if (event.keyCode === 32 && player.getPositionY() + player.getHeight() == floor.getPositionY()) {
-        player.velocity.y -= 20
+    if (gameStarted === true) {
+        // temporary solution 
+        if (event.keyCode === 32 && player.getPositionY() + player.getHeight() == floor.getPositionY()) {
+            player.velocity.y -= 20
+        }
     }
-    console.log(player.getPositionY(), player.getHeight(), "=", floor.getPositionY());
-    console.log(canvas.height);
-    console.log("Space bar pressed");
+    if(event.keyCode === 32 && gameStarted == false ){
+        player.velocity.x += 5;
+        gameStarted = true
+        document.getElementById("startText").classList.add("hide");
+    }
 });
-
- 
