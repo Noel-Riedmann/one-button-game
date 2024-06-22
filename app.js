@@ -1,5 +1,7 @@
 import Player from "./objects/Player.js"
 import Floor from "./objects/Floor.js"
+import Enemy from "./objects/Enemy.js"
+
 
 
 const canvas = document.querySelector('canvas')
@@ -8,11 +10,14 @@ const c = canvas.getContext('2d')
 canvas.width = innerWidth
 canvas.height = innerHeight
 
-let gameStarted = false
-const player = new Player()
-player.draw()
 
-const floor = new Floor()
+    let gameStarted = false
+const player = new Player();
+
+    const floor = new Floor();
+
+    const enemy = new Enemy();
+
 
 function animate() {
     requestAnimationFrame(animate)
@@ -35,9 +40,10 @@ function animate() {
         console.log("collision above");
     }
 
+    
 }
-animate()
 
+animate();
 
 document.addEventListener('keydown', (event) => {
     if (gameStarted === true) {
@@ -52,4 +58,3 @@ document.addEventListener('keydown', (event) => {
         document.getElementById("startText").classList.add("hide");
     }
 });
-
