@@ -11,8 +11,6 @@ class Player {
             y: 1
         }
         this.gravity = 0.5
-        console.log("player created");
-        console.log("inner", innerHeight);
 
         this.canvas = document.querySelector('canvas');
         this.c = this.canvas.getContext('2d');
@@ -48,12 +46,7 @@ class Player {
     getVelocity() {
         return this.velocity;
     }
-
-    draw() {
-        this.c.fillStyle = "Red"
-        this.c.fillRect(this.position.x, this.position.y, this.width, this.height)
-    }
-
+    
     getCollisionPointBelow() {
         return {
             x: this.position.x + this.width / 2,
@@ -75,6 +68,11 @@ class Player {
         }
     }
 
+    draw() {
+        this.c.fillStyle = "Red"
+        this.c.fillRect(this.position.x, this.position.y, this.width, this.height)
+    }
+
     update() {
         this.draw()
         this.position.y += this.velocity.y
@@ -82,7 +80,10 @@ class Player {
             this.velocity.y += this.gravity
         }
         else { this.velocity.y = 0 }
-
+        this.position.x += this.velocity.x
+        if(this.position.x + this.width >= innerWidth){
+            this.position.x = 0
+        }
     }
 }
 
