@@ -20,10 +20,21 @@ function animate() {
     player.update()
     floor.draw()
 
-    if (player.getPositionY() + player.getHeight() >= floor.getPositionY()) {
+    const collisionPointBelow = player.getCollisionPointBelow()
+    const collisionPointAbove = player.getCollisionPointAbove()
+
+ 
+    if (collisionPointBelow.y >= floor.getPositionY()) {
         player.velocity.y = 0
-        player.setPosition(player.getPositionX(), innerHeight - 200) //get floor height + player
+        player.setPosition(player.getPositionX(), floor.getPositionY() - player.getHeight())
+        console.log("collision below");
     }
+
+    if (collisionPointAbove.y <= 600) {  
+        player.velocity.y = 1 
+        console.log("collision above");
+    }
+
 }
 animate()
 

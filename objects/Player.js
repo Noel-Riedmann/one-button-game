@@ -52,6 +52,27 @@ class Player {
         this.c.fillRect(this.position.x, this.position.y, this.width, this.height)
     }
 
+    getCollisionPointBelow() {
+        return {
+            x: this.position.x + this.width / 2,
+            y: this.position.y + this.height + 5
+        }
+    }
+
+    getCollisionPointAbove() {
+        return {
+            x: this.position.x + this.width / 2,
+            y: this.position.y - 5
+        }
+    }
+
+    getCollisionPointRight() {
+        return {
+            x: this.position.x + 5,
+            y: this.position.y + this.height / 2
+        }
+    }
+
     update() {
         this.draw()
         this.position.y += this.velocity.y
