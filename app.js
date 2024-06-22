@@ -30,7 +30,7 @@ function animate() {
         console.log("collision below");
     }
 
-    if (collisionPointAbove.y <= 600) {  
+    if (collisionPointAbove.y <= 0) {  
         player.velocity.y = 1 
         console.log("collision above");
     }

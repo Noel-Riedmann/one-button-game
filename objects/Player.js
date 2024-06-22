@@ -46,6 +46,27 @@ class Player {
     getVelocity() {
         return this.velocity;
     }
+    
+    getCollisionPointBelow() {
+        return {
+            x: this.position.x + this.width / 2,
+            y: this.position.y + this.height + 5
+        }
+    }
+
+    getCollisionPointAbove() {
+        return {
+            x: this.position.x + this.width / 2,
+            y: this.position.y - 5
+        }
+    }
+
+    getCollisionPointRight() {
+        return {
+            x: this.position.x + 5,
+            y: this.position.y + this.height / 2
+        }
+    }
 
     draw() {
         this.c.fillStyle = "Red"
