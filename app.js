@@ -11,40 +11,68 @@ canvas.width = innerWidth
 canvas.height = innerHeight
 
 
-    let gameStarted = false
-const player = new Player();
+let gameStarted = false
+let gameOver = false;
+let animationFrameID;
+let player, floor, enemy;
 
-    const floor = new Floor();
+function init() {
+    player = new Player();
 
-    const enemy = new Enemy();
+    floor = new Floor();
+
+    enemy = new Enemy();
+
+    gameOver = false;
+    gameStarted = false;
+    animate();
+    gameStart();
+
+    
+    
+}
+
 
 
 function animate() {
-    requestAnimationFrame(animate)
+    if (gameOver) return;
+    animationFrameID = requestAnimationFrame(animate)
     c.clearRect(0, 0, canvas.width, canvas.height)
     player.update()
-    floor.draw()
-    enemy.draw()
+    floor.draw(c)
+    enemy.draw(c)
 
     const collisionPointBelow = player.getCollisionPointBelow()
     const collisionPointAbove = player.getCollisionPointAbove()
 
- 
+
     if (collisionPointBelow.y >= floor.getPositionY()) {
         player.velocity.y = 0
         player.setPosition(player.getPositionX(), floor.getPositionY() - player.getHeight())
         console.log("collision below");
     }
 
-    if (collisionPointAbove.y <= 0) {  
-        player.velocity.y = 1 
+    if (collisionPointAbove.y <= 0) {
+        player.velocity.y = 1
         console.log("collision above");
     }
 
-    
-}
+    //Enemy Player Collision-Abfrage
+    if (
+        player.getPositionX() < enemy.getPositionX() + enemy.getWidth() &&
+        player.getPositionX() + player.getWidth() > enemy.getPositionX() &&
+        player.getPositionY() + 20 < enemy.getPositionY() + enemy.getHeight() &&
+        player.getPositionY() + player.getHeight() > enemy.getPositionY()
+    ) {
+        gameOver = true;
+        cancelAnimationFrame(animationFrameID);
+        init();
+        console.log("aösdfjösafjsafs")
+        gameStarted = false;
+    }
 
-animate();
+
+}
 
 document.addEventListener('keydown', (event) => {
     if (gameStarted === true) {
@@ -53,9 +81,20 @@ document.addEventListener('keydown', (event) => {
             player.velocity.y -= 20
         }
     }
-    if(event.keyCode === 32 && gameStarted == false ){
-        player.velocity.x += 5;
-        gameStarted = true
-        document.getElementById("startText").classList.add("hide");
+
+    function gameStart() {
+        if (event.keyCode === 32 && gameStarted == false) {
+            player.velocity.x += 5;
+            gameStarted = true
+            const startText = document.getElementById("startText");
+            if (startText) {
+                startText.classList.add("hide");
+            }
+        }
     }
+
+    gameStart();
 });
+
+
+init();
