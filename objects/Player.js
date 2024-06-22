@@ -11,8 +11,6 @@ class Player {
             y: 1
         }
         this.gravity = 0.5
-        console.log("player created");
-        console.log("inner", innerHeight);
 
         this.canvas = document.querySelector('canvas');
         this.c = this.canvas.getContext('2d');
@@ -61,7 +59,10 @@ class Player {
             this.velocity.y += this.gravity
         }
         else { this.velocity.y = 0 }
-
+        this.position.x += this.velocity.x
+        if(this.position.x + this.width >= innerWidth){
+            this.position.x = 0
+        }
     }
 }
 

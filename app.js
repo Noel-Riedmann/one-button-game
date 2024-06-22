@@ -8,6 +8,7 @@ const c = canvas.getContext('2d')
 canvas.width = innerWidth
 canvas.height = innerHeight
 
+let gameStarted = false
 const player = new Player()
 player.draw()
 
@@ -28,13 +29,16 @@ animate()
 
 
 document.addEventListener('keydown', (event) => {
-    // temporary solution 
-    if (event.keyCode === 32 && player.getPositionY() + player.getHeight() == floor.getPositionY()) {
-        player.velocity.y -= 20
+    if (gameStarted === true) {
+        // temporary solution 
+        if (event.keyCode === 32 && player.getPositionY() + player.getHeight() == floor.getPositionY()) {
+            player.velocity.y -= 20
+        }
     }
-    console.log(player.getPositionY(), player.getHeight(), "=", floor.getPositionY());
-    console.log(canvas.height);
-    console.log("Space bar pressed");
+    if(event.keyCode === 32 && gameStarted == false ){
+        player.velocity.x += 5;
+        gameStarted = true
+        document.getElementById("startText").classList.add("hide");
+    }
 });
 
- 
