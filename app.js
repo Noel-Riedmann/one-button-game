@@ -29,21 +29,22 @@ function animate() {
     player.update()
     enemy.draw()
 
+    if(player.position.y > innerHeight - 100){
+        player.velocity.x = 0
+        player.velocity.y = 20
+    }
+
     floors.forEach(floor => {
         floor.draw()
         const collisionPointBelow = player.getCollisionPointBelow()
         const collisionPointAbove = player.getCollisionPointAbove()
-        if((player.position.y + player.height <= floor.position.y + 5 || player.position.y + player.height >= floor.position.y - 5) && player.position.y + player.height != floor.position.y){
-            console.log("player is in rage to tp");
-        }
         if (collisionPointBelow.y >= floor.position.y && player.position.x > floor.position.x && player.position.x <= floor.position.x + floor.width) {
             player.velocity.y = 0
-            if (player.position.y != floor.position.y - player.height && player.velocity.y == 0) {
+            if (player.position.y + player.height <= floor.position.y - 3 || player.position.y + player.height <= floor.position.y + 3 && player.position.y + player.height != floor.position.y) {
                 player.setPosition(player.position.x, floor.position.y - player.height)
                 console.log("player height corrected")
             }
         }
-
         if (collisionPointAbove.y <= 0) {
             player.velocity.y = 1
             console.log("collision above");
