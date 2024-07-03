@@ -16,6 +16,7 @@ let gameOver = false;
 let animationFrameID;
 let player, floor, enemy;
 
+
 function init() {
     player = new Player();
 
@@ -23,11 +24,18 @@ function init() {
 
     enemy = new Enemy();
 
-    gameOver = false;
-    gameStarted = false;
-    animate();
-    gameStart();
+    
 
+    gameOver = false;
+    
+    gameStarted = false;
+    
+    animate();
+    
+    const startText = document.getElementById("startText");
+    if (startText) {
+        startText.classList.remove("hide");
+    }
     
     
 }
