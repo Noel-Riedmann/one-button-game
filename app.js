@@ -14,7 +14,7 @@ let animationFrameID;
 let player, enemies, floors;
 let lastUpdateTime = performance.now();
 let accumulator = 0;
-const timeStep = 1000 / 60; // Assuming 60 FPS
+const timeStep = 1000 / 60; // Assuming 60 FPSs
 
 function init() {
     player = new Player();
