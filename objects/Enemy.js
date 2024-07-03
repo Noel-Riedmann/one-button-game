@@ -1,12 +1,11 @@
 class Enemy {
-    constructor() {
+    constructor(height, width, positionX, positionY) {
+        this.height = height;
+        this.width = width;
         this.position = {
-            x: 220,
-            y: 400
+            x: positionX,
+            y: positionY
         };
-        this.width = 20;
-        this.height = 20;
-
         this.canvas = document.querySelector('canvas');
         this.c = this.canvas.getContext('2d');
 

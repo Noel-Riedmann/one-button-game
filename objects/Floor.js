@@ -1,10 +1,10 @@
 class Floor {
-    constructor() {
-        this.height = 100;
-        this.width = innerWidth;
+    constructor(height, width, positionX, positionY) {
+        this.height = height;
+        this.width = width;
         this.position = {
-            x: 0,
-            y: innerHeight - this.height
+            x: positionX,
+            y: positionY
         };
 
         this.canvas = document.querySelector('canvas');
