@@ -14,7 +14,7 @@ canvas.height = innerHeight
 let gameStarted = false
 let gameOver = false;
 let animationFrameID;
-let player, enemy, floors;
+let player, enemies, floors;
 
 
 function init() {
@@ -26,9 +26,10 @@ function init() {
         new Floor(30, 300, 1000, 500)
     ]
 
-    enemy = new Enemy();
-
-
+    enemies = [
+        new Enemy(20, 20, 200, 400),
+        new Enemy(20, canvas.width, 0, canvas.height)
+    ]
 
     gameOver = false;
 
@@ -40,10 +41,7 @@ function init() {
     if (startText) {
         startText.classList.remove("hide");
     }
-
-
 }
-
 
 
 function animate() {
@@ -51,7 +49,7 @@ function animate() {
     animationFrameID = requestAnimationFrame(animate)
     c.clearRect(0, 0, canvas.width, canvas.height)
     player.update()
-    enemy.draw()
+
 
     if (player.position.y > innerHeight - 100) {
         player.velocity.x = 0
@@ -59,42 +57,53 @@ function animate() {
     }
 
     floors.forEach(floor => {
-        floor.draw()
-        const collisionPointBelow = player.getCollisionPointBelow()
-        const collisionPointAbove = player.getCollisionPointAbove()
-        if (collisionPointBelow.y >= floor.position.y && player.position.x > floor.position.x && player.position.x <= floor.position.x + floor.width) {
-            player.velocity.y = 0
-            if (player.position.y + player.height <= floor.position.y - 3 || player.position.y + player.height <= floor.position.y + 3 && player.position.y + player.height != floor.position.y) {
-                player.setPosition(player.position.x, floor.position.y - player.height)
-                console.log("player height corrected")
-            }
+        floor.draw();
+        const collisionPointBelow = player.getCollisionPointBelow();
+        const collisionPointAbove = player.getCollisionPointAbove();
+
+        // Überprüfung, ob der Spieler auf die Plattform fällt
+        if (
+            collisionPointBelow.y >= floor.position.y &&
+            collisionPointBelow.y < floor.position.y + floor.height &&
+            player.position.x + player.width > floor.position.x &&
+            player.position.x < floor.position.x + floor.width &&
+            player.velocity.y >= 0
+        ) {
+            player.velocity.y = 0;
+            player.position.y = floor.position.y - player.height;
+            console.log("player landed on platform");
         }
-        if (collisionPointAbove.y <= 0) {
-            player.velocity.y = 1
-            console.log("collision above");
+
+        // Überprüfung, ob der Spieler von unten gegen die Plattform springt
+        if (
+            collisionPointAbove.y <= floor.position.y + floor.height &&
+            collisionPointAbove.y > floor.position.y &&
+            player.position.x + player.width > floor.position.x &&
+            player.position.x < floor.position.x + floor.width &&
+            player.velocity.y < 0
+        ) {
+            player.velocity.y = Math.abs(player.velocity.y); // Invert the velocity to make the player bounce off
+            console.log("collision from below, player bounces off");
         }
     });
 
-
-
-
-
-
     //Enemy Player Collision-Abfrage
-    if (
-        player.getPositionX() < enemy.getPositionX() + enemy.getWidth() &&
-        player.getPositionX() + player.getWidth() > enemy.getPositionX() &&
-        player.getPositionY() + 20 < enemy.getPositionY() + enemy.getHeight() &&
-        player.getPositionY() + player.getHeight() > enemy.getPositionY()
-    ) {
-        gameOver = true;
-        cancelAnimationFrame(animationFrameID);
-        init();
-        console.log("aösdfjösafjsafs")
-        gameStarted = false;
-    }
 
-
+    enemies.forEach(enemy => {
+        enemy.draw()
+        if (
+            player.getPositionX() < enemy.getPositionX() + enemy.getWidth() &&
+            player.getPositionX() + player.getWidth() > enemy.getPositionX() &&
+            player.getPositionY() + 20 < enemy.getPositionY() + enemy.getHeight() &&
+            player.getPositionY() + player.getHeight() > enemy.getPositionY()
+        ) {
+            gameOver = true;
+            cancelAnimationFrame(animationFrameID);
+            init();
+            console.log("aösdfjösafjsafs")
+            gameStarted = false;
+        }
+    })
 }
 
 document.addEventListener('keydown', (event) => {
