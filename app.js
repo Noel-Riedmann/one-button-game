@@ -1,21 +1,20 @@
-import Player from "./objects/Player.js"
-import Floor from "./objects/Floor.js"
-import Enemy from "./objects/Enemy.js"
+import Player from "./objects/Player.js";
+import Floor from "./objects/Floor.js";
+import Enemy from "./objects/Enemy.js";
 
+const canvas = document.querySelector('canvas');
+const c = canvas.getContext('2d');
 
+canvas.width = innerWidth;
+canvas.height = innerHeight;
 
-const canvas = document.querySelector('canvas')
-const c = canvas.getContext('2d')
-
-canvas.width = innerWidth
-canvas.height = innerHeight
-
-
-let gameStarted = false
+let gameStarted = false;
 let gameOver = false;
 let animationFrameID;
 let player, enemies, floors;
-
+let lastUpdateTime = performance.now();
+let accumulator = 0;
+const timeStep = 1000 / 60; // Assuming 60 FPS
 
 function init() {
     player = new Player();
@@ -24,40 +23,53 @@ function init() {
         new Floor(100, 500, 0, innerHeight - 100),
         new Floor(100, 1000, 700, innerHeight - 100),
         new Floor(30, 300, 1000, 500)
-    ]
+    ];
 
     enemies = [
         new Enemy(20, 20, 200, 400),
         new Enemy(20, canvas.width, 0, canvas.height)
-    ]
+    ];
 
     gameOver = false;
-
     gameStarted = false;
-
-    animate();
 
     const startText = document.getElementById("startText");
     if (startText) {
         startText.classList.remove("hide");
     }
-}
 
+    animate();
+}
 
 function animate() {
     if (gameOver) return;
-    animationFrameID = requestAnimationFrame(animate)
-    c.clearRect(0, 0, canvas.width, canvas.height)
-    player.update()
 
+    const now = performance.now();
+    const deltaTime = now - lastUpdateTime;
+    lastUpdateTime = now;
+    accumulator += deltaTime;
+
+    while (accumulator >= timeStep) {
+        update(timeStep / 1000); // Convert ms to seconds
+        accumulator -= timeStep;
+    }
+
+    draw();
+
+    if (!gameOver) {
+        animationFrameID = requestAnimationFrame(animate);
+    }
+}
+
+function update(step) {
+    player.update(step);
 
     if (player.position.y > innerHeight - 100) {
-        player.velocity.x = 0
-        player.velocity.y = 20
+        player.velocity.x = 0;
+        player.velocity.y = 20;
     }
 
     floors.forEach(floor => {
-        floor.draw();
         const collisionPointBelow = player.getCollisionPointBelow();
         const collisionPointAbove = player.getCollisionPointAbove();
 
@@ -88,9 +100,7 @@ function animate() {
     });
 
     //Enemy Player Collision-Abfrage
-
     enemies.forEach(enemy => {
-        enemy.draw()
         if (
             player.getPositionX() < enemy.getPositionX() + enemy.getWidth() &&
             player.getPositionX() + player.getWidth() > enemy.getPositionX() &&
@@ -100,24 +110,37 @@ function animate() {
             gameOver = true;
             cancelAnimationFrame(animationFrameID);
             init();
-            console.log("aösdfjösafjsafs")
+            console.log("aösdfjösafjsafs");
             gameStarted = false;
         }
-    })
+    });
+}
+
+function draw() {
+    c.clearRect(0, 0, canvas.width, canvas.height);
+    player.draw();
+
+    floors.forEach(floor => {
+        floor.draw();
+    });
+
+    enemies.forEach(enemy => {
+        enemy.draw();
+    });
 }
 
 document.addEventListener('keydown', (event) => {
     if (gameStarted === true) {
         // temporary solution 
         if (event.keyCode === 32 /*&& player.getPositionY() + player.getHeight() == floor.getPositionY()*/) {
-            player.velocity.y -= 20
+            player.velocity.y -= 20;
         }
     }
 
     function gameStart() {
         if (event.keyCode === 32 && gameStarted == false) {
             player.velocity.x += 5;
-            gameStarted = true
+            gameStarted = true;
             const startText = document.getElementById("startText");
             if (startText) {
                 startText.classList.add("hide");
@@ -127,6 +150,5 @@ document.addEventListener('keydown', (event) => {
 
     gameStart();
 });
-
 
 init();
