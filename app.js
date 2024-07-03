@@ -14,34 +14,34 @@ canvas.height = innerHeight
 let gameStarted = false
 let gameOver = false;
 let animationFrameID;
-let player, floor, enemy;
+let player, enemy, floors;
 
 
 function init() {
     player = new Player();
 
-const floors = [
-    new Floor(100, 500, 0, innerHeight - 100),
-    new Floor(100, 1000, 700, innerHeight - 100),
-    new Floor(30, 300, 1000, 500)
-]
+    floors = [
+        new Floor(100, 500, 0, innerHeight - 100),
+        new Floor(100, 1000, 700, innerHeight - 100),
+        new Floor(30, 300, 1000, 500)
+    ]
 
     enemy = new Enemy();
 
-    
+
 
     gameOver = false;
-    
+
     gameStarted = false;
-    
+
     animate();
-    
+
     const startText = document.getElementById("startText");
     if (startText) {
         startText.classList.remove("hide");
     }
-    
-    
+
+
 }
 
 
@@ -53,7 +53,7 @@ function animate() {
     player.update()
     enemy.draw()
 
-    if(player.position.y > innerHeight - 100){
+    if (player.position.y > innerHeight - 100) {
         player.velocity.x = 0
         player.velocity.y = 20
     }
