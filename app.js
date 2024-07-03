@@ -32,9 +32,9 @@ function init() {
     ]
 
     enemies = [
-        new Enemy(20, 20, 500, 400, "blue"),
+        new Enemy(20, 20, 500, 405, "blue"),
         new Enemy(20, 20, 750, 700, "blue"),
-        new Enemy(20, canvas.width, 0, canvas.height, "red"),
+        new Enemy(20, canvas.width, 0, canvas.height-5, "red"),
         new Enemy(100,20,canvas.width-40, canvas.height-200, "green")
         
     ]
@@ -73,7 +73,7 @@ function animate() {
 function update(step) {
     player.update(step);
 
-    if (player.position.y > innerHeight - 100) {
+    if (player.position.y > canvas.height - 100) {
         player.velocity.x = 0;
         player.velocity.y = 20;
     }
@@ -140,14 +140,14 @@ function draw() {
 document.addEventListener('keydown', (event) => {
     if (gameStarted === true) {
         // temporary solution 
-        if (event.keyCode === 32 && canJump === true) {
+        if (event.keyCode === 32 && canJump === true && player.velocity.y === 0) {
             canJump = false
             player.velocity.y -= 15 
         }
     }
 
     function gameStart() {
-        if (event.keyCode === 32 && gameStarted == false) {
+        if (event.keyCode === 32 && gameStarted === false) {
             player.velocity.x += 5;
             gameStarted = true;
             const startText = document.getElementById("startText");
