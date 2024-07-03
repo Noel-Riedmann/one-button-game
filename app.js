@@ -12,7 +12,13 @@ canvas.height = innerHeight
 
 
 let gameStarted = false
-const player = new Player();
+let gameOver = false;
+let animationFrameID;
+let player, floor, enemy;
+
+
+function init() {
+    player = new Player();
 
 const floors = [
     new Floor(100, 500, 0, innerHeight - 100),
@@ -20,11 +26,29 @@ const floors = [
     new Floor(30, 300, 1000, 500)
 ]
 
-const enemy = new Enemy();
+    enemy = new Enemy();
+
+    
+
+    gameOver = false;
+    
+    gameStarted = false;
+    
+    animate();
+    
+    const startText = document.getElementById("startText");
+    if (startText) {
+        startText.classList.remove("hide");
+    }
+    
+    
+}
+
 
 
 function animate() {
-    requestAnimationFrame(animate)
+    if (gameOver) return;
+    animationFrameID = requestAnimationFrame(animate)
     c.clearRect(0, 0, canvas.width, canvas.height)
     player.update()
     enemy.draw()
@@ -56,10 +80,22 @@ function animate() {
 
 
 
+    //Enemy Player Collision-Abfrage
+    if (
+        player.getPositionX() < enemy.getPositionX() + enemy.getWidth() &&
+        player.getPositionX() + player.getWidth() > enemy.getPositionX() &&
+        player.getPositionY() + 20 < enemy.getPositionY() + enemy.getHeight() &&
+        player.getPositionY() + player.getHeight() > enemy.getPositionY()
+    ) {
+        gameOver = true;
+        cancelAnimationFrame(animationFrameID);
+        init();
+        console.log("aösdfjösafjsafs")
+        gameStarted = false;
+    }
+
 
 }
-
-animate();
 
 document.addEventListener('keydown', (event) => {
     if (gameStarted === true) {
@@ -68,9 +104,20 @@ document.addEventListener('keydown', (event) => {
             player.velocity.y -= 20
         }
     }
-    if (event.keyCode === 32 && gameStarted == false) {
-        player.velocity.x += 5;
-        gameStarted = true
-        document.getElementById("startText").classList.add("hide");
+
+    function gameStart() {
+        if (event.keyCode === 32 && gameStarted == false) {
+            player.velocity.x += 5;
+            gameStarted = true
+            const startText = document.getElementById("startText");
+            if (startText) {
+                startText.classList.add("hide");
+            }
+        }
     }
+
+    gameStart();
 });
+
+
+init();
