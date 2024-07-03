@@ -13,6 +13,9 @@ let gameStarted = false;
 let gameOver = false;
 let animationFrameID;
 let player, enemies, floors;
+let lastUpdateTime = performance.now();
+let accumulator = 0;
+const timeStep = 1000 / 60; // Assuming 60 FPSs
 let canJump = false;
 
 
