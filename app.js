@@ -27,8 +27,11 @@ function init() {
     ]
 
     enemies = [
-        new Enemy(20, 20, 200, 400),
-        new Enemy(20, canvas.width, 0, canvas.height)
+        new Enemy(20, 20, 500, 400, "blue"),
+        new Enemy(20, 20, 750, 700, "blue"),
+        new Enemy(20, canvas.width, 0, canvas.height, "red"),
+        new Enemy(100,20,canvas.width-40, canvas.height-200, "green")
+        
     ]
 
     gameOver = false;

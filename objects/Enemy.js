@@ -1,18 +1,19 @@
 class Enemy {
-    constructor(height, width, positionX, positionY) {
+    constructor(height, width, positionX, positionY, color) {
         this.height = height;
         this.width = width;
         this.position = {
             x: positionX,
             y: positionY
         };
+        this.color = color;
         this.canvas = document.querySelector('canvas');
         this.c = this.canvas.getContext('2d');
 
     }
 
     draw() {
-        this.c.fillStyle = "Blue"
+        this.c.fillStyle = this.color;
         this.c.fillRect(this.position.x, this.position.y, this.width, this.height)
     }    
 
