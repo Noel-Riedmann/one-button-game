@@ -1,14 +1,23 @@
-body{
-    margin: 0
+body {
+    margin: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
 }
 
-.startText{
+.startText {
     position: absolute;
     width: 100%;
     top: 20%;
     text-align: center;
 }
 
-.hide{
+.hide {
     display: none;
+}
+
+.canvas {
+    border-style: solid;
+
 }

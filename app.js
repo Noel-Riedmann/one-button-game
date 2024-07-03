@@ -5,25 +5,28 @@ import Enemy from "./objects/Enemy.js";
 const canvas = document.querySelector('canvas');
 const c = canvas.getContext('2d');
 
-canvas.width = innerWidth;
-canvas.height = innerHeight;
+canvas.width = 1200
+canvas.height = 700
+
 
 let gameStarted = false;
 let gameOver = false;
 let animationFrameID;
 let player, enemies, floors;
-let lastUpdateTime = performance.now();
-let accumulator = 0;
-const timeStep = 1000 / 60; // Assuming 60 FPS
+let canJump = false;
+
 
 function init() {
     player = new Player();
 
     floors = [
-        new Floor(100, 500, 0, innerHeight - 100),
-        new Floor(100, 1000, 700, innerHeight - 100),
-        new Floor(30, 300, 1000, 500)
-    ];
+        //height / widhth / pos x / pos y
+        new Floor(100, 500, 0, canvas.height - 100),
+        new Floor(100, 1000, 700, canvas.height - 100),
+        new Floor(20, 200, 400, 450),
+        new Floor(20, 200,600,300)
+    
+    ]
 
     enemies = [
         new Enemy(20, 20, 500, 400, "blue"),
@@ -76,7 +79,6 @@ function update(step) {
         const collisionPointBelow = player.getCollisionPointBelow();
         const collisionPointAbove = player.getCollisionPointAbove();
 
-        // Überprüfung, ob der Spieler auf die Plattform fällt
         if (
             collisionPointBelow.y >= floor.position.y &&
             collisionPointBelow.y < floor.position.y + floor.height &&
@@ -87,9 +89,9 @@ function update(step) {
             player.velocity.y = 0;
             player.position.y = floor.position.y - player.height;
             console.log("player landed on platform");
+            canJump = true
         }
 
-        // Überprüfung, ob der Spieler von unten gegen die Plattform springt
         if (
             collisionPointAbove.y <= floor.position.y + floor.height &&
             collisionPointAbove.y > floor.position.y &&
@@ -97,7 +99,7 @@ function update(step) {
             player.position.x < floor.position.x + floor.width &&
             player.velocity.y < 0
         ) {
-            player.velocity.y = Math.abs(player.velocity.y); // Invert the velocity to make the player bounce off
+            player.velocity.y = 0; 
             console.log("collision from below, player bounces off");
         }
     });
@@ -135,8 +137,9 @@ function draw() {
 document.addEventListener('keydown', (event) => {
     if (gameStarted === true) {
         // temporary solution 
-        if (event.keyCode === 32 /*&& player.getPositionY() + player.getHeight() == floor.getPositionY()*/) {
-            player.velocity.y -= 20;
+        if (event.keyCode === 32 && canJump === true) {
+            canJump = false
+            player.velocity.y -= 15 
         }
     }
 

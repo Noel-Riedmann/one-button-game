@@ -1,11 +1,11 @@
 class Player {
     constructor() {
         this.position = {
-            x: 200,
-            y: innerHeight - 200 //get floor height + player
+            x: 50,
+            y: 500
         };
-        this.width = 100;
-        this.height = 100;
+        this.width = 50;
+        this.height = 50;
         this.velocity = {
             x: 0,
             y: 1
@@ -81,7 +81,7 @@ class Player {
         }
         else { this.velocity.y = 0 }
         this.position.x += this.velocity.x
-        if(this.position.x + this.width >= innerWidth){
+        if(this.position.x + this.width >= 1200){
             this.position.x = 0
         }
     }
