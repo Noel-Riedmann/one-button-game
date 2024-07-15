@@ -1,4 +1,3 @@
-
 import Player from "./Player.js";
 
 class Game {
@@ -16,10 +15,11 @@ class Game {
         if (this.gameStarted === true && this.canJump === true && this.player.velocity.y === 0) {
             this.canJump = false;
             this.player.velocity.y -= 15;
-
-            console.log("test");
+            console.log("Player jumped");
         }
+    }
 
+    startGame() {
         if (this.gameStarted === false) {
             this.player.velocity.x += 5;
             this.gameStarted = true;
@@ -27,14 +27,23 @@ class Game {
             if (startText) {
                 startText.classList.add("hide");
             }
-            console.log("test2");
+            console.log("Game started");
         }
     }
 
-    
+    update() {
+        this.player.update();
+        this.player.collisionDetectionPlatforms();
+        
+        // Reset jump capability if player is on the ground
+        if (this.player.position.y + this.player.height >= this.canvas.height) {
+            this.canJump = true;
+        }
+    }
 
-    startGame() {
-        this.gameStarted = true;
+    draw() {
+        this.c.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        this.player.draw();
     }
 
     endGame() {

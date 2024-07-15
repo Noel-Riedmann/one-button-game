@@ -12,7 +12,7 @@ class Player {
             x: 0,
             y: 1
         }
-        this.gravity = 0.5
+        this.gravity = 0.5;
 
         this.canvas = document.querySelector('canvas');
         this.c = this.canvas.getContext('2d');
@@ -33,7 +33,7 @@ class Player {
         };
 
         this.collisionPointRight = {
-            x: this.position.x + 5,
+            x: this.position.x + this.width - 5,
             y: this.position.y + this.height / 2
         };
     }
@@ -56,7 +56,6 @@ class Player {
     }
 
     update() {
-        this.draw();
         this.position.y += this.velocity.y;
         if (this.position.y + this.height + this.velocity.y <= this.canvas.height) {
             this.velocity.y += this.gravity;
@@ -68,6 +67,7 @@ class Player {
             this.position.x = 0;
         }
         this.updateCollisionPoints();
+        this.draw();
     }
 
     collisionDetectionPlatforms() {
