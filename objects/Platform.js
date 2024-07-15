@@ -1,4 +1,4 @@
-class Floor {
+class Platform {
     constructor(height, width, positionX, positionY) {
         this.height = height;
         this.width = width;
@@ -9,25 +9,23 @@ class Floor {
 
         this.canvas = document.querySelector('canvas');
         this.c = this.canvas.getContext('2d');
-
-
-        console.log(this.position.y);
     }
 
     draw() {
         this.c.fillStyle = "Black"
         this.c.fillRect(this.position.x, this.position.y, this.width, this.height);
     }
+    getPlatforms() {
+        return [
+            //height / widhth / pos x / pos y
+            new Platform(100, 500, 0, this.canvas.height - 100),
+            new Platform(100, 1000, 700, this.canvas.height - 100),
+            new Platform(20, 200, 400, 450),
+            new Platform(20, 200, 600, 300)
 
-    getHeight() {
-        return this.height;
+        ]
     }
-
-    getPositionY() {
-        return this.position.y;
-    }
-
 
 }
 
-export default Floor;
+export default Platform;
