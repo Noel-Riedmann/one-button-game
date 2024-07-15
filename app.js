@@ -1,27 +1,28 @@
 import Player from "./objects/Player.js";
 import Platform from "./objects/Platform.js";
 import Enemy from "./objects/Enemy.js";
+import Game from "./objects/Game.js";
 
 const canvas = document.querySelector('canvas');
 const c = canvas.getContext('2d');
 
-canvas.width = 1200
-canvas.height = 700
 
 
-let gameStarted = false;
+
+
 let gameOver = false;
 let animationFrameID;
-let player, enemies, platform;
+let player, enemies, platform, game;
 let lastUpdateTime = performance.now();
 let accumulator = 0;
 const timeStep = 1000 / 60; // Assuming 60 FPSs
-let canJump = false;
+
 
 
 function init() {
     player = new Player();
     platform = new Platform();
+    game = new Game();
 
     
 
@@ -34,7 +35,7 @@ function init() {
     ]
 
     gameOver = false;
-    gameStarted = false;
+    game.endGame();
 
     const startText = document.getElementById("startText");
     if (startText) {
@@ -88,7 +89,10 @@ function update(step) {
             console.log("aösdfjösafjsafs");
             gameStarted = false;
         }
+        
     });
+
+    
 }
 
 function draw() {
@@ -105,26 +109,11 @@ function draw() {
 }
 
 document.addEventListener('keydown', (event) => {
-    if (gameStarted === true) {
-        // temporary solution 
-        if (event.keyCode === 32 && canJump === true && player.velocity.y === 0) {
-            canJump = false
-            player.velocity.y -= 15 
-        }
+    if (event.keyCode === 32 && game.gameStarted === false) {
+        game.playerJump();
+       
     }
-
-    function gameStart() {
-        if (event.keyCode === 32 && gameStarted === false) {
-            player.velocity.x += 5;
-            gameStarted = true;
-            const startText = document.getElementById("startText");
-            if (startText) {
-                startText.classList.add("hide");
-            }
-        }
-    }
-
-    gameStart();
+    
 });
 
 init();
