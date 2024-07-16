@@ -1,5 +1,7 @@
 import Game from "./Game.js";
 import Platform from "./Platform.js";
+import Enemy from "./Enemy.js";
+
 
 class Player {
     constructor(canvas) {
@@ -19,8 +21,10 @@ class Player {
         this.c = this.canvas.getContext('2d');
         this.platform = new Platform();
         this.game = null;
-
+        this.enemy = new Enemy();
+        this.gameOver = false;
         this.updateCollisionPoints();
+      
     }
 
 
@@ -101,6 +105,23 @@ class Player {
             ) {
                 this.velocity.y = 0;
                 console.log("collision from below, player bounces off");
+            }
+            if (this.position.y > this.canvas.height - 100) {
+                this.velocity.x = 0;
+                this.velocity.y = 20;
+            }
+        });
+    }
+
+    collisionDetectionEnemies() {
+        this.enemy.getEnemies().forEach(enemy => { 
+            if (
+                this.position.x < enemy.position.x + enemy.width &&
+                this.position.x + this.width > enemy.position.x &&
+                this.position.y + 20 < enemy.position.y + enemy.height &&
+                this.position.y + this.height > enemy.position.y
+            ) {
+                this.gameOver = true;
             }
         });
     }

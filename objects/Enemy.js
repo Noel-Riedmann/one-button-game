@@ -10,6 +10,7 @@ class Enemy {
         this.canvas = document.querySelector('canvas');
         this.c = this.canvas.getContext('2d');
 
+
     }
 
     draw() {
@@ -43,6 +44,13 @@ class Enemy {
     getHeight() {
         return this.height;
     }
+
+    getEnemies() { return [
+        new Enemy(20, 20, 500, 405, "blue"),
+        new Enemy(20, 20, 750, 700, "blue"),
+        new Enemy(20, this.canvas.width, 0, this.canvas.height - 5, "red"),
+        new Enemy(100, 20, this.canvas.width - 40, this.canvas.height - 200, "green")
+    ]}
 }
 
 
