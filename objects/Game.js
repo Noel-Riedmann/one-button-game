@@ -8,11 +8,11 @@ class Game {
         this.canvas.height = 700;
         this.gameStarted = false;
         this.canJump = true;
-        this.player = new Player();
+        this.player = new Player(this.canvas);
     }
 
     playerJump() {
-        if (this.gameStarted === true && this.canJump === true && this.player.velocity.y === 0) {
+        if (this.gameStarted && this.canJump && this.player.velocity.y === 0) {
             this.canJump = false;
             this.player.velocity.y -= 15;
             console.log("Player jumped");
@@ -20,8 +20,8 @@ class Game {
     }
 
     startGame() {
-        if (this.gameStarted === false) {
-            this.player.velocity.x += 5;
+        if (!this.gameStarted) {
+            this.player.velocity.x = 5;
             this.gameStarted = true;
             const startText = document.getElementById("startText");
             if (startText) {

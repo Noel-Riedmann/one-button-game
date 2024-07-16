@@ -3,9 +3,9 @@ import Platform from "./objects/Platform.js";
 import Enemy from "./objects/Enemy.js";
 import Game from "./objects/Game.js";
 
+// Initialize game variables
 const canvas = document.querySelector('canvas');
 const c = canvas.getContext('2d');
-
 let gameOver = false;
 let animationFrameID;
 let player, enemies, platform, game;
@@ -13,11 +13,11 @@ let lastUpdateTime = performance.now();
 let accumulator = 0;
 const timeStep = 1000 / 60; // Assuming 60 FPS
 
+// Game initialization function
 function init() {
     player = new Player();
     platform = new Platform();
     game = new Game();
-
     enemies = [
         new Enemy(20, 20, 500, 405, "blue"),
         new Enemy(20, 20, 750, 700, "blue"),
@@ -36,6 +36,7 @@ function init() {
     animate();
 }
 
+// Game animation loop
 function animate() {
     if (gameOver) return;
 
@@ -56,6 +57,7 @@ function animate() {
     }
 }
 
+// Game update function
 function update(step) {
     player.update(step);
 
@@ -65,7 +67,7 @@ function update(step) {
     }
     player.collisionDetectionPlatforms();
 
-    // Enemy Player Collision-Abfrage
+    // Check for collision between player and enemies
     enemies.forEach(enemy => {
         if (
             player.position.x < enemy.position.x + enemy.width &&
@@ -77,11 +79,11 @@ function update(step) {
             cancelAnimationFrame(animationFrameID);
             init();
             console.log("Game Over");
-            gameStarted = false;
         }
     });
 }
 
+// Game draw function
 function draw() {
     c.clearRect(0, 0, canvas.width, canvas.height);
     player.draw();
@@ -95,6 +97,7 @@ function draw() {
     });
 }
 
+// Keydown event listener
 document.onkeydown = function(event) {
     if (event.keyCode === 32) { // Space key
         if (!game.gameStarted) {
@@ -105,4 +108,5 @@ document.onkeydown = function(event) {
     }
 };
 
+// Start the game
 init();
