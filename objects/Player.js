@@ -1,7 +1,8 @@
+import Game from "./Game.js";
 import Platform from "./Platform.js";
 
 class Player {
-    constructor() {
+    constructor(canvas) {
         this.position = {
             x: 50,
             y: 500
@@ -14,11 +15,17 @@ class Player {
         }
         this.gravity = 0.5;
 
-        this.canvas = document.querySelector('canvas');
+        this.canvas = canvas;
         this.c = this.canvas.getContext('2d');
         this.platform = new Platform();
+        this.game = null;
 
         this.updateCollisionPoints();
+    }
+
+
+    setGame(game){
+        this.game = game;
     }
 
     updateCollisionPoints() {
@@ -82,7 +89,7 @@ class Player {
                 this.velocity.y = 0;
                 this.position.y = platform.position.y - this.height;
                 console.log("player landed on platform");
-                // todo: canJump = true;
+                this.game.playerCanJump();
             }
 
             if (

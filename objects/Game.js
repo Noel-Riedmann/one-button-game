@@ -1,18 +1,24 @@
 import Player from "./Player.js";
 
+
 class Game {
-    constructor() {
-        this.canvas = document.querySelector('canvas');
+    constructor(canvas) {
+        this.canvas = canvas
         this.c = this.canvas.getContext('2d');
         this.canvas.width = 1200;
         this.canvas.height = 700;
         this.gameStarted = false;
         this.canJump = true;
-        this.player = new Player(this.canvas);
+        this.player = null;
+    }
+
+
+    setPlayer(player){
+        this.player = player;
     }
 
     playerJump() {
-        if (this.gameStarted && this.canJump && this.player.velocity.y === 0) {
+        if (this.gameStarted === true && this.canJump === true && this.player.velocity.y === 0) {
             this.canJump = false;
             this.player.velocity.y -= 15;
             console.log("Player jumped");
@@ -52,6 +58,10 @@ class Game {
 
     getGamestate() {
         return this.gameStarted;
+    }
+
+    playerCanJump(){
+        return this.canJump = true;
     }
 }
 

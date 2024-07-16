@@ -15,9 +15,14 @@ const timeStep = 1000 / 60; // Assuming 60 FPS
 
 // Game initialization function
 function init() {
-    player = new Player();
-    platform = new Platform();
-    game = new Game();
+    player = new Player(canvas);
+    platform = new Platform(canvas);
+    game = new Game(canvas);
+
+    player.setGame(game);
+    game.setPlayer(player);
+
+
     enemies = [
         new Enemy(20, 20, 500, 405, "blue"),
         new Enemy(20, 20, 750, 700, "blue"),
@@ -97,16 +102,16 @@ function draw() {
     });
 }
 
-// Keydown event listener
-document.onkeydown = function(event) {
-    if (event.keyCode === 32) { // Space key
-        if (!game.gameStarted) {
+// addEventListener
+document.addEventListener('keydown', (event) => {
+    if (event.keyCode === 32) {
+        if (game.gameStarted === false) {
             game.startGame();
         } else {
             game.playerJump();
         }
     }
-};
+});
 
 // Start the game
 init();
