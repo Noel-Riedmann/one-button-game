@@ -6,10 +6,7 @@ import Game from "./objects/Game.js";
 const canvas = document.querySelector('canvas');
 const c = canvas.getContext('2d');
 let gameOver = false;
-let animationFrameID;
 let player, enemy, platform, game;
-let lastUpdateTime = performance.now();
-let accumulator = 0;
 const timeStep = 1000 / 60; 
 
 
