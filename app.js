@@ -16,14 +16,11 @@ const timeStep = 1000 / 60;
 function init() {
     player = new Player(canvas);
     platform = new Platform(canvas);
-    game = new Game(canvas);
+    game = new Game(canvas, update);
     enemy = new Enemy(canvas);
 
     player.setGame(game);
     game.setPlayer(player);
-
-
-   
 
     gameOver = false;
     game.endGame();
@@ -33,31 +30,8 @@ function init() {
         startText.classList.remove("hide");
     }
 
-    animate();
+    game.animate();
 }
-
-
-function animate() {
-    if (gameOver) return;
-
-    
-    const now = performance.now();
-    const deltaTime = now - lastUpdateTime;
-    lastUpdateTime = now;
-    accumulator += deltaTime;
-
-    while (accumulator >= timeStep) {
-        update(timeStep / 1000);
-        accumulator -= timeStep;
-    }
-
-    draw();
-
-    if (!gameOver) {
-        animationFrameID = requestAnimationFrame(animate);
-    }
-}
-
 
 function update(step) {
     player.update(step);
@@ -76,18 +50,7 @@ function update(step) {
     
 }
 
-function draw() {
-    c.clearRect(0, 0, canvas.width, canvas.height);
-    player.draw();
 
-    platform.getPlatforms().forEach(platform => {
-        platform.draw();
-    });
-
-    enemy.getEnemies().forEach(enemy => {
-        enemy.draw();
-    });
-}
 
 
 document.addEventListener('keydown', (event) => {

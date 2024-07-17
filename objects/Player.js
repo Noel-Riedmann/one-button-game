@@ -125,6 +125,9 @@ class Player {
             }
         });
     }
+    getGamestate() {
+        return this.gameOver;
+    }
 }
 
 export default Player;

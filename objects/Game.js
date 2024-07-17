@@ -1,8 +1,9 @@
 import Player from "./Player.js";
-
+import Platform from "./Platform.js";
+import Enemy from "./Enemy.js";
 
 class Game {
-    constructor(canvas) {
+    constructor(canvas, update) {
         this.canvas = canvas
         this.c = this.canvas.getContext('2d');
         this.canvas.width = 1200;
@@ -10,6 +11,17 @@ class Game {
         this.gameStarted = false;
         this.canJump = true;
         this.player = null;
+        this.platform = new Platform();
+        this.c = canvas.getContext('2d');
+        this.enemy = new Enemy();
+        this.lastUpdateTime = performance.now();
+        this.accumulator = 0;
+        this.timeStep = 1000 / 60; 
+        this.animationFrameID;
+
+        this.update = update;
+
+        this.animate = this.animate.bind(this);
     }
 
 
@@ -37,7 +49,7 @@ class Game {
         }
     }
 
-    update() {
+/*    gameUpdate() {
         this.player.update();
         this.player.collisionDetectionPlatforms();
         
@@ -45,7 +57,7 @@ class Game {
         if (this.player.position.y + this.player.height >= this.canvas.height) {
             this.canJump = true;
         }
-    }
+    } */
 
     draw() {
         this.c.clearRect(0, 0, this.canvas.width, this.canvas.height);
@@ -63,6 +75,42 @@ class Game {
     playerCanJump(){
         return this.canJump = true;
     }
+
+    draw() {
+        this.c.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        this.player.draw();
+    
+        this.platform.getPlatforms().forEach(platform => {
+            platform.draw();
+        });
+    
+        this.enemy.getEnemies().forEach(enemy => {
+            enemy.draw();
+        });
+    }
+
+    animate() {
+        if (this.player.getGamestate()) return;
+    
+        
+        const now = performance.now();
+        const deltaTime = now - this.lastUpdateTime;
+        this.lastUpdateTime = now;
+        this.accumulator += deltaTime;
+    
+        while (this.accumulator >= this.timeStep) {
+            this.update(this.timeStep / 1000);
+            this.accumulator -= this.timeStep;
+        }
+    
+        this.draw();
+    
+        if (!this.player.getGamestate()) {
+            this.animationFrameID = requestAnimationFrame(this.animate);
+        }
+    }
+
+    
 }
 
 export default Game;
