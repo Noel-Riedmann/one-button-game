@@ -7,11 +7,11 @@ const canvas = document.querySelector('canvas');
 const c = canvas.getContext('2d');
 let gameOver = false;
 let player, enemy, platform, game;
-const timeStep = 1000 / 60; 
+const timeStep = 1000 / 60;
 
 
 function init() {
-    player = new Player(canvas,init);
+    player = new Player(canvas, init);
     platform = new Platform(canvas);
     game = new Game(canvas, update);
     enemy = new Enemy(canvas);
@@ -35,6 +35,7 @@ function update(step) {
     player.collisionDetectionPlatforms();
     player.collisionDetectionEnemies();
     player.checkDead();
+    platform.update();
 }
 
 
