@@ -4,7 +4,7 @@ import Enemy from "./Enemy.js";
 
 
 class Player {
-    constructor(canvas) {
+    constructor(canvas, init) {
         this.position = {
             x: 50,
             y: 500
@@ -24,7 +24,8 @@ class Player {
         this.enemy = new Enemy();
         this.gameOver = false;
         this.updateCollisionPoints();
-      
+        this.init = init;
+        this.animationFrameID;
     }
 
 
@@ -127,6 +128,13 @@ class Player {
     }
     getGamestate() {
         return this.gameOver;
+    }
+    checkDead() {
+        if(this.gameOver === true){
+            cancelAnimationFrame(this.animationFrameID);
+            this.init();
+            console.log("Game Over");
+        }
     }
 }
 

@@ -14,7 +14,7 @@ const timeStep = 1000 / 60;
 
 
 function init() {
-    player = new Player(canvas);
+    player = new Player(canvas,init);
     platform = new Platform(canvas);
     game = new Game(canvas, update);
     enemy = new Enemy(canvas);
@@ -35,19 +35,9 @@ function init() {
 
 function update(step) {
     player.update(step);
-
-
     player.collisionDetectionPlatforms();
-
-    
     player.collisionDetectionEnemies();
-   
-    if(player.gameOver === true){
-        cancelAnimationFrame(animationFrameID);
-        init();
-        console.log("Game Over");
-    }
-    
+    player.checkDead();
 }
 
 
