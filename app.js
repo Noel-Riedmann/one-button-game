@@ -34,7 +34,6 @@ function update(step) {
     player.collisionDetectionPlatforms();
     player.collisionDetectionEnemies();
     player.checkDead();
-    platform.update();
 }
 
 
