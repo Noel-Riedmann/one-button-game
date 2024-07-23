@@ -46,8 +46,7 @@ class Enemy {
     }
 
     getEnemies() { return [
-        new Enemy(20, 20, 500, 405, "blue"),
-        new Enemy(20, 20, 750, 700, "blue"),
+        new Enemy(20, 20, 300, 200, "blue"),
         new Enemy(20, this.canvas.width, 0, this.canvas.height - 5, "red"),
         new Enemy(100, 20, this.canvas.width - 40, this.canvas.height - 200, "green")
     ]}

@@ -1,5 +1,5 @@
 import Game from "./Game.js";
-import Platform from "./Platform.js";
+import PlatformManager from "./PlatformManager.js";
 import Enemy from "./Enemy.js";
 
 
@@ -19,7 +19,7 @@ class Player {
 
         this.canvas = canvas;
         this.c = this.canvas.getContext('2d');
-        this.platform = new Platform();
+        this.platformManager = new PlatformManager(this.canvas);
         this.game = null;
         this.enemy = new Enemy();
         this.gameOver = false;
@@ -83,7 +83,7 @@ class Player {
     }
 
     collisionDetectionPlatforms() {
-        this.platform.getPlatforms().forEach(platform => {
+        this.platformManager.getPlatforms().forEach(platform => {
             if (
                 this.collisionPointBelow.y >= platform.position.y &&
                 this.collisionPointBelow.y < platform.position.y + platform.height &&
