@@ -1,4 +1,8 @@
+import PlatformManager from "./PlatformManager.js";
 class Platform {
+    constructor(canvas, height, width, positionX, positionY, velocity) {
+        this.canvas = canvas;
+        this.c = canvas.getContext('2d');
     constructor(height, width, positionX, positionY, velocityX) {
         this.height = height;
         this.width = width;
@@ -6,6 +10,7 @@ class Platform {
             x: positionX,
             y: positionY
         };
+        this.velocity = velocity;
         this.velocityX = velocityX;
 
         this.canvas = document.querySelector('canvas');
@@ -13,9 +18,17 @@ class Platform {
     }
 
     draw() {
-        this.c.fillStyle = "Black"
+        this.c.fillStyle = "Black";
         this.c.fillRect(this.position.x, this.position.y, this.width, this.height);
     }
+    
+
+    update() {
+        this.position.x -= this.velocity;
+
+        if (this.position.x + this.width < 0) {
+            this.position.x = this.canvas.width;
+        }
 
 
     update() {

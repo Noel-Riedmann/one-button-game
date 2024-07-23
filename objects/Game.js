@@ -1,5 +1,5 @@
 import Player from "./Player.js";
-import Platform from "./Platform.js";
+import PlatformManager from "./PlatformManager.js";
 import Enemy from "./Enemy.js";
 
 class Game {
@@ -11,7 +11,7 @@ class Game {
         this.gameStarted = false;
         this.canJump = true;
         this.player = null;
-        this.platform = new Platform();
+        this.platformManager = new PlatformManager(this.canvas);
         this.c = canvas.getContext('2d');
         this.enemy = new Enemy();
         this.lastUpdateTime = performance.now();
@@ -79,20 +79,19 @@ class Game {
     draw() {
         this.c.clearRect(0, 0, this.canvas.width, this.canvas.height);
         this.player.draw();
-    
-        this.platform.getPlatforms().forEach(platform => {
-            platform.draw();
-        });
-    
+        this.platformManager.update()
+
+       
         this.enemy.getEnemies().forEach(enemy => {
             enemy.draw();
         });
     }
 
     animate() {
+
         if (this.player.getGamestate()) return;
     
-        
+
         const now = performance.now();
         const deltaTime = now - this.lastUpdateTime;
         this.lastUpdateTime = now;
@@ -102,6 +101,7 @@ class Game {
             this.update(this.timeStep / 1000);
             this.accumulator -= this.timeStep;
         }
+
     
         this.draw();
     
