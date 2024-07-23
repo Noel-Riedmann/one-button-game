@@ -79,7 +79,7 @@ class Game {
     draw() {
         this.c.clearRect(0, 0, this.canvas.width, this.canvas.height);
         this.player.draw();
-        this.platformManager.update()
+        this.platformManager.update();
 
        
         this.enemy.getEnemies().forEach(enemy => {

@@ -1,6 +1,7 @@
 import Player from "./objects/Player.js";
 import Enemy from "./objects/Enemy.js";
 import Game from "./objects/Game.js";
+import PlatformManager from "./objects/PlatformManager.js";
 
 const canvas = document.querySelector('canvas');
 const c = canvas.getContext('2d');
@@ -13,7 +14,7 @@ function init() {
     player = new Player(canvas,init);
     game = new Game(canvas, update);
     enemy = new Enemy(canvas);
-
+    platformManager = new PlatformManager(canvas);
 
     player.setGame(game);
     game.setPlayer(player);
@@ -34,6 +35,7 @@ function update(step) {
     player.collisionDetectionPlatforms();
     player.collisionDetectionEnemies();
     player.checkDead();
+    platformManager.update(step);
 }
 
 
