@@ -84,6 +84,7 @@ class Player {
 
     collisionDetectionPlatforms() {
         this.platformManager.getPlatforms().forEach(platform => {
+            console.log(platform.position.x);
             if (
                 this.collisionPointBelow.y >= platform.position.y &&
                 this.collisionPointBelow.y < platform.position.y + platform.height &&

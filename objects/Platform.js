@@ -12,7 +12,7 @@ class Platform {
         this.velocity = velocity;
     }
 
-    draw() {
+    draw() { 
         this.c.fillStyle = "Black";
         this.c.fillRect(this.position.x, this.position.y, this.width, this.height);
     }
