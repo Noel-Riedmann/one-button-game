@@ -9,8 +9,6 @@ class PlatformManager {
     }
 
     createPlatforms() {
-        console.log("hey");
-
         return [
             new Platform(this.canvas, 100, 500, 0, this.canvas.height - 100, 0),
             new Platform(this.canvas, 100, 1000, 700, this.canvas.height - 100, 0),
@@ -25,10 +23,13 @@ class PlatformManager {
         });
     }
 
-    getPlatforms() {
+    getPlatforms(){
         this.update()
         return this.platforms;
+
     }
+
+     
 }
 
 export default PlatformManager;
