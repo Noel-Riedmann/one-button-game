@@ -17,10 +17,6 @@ class Platform {
 
     update(game) {
         this.position.x -= this.velocity;
-
-        if (this.position.x + this.width < 0) {
-            this.position.x = game.canvas.width;
-        }
     }
 }
 
