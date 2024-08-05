@@ -1,6 +1,6 @@
 import Enemy from "./Enemy.js";
 import Platform from "./Platform.js";
-
+import Highscore from "./Highscore.js";
 
 class Player {
     constructor() {
@@ -13,9 +13,10 @@ class Player {
         this.velocity = {
             x: 0,
             y: 1
-        }
+        };
         this.gravity = 0.5;
 
+        this.highscore = new Highscore();
         this.gameOver = false;
         this.updateCollisionPoints();
     }
@@ -68,18 +69,19 @@ class Player {
         this.updateCollisionPoints();
         this.collisionDetectionPlatforms(game);
         this.collisionDetectionEnemies(game);
-        this.checkDead();
+        this.checkDead(game);
         if (this.canJump === true && this.velocity.y === 0 && game.buttonPressed === true) {
             this.canJump = false;
             this.velocity.y -= 15;
             console.log("Player jumped");
-
         }
+
+        game.highscore.increment();
     }
 
     collisionDetectionPlatforms(game) {
         game.objects.forEach(platform => {
-            if (!(platform instanceof Platform)) { return }
+            if (!(platform instanceof Platform)) { return; }
             if (
                 this.collisionPointBelow.y >= platform.position.y &&
                 this.collisionPointBelow.y < platform.position.y + platform.height &&
@@ -90,7 +92,7 @@ class Player {
                 this.velocity.y = 0;
                 this.position.y = platform.position.y - this.height;
                 console.log("player landed on platform");
-                this.canJump = true
+                this.canJump = true;
             }
 
             if (
@@ -112,7 +114,7 @@ class Player {
 
     collisionDetectionEnemies(game) {
         game.objects.forEach(enemy => {
-            if (!(enemy instanceof Enemy)) { return }
+            if (!(enemy instanceof Enemy)) { return; }
             if (
                 this.position.x < enemy.position.x + enemy.width &&
                 this.position.x + this.width > enemy.position.x &&
@@ -120,14 +122,20 @@ class Player {
                 this.position.y + this.height > enemy.position.y
             ) {
                 game.gameOver = true;
+                game.endGame();
             }
         });
     }
+
     getGamestate() {
         return this.gameOver;
     }
-    checkDead() {
-    
+
+    checkDead(game) {
+        if (game.gameOver) {
+            this.highscore.update();
+            this.highscore.resetCurrentScore();
+        }
     }
 }
 
