@@ -1,10 +1,9 @@
-import Game from "./Game.js";
-import PlatformManager from "./PlatformManager.js";
 import Enemy from "./Enemy.js";
+import Platform from "./Platform.js";
 
 
 class Player {
-    constructor(canvas, init) {
+    constructor() {
         this.position = {
             x: 50,
             y: 500
@@ -17,20 +16,8 @@ class Player {
         }
         this.gravity = 0.5;
 
-        this.canvas = canvas;
-        this.c = this.canvas.getContext('2d');
-        this.platformManager = new PlatformManager(this.canvas);
-        this.game = null;
-        this.enemy = new Enemy();
         this.gameOver = false;
         this.updateCollisionPoints();
-        this.init = init;
-        this.animationFrameID;
-    }
-
-
-    setGame(game){
-        this.game = game;
     }
 
     updateCollisionPoints() {
@@ -62,14 +49,14 @@ class Player {
         this.updateCollisionPoints();
     }
 
-    draw() {
-        this.c.fillStyle = "Red";
-        this.c.fillRect(this.position.x, this.position.y, this.width, this.height);
+    draw(c) {
+        c.fillStyle = "Red";
+        c.fillRect(this.position.x, this.position.y, this.width, this.height);
     }
 
-    update() {
+    update(game) {
         this.position.y += this.velocity.y;
-        if (this.position.y + this.height + this.velocity.y <= this.canvas.height) {
+        if (this.position.y + this.height + this.velocity.y <= game.canvas.height) {
             this.velocity.y += this.gravity;
         } else {
             this.velocity.y = 0;
@@ -79,12 +66,20 @@ class Player {
             this.position.x = 0;
         }
         this.updateCollisionPoints();
-        this.draw();
+        this.collisionDetectionPlatforms(game);
+        this.collisionDetectionEnemies(game);
+        this.checkDead();
+        if (this.canJump === true && this.velocity.y === 0 && game.buttonPressed === true) {
+            this.canJump = false;
+            this.velocity.y -= 15;
+            console.log("Player jumped");
+
+        }
     }
 
-    collisionDetectionPlatforms() {
-        this.platformManager.getPlatforms().forEach(platform => {
-            console.log(platform.position.x);
+    collisionDetectionPlatforms(game) {
+        game.objects.forEach(platform => {
+            if (!(platform instanceof Platform)) { return }
             if (
                 this.collisionPointBelow.y >= platform.position.y &&
                 this.collisionPointBelow.y < platform.position.y + platform.height &&
@@ -95,7 +90,7 @@ class Player {
                 this.velocity.y = 0;
                 this.position.y = platform.position.y - this.height;
                 console.log("player landed on platform");
-                this.game.playerCanJump();
+                this.canJump = true
             }
 
             if (
@@ -108,22 +103,23 @@ class Player {
                 this.velocity.y = 0;
                 console.log("collision from below, player bounces off");
             }
-            if (this.position.y > this.canvas.height - 100) {
+            if (this.position.y > game.canvas.height - 100) {
                 this.velocity.x = 0;
                 this.velocity.y = 20;
             }
         });
     }
 
-    collisionDetectionEnemies() {
-        this.enemy.getEnemies().forEach(enemy => { 
+    collisionDetectionEnemies(game) {
+        game.objects.forEach(enemy => {
+            if (!(enemy instanceof Enemy)) { return }
             if (
                 this.position.x < enemy.position.x + enemy.width &&
                 this.position.x + this.width > enemy.position.x &&
                 this.position.y + 20 < enemy.position.y + enemy.height &&
                 this.position.y + this.height > enemy.position.y
             ) {
-                this.gameOver = true;
+                game.gameOver = true;
             }
         });
     }
@@ -131,11 +127,7 @@ class Player {
         return this.gameOver;
     }
     checkDead() {
-        if(this.gameOver === true){
-            cancelAnimationFrame(this.animationFrameID);
-            this.init();
-            console.log("Game Over");
-        }
+    
     }
 }
 

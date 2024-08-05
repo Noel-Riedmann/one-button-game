@@ -1,8 +1,5 @@
-import PlatformManager from "./PlatformManager.js";
 class Platform {
-    constructor(canvas, height, width, positionX, positionY, velocity) {
-        this.canvas = canvas;
-        this.c = canvas.getContext('2d');
+    constructor(height, width, positionX, positionY, velocity) {
         this.height = height;
         this.width = width;
         this.position = {
@@ -12,17 +9,17 @@ class Platform {
         this.velocity = velocity;
     }
 
-    draw() { 
-        this.c.fillStyle = "Black";
-        this.c.fillRect(this.position.x, this.position.y, this.width, this.height);
+    draw(c) { 
+        c.fillStyle = "Black";
+        c.fillRect(this.position.x, this.position.y, this.width, this.height);
     }
     
 
-    update() {
+    update(game) {
         this.position.x -= this.velocity;
 
         if (this.position.x + this.width < 0) {
-            this.position.x = this.canvas.width;
+            this.position.x = game.canvas.width;
         }
     }
 }

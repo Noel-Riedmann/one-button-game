@@ -1,45 +1,55 @@
 import Player from "./Player.js";
-import PlatformManager from "./PlatformManager.js";
+import Platform from "./Platform.js";
 import Enemy from "./Enemy.js";
 
 class Game {
-    constructor(canvas, update) {
+    constructor(canvas) {
         this.canvas = canvas
-        this.c = this.canvas.getContext('2d');
         this.canvas.width = 1200;
         this.canvas.height = 700;
-        this.gameStarted = false;
-        this.canJump = true;
-        this.player = null;
-        this.platformManager = new PlatformManager(this.canvas);
-        this.c = canvas.getContext('2d');
-        this.enemy = new Enemy();
+        this.c = this.canvas.getContext('2d');
+
         this.lastUpdateTime = performance.now();
         this.accumulator = 0;
-        this.timeStep = 1000 / 60; 
+        this.timeStep = 1000 / 60;
         this.animationFrameID;
 
-        this.update = update;
-
         this.animate = this.animate.bind(this);
+
+        document.addEventListener('keydown', this.onKeydown)
+        document.addEventListener('keyup', this.onKeyup)
+    }
+
+    init() {
+        this.gameOver = false;
+        this.gameStarted = false;
+        this.objects = [
+            new Platform(100, this.canvas.width, 0, this.canvas.height - 100, 0),
+            new Platform(50, 200, 700, 500, 3),
+            new Enemy(20, 20, 75, 300, "blue"),
+            new Enemy(20, this.canvas.width, 0, this.canvas.height - 5, "red"),
+            new Enemy(100, 20, this.canvas.width - 40, this.canvas.height - 200, "green"),
+            new Player()
+        ]
+        this.animate()
+        const startText = document.getElementById("startText"); 
+        startText.classList.remove("hide");
     }
 
 
-    setPlayer(player){
-        this.player = player;
+    onKeydown = (event) => {
+        if (event.keyCode === 32) {
+            this.buttonPressed = true;
+        }
     }
-
-    playerJump() {
-        if (this.gameStarted === true && this.canJump === true && this.player.velocity.y === 0) {
-            this.canJump = false;
-            this.player.velocity.y -= 15;
-            console.log("Player jumped");
+    onKeyup = (event) => {
+        if (event.keyCode === 32) {
+            this.buttonPressed = false;
         }
     }
 
     startGame() {
         if (!this.gameStarted) {
-            this.player.velocity.x = 5;
             this.gameStarted = true;
             const startText = document.getElementById("startText");
             if (startText) {
@@ -48,22 +58,6 @@ class Game {
             console.log("Game started");
         }
     }
-
-/*    gameUpdate() {
-        this.player.update();
-        this.player.collisionDetectionPlatforms();
-        
-        // Reset jump capability if player is on the ground
-        if (this.player.position.y + this.player.height >= this.canvas.height) {
-            this.canJump = true;
-        }
-    } */
-
-    draw() {
-        this.c.clearRect(0, 0, this.canvas.width, this.canvas.height);
-        this.player.draw();
-    }
-
     endGame() {
         this.gameStarted = false;
     }
@@ -72,45 +66,56 @@ class Game {
         return this.gameStarted;
     }
 
-    playerCanJump(){
+    playerCanJump() {
         return this.canJump = true;
     }
 
     draw() {
         this.c.clearRect(0, 0, this.canvas.width, this.canvas.height);
-        this.player.draw();
-        this.platformManager.update();
-
-       
-        this.enemy.getEnemies().forEach(enemy => {
-            enemy.draw();
+        this.objects.forEach(object => {
+            object.draw(this.c)
         });
     }
 
+    update() {
+        this.objects.forEach(object => {
+            object.update(this)
+        });
+
+        if (this.gameOver === true) {
+            cancelAnimationFrame(this.animationFrameID);
+            this.init();
+            console.log("Game Over");
+        }
+
+        if (this.gameStarted === false && this.buttonPressed === true) {
+            this.startGame()
+        }
+    }
+
+
     animate() {
-
-        if (this.player.getGamestate()) return;
-    
-
         const now = performance.now();
         const deltaTime = now - this.lastUpdateTime;
         this.lastUpdateTime = now;
         this.accumulator += deltaTime;
-    
+
         while (this.accumulator >= this.timeStep) {
             this.update(this.timeStep / 1000);
             this.accumulator -= this.timeStep;
         }
 
-    
         this.draw();
-    
-        if (!this.player.getGamestate()) {
-            this.animationFrameID = requestAnimationFrame(this.animate);
-        }
+
+        this.animationFrameID = requestAnimationFrame(this.animate);
+
+
+
     }
 
-    
+
+
+
 }
 
 export default Game;
