@@ -25,7 +25,6 @@ class PlatformManager {
     }
 
     update() {
-        // Check and create platforms if necessary
         let needNewPlatform = true;
         this.game.objects.forEach(platform => {
             if (platform instanceof Platform) {
@@ -38,18 +37,16 @@ class PlatformManager {
             this.createPlatform();
         }
 
-        // Remove platforms that are off-screen
         this.game.objects = this.game.objects.filter(object => {
             if (object instanceof Platform) {
                 if (object.position.x + object.width <= 0) {
                     return false;
                 }
-                // Remove platforms with 0 velocity if the game has started
                 if (this.game. gameStarted && object.velocity === 0) {
                     return false;
                 }
             }
-            return true; // Keep all other objects
+            return true; 
         });
     }
 }
