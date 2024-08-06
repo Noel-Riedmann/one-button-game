@@ -30,3 +30,36 @@ canvas {
     transform: translate(-50%, -50%) scale(var(--canvas-scale, 1));
     image-rendering: pixelated;
   }
+
+  .highScoreText {
+    position: fixed;
+    left: 10vw;
+    top: 2vh;
+    font-size: 2vw;
+    font-family: 'Verdana', sans-serif;
+    color: black;
+}
+
+@media (max-width: 600px) {
+    .highScoreText {
+        left: 5vw;
+        top: 1vh;
+        font-size: 4vw;
+    }
+}
+
+@media (min-width: 601px) and (max-width: 1200px) {
+    .highScoreText {
+        left: 7vw;
+        top: 1.5vh;
+        font-size: 3vw;
+    }
+}
+
+@media (min-width: 1201px) {
+    .highScoreText {
+        left: 10vw;
+        top: 2vh;
+        font-size: 1vw;
+    }
+}

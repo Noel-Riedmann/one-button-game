@@ -1,11 +1,12 @@
 import Player from "./Player.js";
 import Platform from "./Platform.js";
 import Enemy from "./Enemy.js";
+import Highscore from "./Highscore.js";
 import PlatformManager from "./PlatformManager.js";
 
 class Game {
     constructor(canvas) {
-        this.canvas = canvas
+        this.canvas = canvas;
         this.canvas.width = 1200;
         this.canvas.height = 700;
         this.c = this.canvas.getContext('2d');
@@ -18,8 +19,10 @@ class Game {
 
         this.animate = this.animate.bind(this);
 
-        document.addEventListener('keydown', this.onKeydown)
-        document.addEventListener('keyup', this.onKeyup)
+        this.highscore = new Highscore();
+
+        document.addEventListener('keydown', this.onKeydown);
+        document.addEventListener('keyup', this.onKeyup);
     }
 
     init() {
@@ -31,18 +34,18 @@ class Game {
             new Enemy(20, this.canvas.width, 0, this.canvas.height - 5, "red"),
             new Enemy(100, 20, this.canvas.width - 40, this.canvas.height - 200, "green"),
             new Player()
-        ]
-        this.animate()
+        ];
+        this.animate();
         const startText = document.getElementById("startText"); 
         startText.classList.remove("hide");
     }
-
 
     onKeydown = (event) => {
         if (event.keyCode === 32) {
             this.buttonPressed = true;
         }
     }
+
     onKeyup = (event) => {
         if (event.keyCode === 32) {
             this.buttonPressed = false;
@@ -59,7 +62,11 @@ class Game {
             console.log("Game started");
         }
     }
+
     endGame() {
+        
+        this.highscore.update();
+        this.highscore.resetCurrentScore();
         this.gameStarted = false;
     }
 
@@ -74,13 +81,14 @@ class Game {
     draw() {
         this.c.clearRect(0, 0, this.canvas.width, this.canvas.height);
         this.objects.forEach(object => {
-            object.draw(this.c)
+            object.draw(this.c);
         });
+        this.updateHighscoreDisplay();
     }
 
     update() {
         this.objects.forEach(object => {
-            object.update(this)
+            object.update(this);
         });
 
         this.platfformanager.update()
@@ -88,14 +96,12 @@ class Game {
         if (this.gameOver === true) {
             cancelAnimationFrame(this.animationFrameID);
             this.init();
-            console.log("Game Over");
         }
 
         if (this.gameStarted === false && this.buttonPressed === true) {
-            this.startGame()
+            this.startGame();
         }
     }
-
 
     animate() {
         const now = performance.now();
@@ -111,39 +117,14 @@ class Game {
         this.draw();
 
         this.animationFrameID = requestAnimationFrame(this.animate);
-
-
-
     }
 
-
-
-
+    updateHighscoreDisplay() {
+        const highScoreTextElement = document.getElementById('highScoreText');
+        if (highScoreTextElement) {
+            highScoreTextElement.innerHTML = `Highscore: ${this.highscore.getHighScore()}<br>Current Score: ${this.highscore.getCurrentScore()}`;
+        }
+    }
 }
 
 export default Game;
-
-/*document.addEventListener('keydown', (event) => {
-    if (gameStarted === true) {
-        // temporary solution 
-        if (event.keyCode === 32 && canJump === true && player.velocity.y === 0) {
-            canJump = false
-            player.velocity.y -= 15 
-        }
-    }
-
-    function gameStart() {
-        if (event.keyCode === 32 && gameStarted === false) {
-            player.velocity.x += 5;
-            gameStarted = true;
-            const startText = document.getElementById("startText");
-            if (startText) {
-                startText.classList.add("hide");
-            }
-        }
-    }
-
-
-
-    gameStart();
-}); */
