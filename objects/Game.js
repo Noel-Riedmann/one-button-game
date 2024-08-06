@@ -2,6 +2,7 @@ import Player from "./Player.js";
 import Platform from "./Platform.js";
 import Enemy from "./Enemy.js";
 import PlatformManager from "./PlatformManager.js";
+import Background from "./Background.js";
 
 class Game {
     constructor(canvas) {
@@ -30,7 +31,8 @@ class Game {
             new Enemy(20, 20, 0, 300, "blue"),
             new Enemy(20, this.canvas.width, 0, this.canvas.height - 5, "red"),
             new Enemy(100, 20, this.canvas.width - 40, this.canvas.height - 200, "green"),
-            new Player()
+            new Player(),
+            new Background( "../graphics/background.png", 1)
         ]
         this.animate()
         const startText = document.getElementById("startText"); 
@@ -123,27 +125,3 @@ class Game {
 
 export default Game;
 
-/*document.addEventListener('keydown', (event) => {
-    if (gameStarted === true) {
-        // temporary solution 
-        if (event.keyCode === 32 && canJump === true && player.velocity.y === 0) {
-            canJump = false
-            player.velocity.y -= 15 
-        }
-    }
-
-    function gameStart() {
-        if (event.keyCode === 32 && gameStarted === false) {
-            player.velocity.x += 5;
-            gameStarted = true;
-            const startText = document.getElementById("startText");
-            if (startText) {
-                startText.classList.add("hide");
-            }
-        }
-    }
-
-
-
-    gameStart();
-}); */
