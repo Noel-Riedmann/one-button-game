@@ -119,7 +119,7 @@ class Game {
     updateHighscoreDisplay() {
         const highScoreTextElement = document.getElementById('highScoreText');
         if (highScoreTextElement) {
-            highScoreTextElement.textContent = `Highscore: ${this.highscore.getHighScore()} Current Score: ${this.highscore.getCurrentScore()}`;
+            highScoreTextElement.innerHTML = `Highscore: ${this.highscore.getHighScore()}<br>Current Score: ${this.highscore.getCurrentScore()}`;
         }
     }
 }
