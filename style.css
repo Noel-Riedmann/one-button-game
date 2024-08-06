@@ -58,7 +58,7 @@ canvas {
 
 @media (min-width: 1201px) {
     .highScoreText {
-        left: 10vw;
+        left: 11vw;
         top: 2vh;
         font-size: 1vw;
     }
