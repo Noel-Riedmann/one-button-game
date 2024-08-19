@@ -4,6 +4,7 @@ import Enemy from "./Enemy.js";
 import Highscore from "./Highscore.js";
 import PlatformManager from "./PlatformManager.js";
 import Background from "./Background.js";
+import SeedGenerator from "./SeedGenerator.js";
 
 class Game {
     constructor(canvas) {
@@ -21,6 +22,10 @@ class Game {
         this.animate = this.animate.bind(this);
 
         this.highscore = new Highscore();
+        
+        this.generator = new SeedGenerator();
+        this.randomGen = this.generator.randomNumbers(12);
+
 
         document.addEventListener('keydown', this.onKeydown);
         document.addEventListener('keyup', this.onKeyup);
@@ -103,6 +108,9 @@ class Game {
         if (this.gameStarted === false && this.buttonPressed === true) {
             this.startGame();
         }
+        console.log("Random Number:", this.randomGen.next().value);  
+
+
     }
 
     animate() {
