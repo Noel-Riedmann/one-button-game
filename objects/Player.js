@@ -1,6 +1,7 @@
 import Enemy from "./Enemy.js";
 import Platform from "./Platform.js";
 import Highscore from "./Highscore.js";
+import Coin from "./Coin.js";
 
 class Player {
     constructor() {
@@ -63,20 +64,19 @@ class Player {
             this.velocity.y = 0;
         }
         this.position.x += this.velocity.x;
-        if (this.position.x + this.width >= 1200) {
+        if (this.position.x + this.width >= game.canvas.width) {
             this.position.x = 0;
         }
         this.updateCollisionPoints();
         this.collisionDetectionPlatforms(game);
         this.collisionDetectionEnemies(game);
+        this.collisionDetectionCoins(game);
         this.checkDead(game);
         if (this.canJump === true && this.velocity.y === 0 && game.buttonPressed === true) {
             this.canJump = false;
             this.velocity.y -= 15;
             console.log("Player jumped");
         }
-
-        game.highscore.increment();
     }
 
     collisionDetectionPlatforms(game) {
@@ -123,6 +123,25 @@ class Player {
             ) {
                 game.gameOver = true;
                 game.endGame();
+            }
+        });
+    }
+
+    collisionDetectionCoins(game) {
+        game.objects.forEach(object => {
+            if (object instanceof Coin) {
+                const coin = object;
+
+                if (
+                    this.position.x < coin.position.x + coin.size &&
+                    this.position.x + this.width > coin.position.x &&
+                    this.position.y < coin.position.y + coin.size &&
+                    this.position.y + this.height > coin.position.y
+                ) {
+                    coin.collected = true;
+                    game.highscore.increment();
+                    console.log("Coin collected");
+                }
             }
         });
     }

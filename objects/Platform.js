@@ -17,6 +17,7 @@ class Platform {
 
     update(game) {
         this.position.x -= this.velocity;
+        console.log(`Velocity platform ${this.velocity}`)
     }
 }
 
