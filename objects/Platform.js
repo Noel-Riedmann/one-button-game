@@ -7,6 +7,7 @@ class Platform {
             y: positionY
         };
         this.velocity = velocity;
+        this.coinSpawned = false;
     }
 
     draw(c) { 
