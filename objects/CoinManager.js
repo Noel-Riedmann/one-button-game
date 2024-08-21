@@ -10,13 +10,17 @@ class CoinManager {
     }
 
     createCoin(platform) {
-        const positionX = platform.position.x + Math.random() * (platform.width - this.coinSize);
-        const positionY = platform.position.y - this.coinSize;
+        const randomSeed = (this.game.seed * 100) % platform.width;
+    
+        const positionX = platform.position.x + (platform.width / 2) - (this.coinSize / 2) + randomSeed;
+        const positionY = platform.position.y - this.coinSize - 10;
 
         const velocity = platform.velocity;
 
         const coin = new Coin(this.coinSize, positionX, positionY, velocity);
         this.game.objects.push(coin);
+
+        platform.coinSpawned = true;
     }
 
     update() {
@@ -26,15 +30,19 @@ class CoinManager {
     
         const platforms = this.game.objects.filter(obj => obj instanceof Platform);
         const coins = this.game.objects.filter(obj => obj instanceof Coin);
-    
+        
         platforms.forEach(platform => {
+            if (platform.coinSpawned) {
+                return;
+            }
+
             const lastCoinOnPlatform = coins.find(coin => 
                 coin.position.x > platform.position.x && 
                 coin.position.x < platform.position.x + platform.width
             );
-    
+
             if (!lastCoinOnPlatform || lastCoinOnPlatform.position.x < platform.position.x + platform.width - this.spacing) {
-                if (Math.random() < this.spawnChance) {
+                if (this.game.seed < this.spawnChance) {
                     this.createCoin(platform);
                 }
             }
