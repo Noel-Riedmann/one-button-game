@@ -17,10 +17,8 @@ class Coin {
     }
 
     update(game) {
-        // Bewege die Münze entsprechend der Plattformgeschwindigkeit
         this.position.x -= this.velocity;
 
-        // Überprüfen, ob die Münze aus dem Bild verschwunden ist
         if (this.position.x + this.size < 0) {
             this.collected = true;
         }

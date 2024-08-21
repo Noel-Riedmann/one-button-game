@@ -93,18 +93,23 @@ class Game {
     }
 
     update() {
-        this.objects.forEach(object => {
+        this.objects = this.objects.filter(object => {
             object.update(this);
+    
+            if (object instanceof Coin && object.collected) {
+                return false;
+            }
+            return true;
         });
-
-        this.platfformanager.update()
-        this.coinmanager.update()
-
+    
+        this.platfformanager.update();
+        this.coinmanager.update();
+    
         if (this.gameOver === true) {
             cancelAnimationFrame(this.animationFrameID);
             this.init();
         }
-
+    
         if (this.gameStarted === false && this.buttonPressed === true) {
             this.startGame();
         }
