@@ -1,0 +1,28 @@
+class Coin {
+    constructor(size, positionX, positionY, velocity) {
+        this.size = size;
+        this.position = {
+            x: positionX,
+            y: positionY
+        };
+        this.velocity = velocity;
+        this.collected = false;
+    }
+
+    draw(c) { 
+        c.fillStyle = "Yellow";
+        c.beginPath();
+        c.arc(this.position.x + this.size / 2, this.position.y + this.size / 2, this.size / 2, 0, Math.PI * 2);
+        c.fill();
+    }
+
+    update(game) {
+        this.position.x -= this.velocity;
+
+        if (this.position.x + this.size < 0) {
+            this.collected = true;
+        }
+    }
+}
+
+export default Coin;

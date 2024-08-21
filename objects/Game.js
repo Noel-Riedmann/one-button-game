@@ -4,6 +4,8 @@ import Enemy from "./Enemy.js";
 import Highscore from "./Highscore.js";
 import PlatformManager from "./PlatformManager.js";
 import Background from "./Background.js";
+import Coin from "./Coin.js";
+import CoinManager from "./CoinManager.js";
 import SeedGenerator from "./SeedGenerator.js";
 
 class Game {
@@ -13,6 +15,7 @@ class Game {
         this.canvas.height = 700;
         this.c = this.canvas.getContext('2d');
         this.platfformanager = new PlatformManager(this)
+        this.coinmanager = new CoinManager(this)
 
         this.lastUpdateTime = performance.now();
         this.accumulator = 0;
@@ -38,6 +41,7 @@ class Game {
         this.objects = [
             new Background( "../graphics/background.png", 3),
             new Platform(100, this.canvas.width, 0, this.canvas.height - 100, 0),
+            new Coin(20, this.canvas.width, 0, this.canvas.height - 100, 0),
             new Enemy(20, 20, 0, 300, "blue"),
             new Enemy(20, this.canvas.width, 0, this.canvas.height - 5, "red"),
             new Enemy(100, 20, this.canvas.width - 40, this.canvas.height - 200, "green"),
@@ -95,17 +99,23 @@ class Game {
     }
 
     update() {
-        this.objects.forEach(object => {
+        this.objects = this.objects.filter(object => {
             object.update(this);
+    
+            if (object instanceof Coin && object.collected) {
+                return false;
+            }
+            return true;
         });
-
-        this.platfformanager.update()
-
+    
+        this.platfformanager.update();
+        this.coinmanager.update();
+    
         if (this.gameOver === true) {
             cancelAnimationFrame(this.animationFrameID);
             this.init();
         }
-
+    
         if (this.gameStarted === false && this.buttonPressed === true) {
             this.startGame();
         }
