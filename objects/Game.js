@@ -24,7 +24,8 @@ class Game {
         this.highscore = new Highscore();
         
         this.generator = new SeedGenerator();
-        this.randomGen = this.generator.randomNumbers(12);
+        this.randomGen = this.generator.randomNumbers();
+        this.seed;
 
 
         document.addEventListener('keydown', this.onKeydown);
@@ -108,7 +109,7 @@ class Game {
         if (this.gameStarted === false && this.buttonPressed === true) {
             this.startGame();
         }
-        console.log("Random Number:", this.randomGen.next().value);  
+        this.seed = this.randomGen.next().value
 
 
     }

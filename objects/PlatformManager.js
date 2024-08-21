@@ -3,7 +3,8 @@ import Platform from "./Platform.js";
 class PlatformManager {
     constructor(game) {
         this.game = game;
-        this.spacing = 150; 
+        this.spacing = 150;
+        this.width; 
     }
 
     createPlatform() {
@@ -17,10 +18,18 @@ class PlatformManager {
         });
 
         const positionX = lastPlatformX + this.spacing;
-        const positionY = this.game.canvas.height - (Math.random() * 200 + 125 ); 
-        const width = Math.random() * 100 + 50;
+        const positionY = this.game.canvas.height - (this.game.seed * 200 + 125 ); 
+        if(this.game.seed <= 0.33){
+            this.width = 100
+        }
+        else if(this.game.seed <= 0.66 && this.game.seed > 0.33){
+            this.width = 200
+        }
+        else{
+            this.width = 300
+        }
 
-        const platform = new Platform(25, width, positionX, positionY, 3);
+        const platform = new Platform(25, this.width, positionX, positionY, 3);
         this.game.objects.push(platform);
     }
 
