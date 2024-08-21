@@ -140,7 +140,6 @@ class Player {
                 ) {
                     coin.collected = true;
                     game.highscore.increment();
-                    console.log("Coin collected");
                 }
             }
         });

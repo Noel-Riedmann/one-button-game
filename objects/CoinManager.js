@@ -15,8 +15,6 @@ class CoinManager {
 
         const velocity = platform.velocity;
 
-        console.log(`Creating coin at (${positionX}, ${positionY}) with velocity ${velocity}`);
-
         const coin = new Coin(this.coinSize, positionX, positionY, velocity);
         this.game.objects.push(coin);
     }
