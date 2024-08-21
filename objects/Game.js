@@ -42,9 +42,9 @@ class Game {
             new Background( "../graphics/background.png", 3),
             new Platform(100, this.canvas.width, 0, this.canvas.height - 100, 0),
             new Coin(20, this.canvas.width, 0, this.canvas.height - 100, 0),
-            new Enemy(20, 20, 0, 300, "blue"),
-            new Enemy(20, this.canvas.width, 0, this.canvas.height - 5, "red"),
-            new Enemy(100, 20, this.canvas.width - 40, this.canvas.height - 200, "green"),
+            new Enemy(20, 20, 0, 300, "blue", 5),
+            new Enemy(20, this.canvas.width, 0, this.canvas.height - 5, "red", 0),
+            new Enemy(100, 20, this.canvas.width - 40, this.canvas.height - 200, "green", 0),
             new Player()
         ];
         this.animate();
