@@ -21,6 +21,8 @@ class CoinManager {
         this.game.objects.push(coin);
 
         platform.coinSpawned = true;
+
+        this.game.logAction('coinSpawn', 'spawn', positionX, positionY);
     }
 
     update() {
@@ -46,6 +48,13 @@ class CoinManager {
                     this.createCoin(platform);
                 }
             }
+        });
+        this.game.objects = this.game.objects.filter(object => {
+            if (object instanceof Coin && object.collected) {
+                this.game.logAction('coinCollected', 'collect', object.position.x, object.position.y);
+                return false;
+            }
+            return true;
         });
     }
 }
