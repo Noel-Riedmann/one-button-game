@@ -71,7 +71,6 @@ class Game {
             if (startText) {
                 startText.classList.add("hide");
             }
-            console.log("Game started");
         }
     }
 

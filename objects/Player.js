@@ -75,7 +75,6 @@ class Player {
         if (this.canJump === true && this.velocity.y === 0 && game.buttonPressed === true) {
             this.canJump = false;
             this.velocity.y -= 15;
-            console.log("Player jumped");
         }
     }
 
@@ -91,7 +90,6 @@ class Player {
             ) {
                 this.velocity.y = 0;
                 this.position.y = platform.position.y - this.height;
-                console.log("player landed on platform");
                 this.canJump = true;
             }
 
@@ -103,7 +101,6 @@ class Player {
                 this.velocity.y < 0
             ) {
                 this.velocity.y = 0;
-                console.log("collision from below, player bounces off");
             }
             if (this.position.y > game.canvas.height - 100) {
                 this.velocity.x = 0;
