@@ -17,6 +17,9 @@ class Game {
         this.platfformanager = new PlatformManager(this)
         this.coinmanager = new CoinManager(this)
 
+        this.logs = [];
+        this.latButtonPressedState = false
+
         this.lastUpdateTime = performance.now();
         this.accumulator = 0;
         this.timeStep = 1000 / 60;
@@ -64,14 +67,39 @@ class Game {
         }
     }
 
+    logAction(action, type, positionX = null, positionY = null) {
+        const logEntry = {
+            action: action,
+            type: type
+        };
+        
+        if (positionX !== null && positionY !== null) {
+            logEntry.positionX = positionX;
+            logEntry.positionY = positionY;
+        }
+
+        this.logs.push(logEntry);
+        this.saveLogs();
+    }
+
+    saveLogs() {
+        try {
+            localStorage.setItem('gameLogs', JSON.stringify(this.logs));
+            console.log("Logs saved successfully.");
+        } catch (error) {
+            console.error("Error saving logs:", error);
+        }
+    }
+
+
     startGame() {
         if (!this.gameStarted) {
             this.gameStarted = true;
+            localStorage.setItem('gameSeed', this.seed);
             const startText = document.getElementById("startText");
             if (startText) {
                 startText.classList.add("hide");
             }
-            console.log("Game started");
         }
     }
 
@@ -99,10 +127,20 @@ class Game {
     }
 
     update() {
+        if (this.buttonPressed !== this.lastButtonPressedState) {
+            if (this.buttonPressed) {
+                this.logAction('jump', 'pressed');
+            } else {
+                this.logAction('jump', 'released');
+            }
+            this.lastButtonPressedState = this.buttonPressed;
+        }
+
         this.objects = this.objects.filter(object => {
             object.update(this);
     
             if (object instanceof Coin && object.collected) {
+                this.logAction('coinCollected', 'collect', object.position.x, object.position.y);
                 return false;
             }
             return true;
@@ -119,9 +157,7 @@ class Game {
         if (this.gameStarted === false && this.buttonPressed === true) {
             this.startGame();
         }
-        this.seed = this.randomGen.next().value
-
-
+        this.seed = this.randomGen.next().value;
     }
 
     animate() {
@@ -146,6 +182,9 @@ class Game {
             highScoreTextElement.innerHTML = `Highscore: ${this.highscore.getHighScore()}<br>Current Score: ${this.highscore.getCurrentScore()}`;
         }
     }
+
+
+
 }
 
 export default Game;
