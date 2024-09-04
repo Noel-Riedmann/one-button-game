@@ -9,21 +9,13 @@ class Platform {
         this.velocity = velocity;
         this.coinSpawned = false;
 
-        this.imageSmall = new Image();
-        this.imageSmall.src = '../graphics/plat_150.png';
-
-        this.imageMedium = new Image();
-        this.imageMedium.src = '../graphics/plat_200.png';
-
-        this.imageLarge = new Image();
-        this.imageLarge.src = '../graphics/plat_250.png';
-
-        if (width === 150) {
-            this.image = this.imageSmall;
-        } else if (width === 200) {
-            this.image = this.imageMedium;
-        } else if (width === 250) {
-            this.image = this.imageLarge;
+        this.image = new Image();
+        if (this.width <= 150) {
+            this.image.src = '../graphics/plat_150.png';
+        } else if (this.width <= 200) {
+            this.image.src = '../graphics/plat_200.png';
+        } else if (this.width <=250) {
+            this.image.src = '../graphics/plat_250.png';
         }
     }
 
