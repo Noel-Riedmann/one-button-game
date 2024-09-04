@@ -18,7 +18,7 @@ class Platform {
         this.imageLarge = new Image();
         this.imageLarge.src = '../graphics/plat_250.png';
 
-        if (width === 100) {
+        if (width === 150) {
             this.image = this.imageSmall;
         } else if (width === 200) {
             this.image = this.imageMedium;
