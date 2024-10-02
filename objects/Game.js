@@ -17,12 +17,17 @@ class Game {
         this.platfformanager = new PlatformManager(this)
         this.coinmanager = new CoinManager(this)
 
+        this.offScreenCanvas = document.createElement('canvas');
+        this.offScreenCanvas.width = 1200;
+        this.offScreenCanvas.height = 700;
+        this.offScreenC = this.offScreenCanvas.getContext('2d');
+
         this.logs = [];
         this.latButtonPressedState = false
 
         this.lastUpdateTime = performance.now();
         this.accumulator = 0;
-        this.timeStep = 1000 / 60;
+        this.timeStep = 1000 / 75; // W.I.P. 
         this.animationFrameID;
 
         this.animate = this.animate.bind(this);
@@ -119,10 +124,12 @@ class Game {
     }
 
     draw() {
-        this.c.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        this.offScreenC.clearRect(0, 0, this.offScreenCanvas.width, this.offScreenCanvas.height);
+        this.c.clearRect(0, 0, this.offScreenCanvas.width, this.offScreenCanvas.height);
         this.objects.forEach(object => {
-            object.draw(this.c);
+            object.draw(this.offScreenC);
         });
+        this.c.drawImage(this.offScreenCanvas,0,0)
         this.updateHighscoreDisplay();
     }
 
