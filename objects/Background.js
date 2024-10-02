@@ -22,26 +22,26 @@ class Background {
         if (this.image.complete) {
             c.drawImage(this.image, this.xdrawn, 0, c.canvas.width, c.canvas.height);
             console.log("Background drawn");
-            this.xdrawn -= this.speed
+            //this.xdrawn -= this.speed
         }
 
     }
     update(game) {
        console.log(this.x1, this.x2);
        console.log(-this.image.width, -this.image.height);
-        this.x1 -= this.speed;
-        this.x2 -= this.speed;
+        //this.x1 -= this.speed;
+        //this.x2 -= this.speed;
 
         if (this.x1 <= -this.image.width) {
             this.x1 = this.image.width + this.x2 - this.speed;
             console.log("Background updated");
         }
 
-        if (this.x2 <= -this.image.width) {
+        /*if (this.x2 <= -this.image.width) {
             this.x2 = this.image.width + this.x1 - this.speed;
             console.log("Background updated");
 
-        }
+        }*/
     }
 }
 
