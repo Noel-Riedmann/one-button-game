@@ -5,23 +5,25 @@ class CoinManager {
     constructor(game) {
         this.game = game;
         this.spacing = 300;
-        this.coinSize = 20;
+        this.coinWidth = 20;   // Breite der Münze
+        this.coinHeight = 20;  // Höhe der Münze
         this.spawnChance = 0.02;
     }
 
     createCoin(platform) {
-        const randomSeed = (this.game.seed * 100) % platform.width;
+        const positionX = platform.position.x + (platform.width / 2) - (this.coinWidth / 2); // Zentrale Position X
+        const positionY = platform.position.y - this.coinHeight - 10; // Position Y über der Plattform
     
-        const positionX = platform.position.x + (platform.width / 2) - (this.coinSize / 2) + randomSeed;
-        const positionY = platform.position.y - this.coinSize - 10;
-
         const velocity = platform.velocity;
 
-        const coin = new Coin(this.coinSize, positionX, positionY, velocity);
+        console.log("Creating coin at: ", { x: positionX, y: positionY });
+    
+        // Hier müssen die Breite und Höhe für die Münze angegeben werden
+        const coin = new Coin(this.coinWidth, this.coinHeight, positionX, positionY, velocity);
         this.game.objects.push(coin);
-
+    
         platform.coinSpawned = true;
-
+    
         this.game.logAction('coinSpawn', 'spawn', positionX, positionY);
     }
 
