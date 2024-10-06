@@ -23,7 +23,7 @@ class Background {
             c.drawImage(this.image, this.xdrawn, 0, c.canvas.width, c.canvas.height);
             //console.log("Background drawn");
             this.xdrawn -= this.speed
-            console.log("Background drawn");
+            //console.log("Background drawn");
             //this.xdrawn -= this.speed
         }
 
@@ -33,8 +33,8 @@ class Background {
        //console.log(-this.image.width, -this.image.height);
         this.x1 -= this.speed;
         this.x2 -= this.speed;
-       console.log(this.x1, this.x2);
-       console.log(-this.image.width, -this.image.height);
+       //console.log(this.x1, this.x2);
+       //console.log(-this.image.width, -this.image.height);
         //this.x1 -= this.speed;
         //this.x2 -= this.speed;
 

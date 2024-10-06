@@ -5,6 +5,9 @@ class PlatformManager {
         this.game = game;
         this.spacing = 150;
         this.width;
+        this.height = 25;
+        this.groundArea = false;
+        this.groundAreaStage = 0;
     }
 
     createPlatform() {
@@ -17,8 +20,8 @@ class PlatformManager {
             }
         });
 
-        const positionX = lastPlatformX + this.spacing;
-        const positionY = this.game.canvas.height - (this.game.seed * 200 + 125);
+        let positionX = lastPlatformX + this.spacing;
+        let positionY = this.game.canvas.height - (this.game.seed * 200 + 125);
 
         let shiftedSeed = (Math.floor(this.game.seed * 10000)) % 100;
         if (shiftedSeed <= 33) {
@@ -29,8 +32,25 @@ class PlatformManager {
             this.width = 250;
         }
 
+        if(this.groundAreaStage === 0 && shiftedSeed <= 10){
+            this.groundArea = true;
+            this.groundAreaStage = 6
+        }
 
-        const platform = new Platform(25, this.width, positionX, positionY, 3);
+        if(this.groundAreaStage == 1){
+            this.groundArea = false;
+            this.groundAreaStage = 0;
+            this.height = 25;
+        }
+
+        if(this.groundArea === true){
+            positionY = this.game.canvas.height -  100;
+            this.height = 100
+            this.groundAreaStage -= 1;
+        }
+
+
+        const platform = new Platform(this.height, this.width, positionX, positionY, 3);
         this.game.objects.push(platform);
     }
 
