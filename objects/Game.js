@@ -27,27 +27,32 @@ class Game {
 
         this.lastUpdateTime = performance.now();
         this.accumulator = 0;
-        this.timeStep = 1000 / 75; // W.I.P. 
+        this.timeStep = 1000 / 60; 
         this.animationFrameID;
 
-        this.animate = this.animate.bind(this);
-
         this.highscore = new Highscore();
-        
         this.generator = new SeedGenerator();
         this.randomGen = this.generator.randomNumbers();
         this.seed;
 
+        
+        this.fps = 60; 
+        this.frameCount = 0;
+        this.lastFPSUpdate = performance.now();
+
+        this.animate = this.animate.bind(this);
 
         document.addEventListener('keydown', this.onKeydown);
         document.addEventListener('keyup', this.onKeyup);
+
+        this.setFPS();
     }
 
     init() {
         this.gameOver = false;
         this.gameStarted = false;
         this.objects = [
-            new Background( "../graphics/sky.png", 3),
+            new Background("../graphics/sky.png", 3),
             new Platform(100, this.canvas.width, 0, this.canvas.height - 100, 0),
             new Coin(20, 20, this.canvas.width, 0, this.canvas.height - 100, 0),
             new Enemy(20, 20, 0, 300, "blue", 5),
@@ -56,13 +61,29 @@ class Game {
             new Player()
         ];
         this.animate();
-        const startText = document.getElementById("startText"); 
+        const startText = document.getElementById("startText");
         startText.classList.remove("hide");
     }
 
     onKeydown = (event) => {
         if (event.keyCode === 32) {
             this.buttonPressed = true;
+        }
+    }
+
+    setFPS() {
+        this.timeStep = 1000 / this.fps;
+    }
+
+    calculateFPS(now) {
+        this.frameCount++;
+        const elapsed = now - this.lastFPSUpdate;
+
+        if (elapsed >= 1000) {
+            this.fps = (this.frameCount / (elapsed / 1000)) | 0; 
+            this.frameCount = 0;
+            this.lastFPSUpdate = now;
+            this.setFPS(); 
         }
     }
 
@@ -77,7 +98,7 @@ class Game {
             action: action,
             type: type
         };
-        
+
         if (positionX !== null && positionY !== null) {
             logEntry.positionX = positionX;
             logEntry.positionY = positionY;
@@ -109,7 +130,7 @@ class Game {
     }
 
     endGame() {
-        
+        this.platfformanager.resetValues();
         this.highscore.update();
         this.highscore.resetCurrentScore();
         this.gameStarted = false;
@@ -129,7 +150,7 @@ class Game {
         this.objects.forEach(object => {
             object.draw(this.offScreenC);
         });
-        this.c.drawImage(this.offScreenCanvas,0,0)
+        this.c.drawImage(this.offScreenCanvas, 0, 0)
         this.updateHighscoreDisplay();
     }
 
@@ -145,22 +166,22 @@ class Game {
 
         this.objects = this.objects.filter(object => {
             object.update(this);
-    
+
             if (object instanceof Coin && object.collected) {
                 this.logAction('coinCollected', 'collect', object.position.x, object.position.y);
                 return false;
             }
             return true;
         });
-    
+
         this.platfformanager.update();
         this.coinmanager.update();
-    
+
         if (this.gameOver === true) {
             cancelAnimationFrame(this.animationFrameID);
             this.init();
         }
-    
+
         if (this.gameStarted === false && this.buttonPressed === true) {
             this.startGame();
         }
@@ -172,6 +193,9 @@ class Game {
         const deltaTime = now - this.lastUpdateTime;
         this.lastUpdateTime = now;
         this.accumulator += deltaTime;
+
+        this.calculateFPS(now);
+
 
         while (this.accumulator >= this.timeStep) {
             this.update(this.timeStep / 1000);

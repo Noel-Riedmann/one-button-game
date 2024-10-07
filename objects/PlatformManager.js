@@ -10,7 +10,12 @@ class PlatformManager {
         this.groundAreaStage = 0;
         this.speed = 3;
     }
-
+    resetValues(){
+        this.height = 25;
+        this.groundArea = false;
+        this.groundAreaStage = 0;
+        this.speed = 3;
+    }
     createPlatform() {
         let lastPlatformX = 0;
         this.game.objects.forEach(platform => {
@@ -50,7 +55,7 @@ class PlatformManager {
             this.groundAreaStage -= 1;
         }
 
-        if (this.speed <= 7) { this.speed += 0.03; }
+        if (this.speed <= 7) { this.speed += 0.02; }
 
 
 
