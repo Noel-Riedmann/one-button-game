@@ -27,7 +27,7 @@ class Game {
 
         this.lastUpdateTime = performance.now();
         this.accumulator = 0;
-        this.timeStep = 1000 / 60; 
+        this.timeStep = 1000 / 60;
         this.animationFrameID;
 
         this.highscore = new Highscore();
@@ -35,8 +35,8 @@ class Game {
         this.randomGen = this.generator.randomNumbers();
         this.seed;
 
-        
-        this.fps = 60; 
+
+        this.fps = 60;
         this.frameCount = 0;
         this.lastFPSUpdate = performance.now();
 
@@ -60,13 +60,13 @@ class Game {
             new Enemy(100, 20, this.canvas.width - 40, this.canvas.height - 200, "green", 0),
             new Player()
         ];
-        if (!this.animationFrameID) { // Only call animate if not already running
+        if (!this.animationFrameID) {
             this.animate();
         }
         const startText = document.getElementById("startText");
         startText.classList.remove("hide");
     }
-    
+
 
     onKeydown = (event) => {
         if (event.keyCode === 32) {
@@ -83,11 +83,10 @@ class Game {
         const elapsed = now - this.lastFPSUpdate;
 
         if (elapsed >= 1000) {
-            this.fps = (this.frameCount / (elapsed / 1000)) | 0; 
+            this.fps = (this.frameCount / (elapsed / 1000)) | 0;
             this.frameCount = 0;
             this.lastFPSUpdate = now;
-            this.setFPS(); 
-            console.log("fps", this.fps)
+            if (this.fps >= 58) { this.setFPS(); }
         }
     }
 
@@ -139,8 +138,8 @@ class Game {
         this.highscore.resetCurrentScore();
         this.gameStarted = false;
         this.frameCount = 0;
-        this.fps = 60; 
- 
+        this.fps = 60;
+
     }
 
     getGamestate() {
