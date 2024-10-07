@@ -9,8 +9,8 @@ class Player {
             x: 50,
             y: 500
         };
-        this.width = 37; // Breite des Sprite-Frames (an das Bild angepasst)
-        this.height = 69; // Höhe des Sprite-Frames (an das Bild angepasst)
+        this.width = 31;
+        this.height = 48;
         this.velocity = {
             x: 0,
             y: 1
@@ -21,24 +21,24 @@ class Player {
         this.gameOver = false;
         this.updateCollisionPoints();
 
-        // Sprite-Sheet Einstellungen
         this.spriteSheet = new Image();
-        this.spriteSheet.src = '../graphics/dude.png'; // Pfad zum Sprite-Sheet
-        this.spriteSheetLoaded = false; // Bild geladen Flag
+        this.spriteSheet.src = '../graphics/dude2.png';
+        this.spriteSheetLoaded = false;
         
-        // Onload-Event für das Sprite-Sheet
         this.spriteSheet.onload = () => {
-            this.spriteSheetLoaded = true; // Bild als geladen markieren
+            this.spriteSheetLoaded = true;
         };
 
-        this.frameIndex = 0; // Aktueller Frame
-        this.frameSpeed = 10;  // Anzahl der Frames, bevor der nächste Frame angezeigt wird (langsamer, damit es flüssiger aussieht)
-        this.frameCount = 0;  // Zählt die Frames
-        this.isJumping = false; // Status: Springt der Charakter?
+        this.frameIndex = 0;
+        this.frameSpeed = 10
+        this.frameCount = 0;
+        this.isJumping = false;
+
         
-        // Nur die Frames, die nach rechts schauend laufen
-        this.walkRightFrames = [0, 1, 2]; // Indexe der Frames für "Laufen nach rechts"
-        this.jumpRightFrame = 2; // Verwende den letzten Frame als Sprung-Frame
+        this.walkRightFrames = [0, 1, 2];
+        this.jumpRightFrame = 2;
+
+        this.canJump = false;
     }
 
     updateCollisionPoints() {
@@ -71,65 +71,80 @@ class Player {
     }
 
     draw(c) {
-        // Überprüfe, ob das Sprite-Sheet vollständig geladen wurde
         if (!this.spriteSheetLoaded) {
-            return; // Wenn das Bild nicht geladen ist, zeichne nichts
+            return;
         }
-
+    
         let sourceX;
-
-        // Wenn der Charakter springt, nutze den Sprung-Frame
+        const sourceY = 0;
+    
         if (this.isJumping) {
             sourceX = this.jumpRightFrame * this.width;
         } else {
-            // Lauf-Animation: Wechsel zwischen den Frames des Laufens nach rechts
             sourceX = this.walkRightFrames[this.frameIndex] * this.width;
-
-            // Frame-Animation aktualisieren
+    
             this.frameCount++;
             if (this.frameCount >= this.frameSpeed) {
                 this.frameIndex = (this.frameIndex + 1) % this.walkRightFrames.length;
                 this.frameCount = 0;
             }
         }
+    
+        c.save();
+    
+        if (this.velocity.x > 0) {
+            c.translate(this.position.x + this.width, this.position.y);
+            c.scale(-1, 1);
+            c.translate(-this.width, 0);
+        } else {
 
-        // Zeichne den aktuellen Frame des Sprite-Sheets auf das Canvas
+            c.translate(this.position.x, this.position.y);
+        }
+    
+
         c.drawImage(
-            this.spriteSheet,      // Bildquelle (Sprite-Sheet)
-            sourceX, 0,            // X und Y Position des aktuellen Frames im Sprite-Sheet
-            this.width, this.height, // Breite und Höhe des Frames im Sprite-Sheet
-            this.position.x, this.position.y, // X und Y Position auf dem Canvas
-            this.width, this.height  // Breite und Höhe auf dem Canvas
+            this.spriteSheet,   
+            sourceX, sourceY,  
+            this.width, this.height,
+            0, 0,              
+            this.width, this.height
         );
+    
+        c.restore();
     }
 
     update(game) {
         this.position.y += this.velocity.y;
         if (this.position.y + this.height + this.velocity.y <= game.canvas.height) {
             this.velocity.y += this.gravity;
-            this.isJumping = true;  // Solange der Charakter fällt, springt er
+            this.isJumping = true;
         } else {
             this.velocity.y = 0;
-            this.isJumping = false; // Wenn er den Boden erreicht, springt er nicht mehr
+            this.isJumping = false;
         }
+
         this.position.x += this.velocity.x;
         if (this.position.x + this.width >= game.canvas.width) {
             this.position.x = 0;
         }
+
         this.updateCollisionPoints();
         this.collisionDetectionPlatforms(game);
         this.collisionDetectionEnemies(game);
         this.collisionDetectionCoins(game);
         this.checkDead(game);
-        if (this.canJump === true && this.velocity.y === 0 && game.buttonPressed === true) {
+
+        if (this.canJump && this.velocity.y === 0 && game.buttonPressed) {
             this.canJump = false;
-            this.velocity.y -= 15; // Der Spieler springt
+            this.velocity.y -= 15;
+            this.isJumping = true;
         }
     }
 
     collisionDetectionPlatforms(game) {
         game.objects.forEach(platform => {
-            if (!(platform instanceof Platform)) { return; }
+            if (!(platform instanceof Platform)) return;
+
             if (
                 this.collisionPointBelow.y >= platform.position.y &&
                 this.collisionPointBelow.y < platform.position.y + platform.height &&
@@ -140,6 +155,7 @@ class Player {
                 this.velocity.y = 0;
                 this.position.y = platform.position.y - this.height;
                 this.canJump = true;
+                this.isJumping = false;
             }
 
             if (
@@ -151,16 +167,14 @@ class Player {
             ) {
                 this.velocity.y = 0;
             }
-            if (this.position.y > game.canvas.height - 100) {
-                this.velocity.x = 0;
-                this.velocity.y = 20;
-            }
+
         });
     }
 
     collisionDetectionEnemies(game) {
         game.objects.forEach(enemy => {
-            if (!(enemy instanceof Enemy)) { return; }
+            if (!(enemy instanceof Enemy)) return;
+
             if (
                 this.position.x < enemy.position.x + enemy.width &&
                 this.position.x + this.width > enemy.position.x &&
@@ -189,10 +203,6 @@ class Player {
                 }
             }
         });
-    }
-
-    getGamestate() {
-        return this.gameOver;
     }
 
     checkDead(game) {
