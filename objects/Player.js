@@ -111,7 +111,6 @@ class Player {
         );
     
         c.restore();
-        console.log("Framecount: ",this.frameCount)
     }
 
     update(game) {
