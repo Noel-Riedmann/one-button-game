@@ -22,7 +22,7 @@ class Background {
         if (this.image.complete) {
             c.drawImage(this.image, this.xdrawn, 0, c.canvas.width, c.canvas.height);
             //console.log("Background drawn");
-            this.xdrawn -= this.speed
+            // this.xdrawn -= this.speed
             //console.log("Background drawn");
             //this.xdrawn -= this.speed
         }
