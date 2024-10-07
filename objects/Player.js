@@ -22,7 +22,7 @@ class Player {
         this.updateCollisionPoints();
 
         this.spriteSheet = new Image();
-        this.spriteSheet.src = '../graphics/dude2.png';
+        this.spriteSheet.src = '../graphics/heart-spritesheet.png';
         this.spriteSheetLoaded = false;
         
         this.spriteSheet.onload = () => {
@@ -35,8 +35,8 @@ class Player {
         this.isJumping = false;
 
         
-        this.walkRightFrames = [0, 1, 2];
-        this.jumpRightFrame = 2;
+        this.walkRightFrames = [0, 1, 2, 3];
+        this.jumpRightFrame = 1;
 
         this.canJump = false;
     }
@@ -111,6 +111,7 @@ class Player {
         );
     
         c.restore();
+        console.log("Framecount: ",this.frameCount)
     }
 
     update(game) {
