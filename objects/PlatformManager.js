@@ -64,6 +64,9 @@ class PlatformManager {
     }
 
     update() {
+        if (!this.game.gameStarted) {
+            return;
+        }
         let needNewPlatform = true;
         this.game.objects.forEach(platform => {
             if (platform instanceof Platform) {

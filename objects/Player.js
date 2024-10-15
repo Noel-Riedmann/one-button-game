@@ -10,7 +10,7 @@ class Player {
             y: 500
         };
         this.width = 31;
-        this.height = 48;
+        this.height = 47;
         this.velocity = {
             x: 0,
             y: 1
@@ -78,6 +78,7 @@ class Player {
         let sourceX;
         const sourceY = 0;
     
+
         if (this.isJumping) {
             sourceX = this.jumpRightFrame * this.width;
         } else {
@@ -107,9 +108,9 @@ class Player {
             sourceX, sourceY,  
             this.width, this.height,
             0, 0,              
-            this.width, this.height
+            this.width, this.height,
         );
-    
+
         c.restore();
     }
 
