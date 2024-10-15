@@ -6,7 +6,6 @@ let game;
 function init() {
   game = new Game(canvas);
   game.init()
-  checkOrientation();
 }
 
 function onResize() {

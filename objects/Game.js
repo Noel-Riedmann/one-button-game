@@ -44,6 +44,8 @@ class Game {
 
         document.addEventListener('keydown', this.onKeydown);
         document.addEventListener('keyup', this.onKeyup);
+        document.addEventListener('touchstart', this.onTouchStart);
+        document.addEventListener('touchend', this.onTouchEnd);
 
         this.setFPS();
     }
@@ -72,6 +74,20 @@ class Game {
             this.buttonPressed = true;
         }
     }
+    onTouchStart = (event) => {
+        this.buttonPressed = true;
+    };
+
+
+    onKeyup = (event) => {
+        if (event.keyCode === 32) {
+            this.buttonPressed = false;
+        }
+    }
+
+    onTouchEnd = (event) => {
+        this.buttonPressed = false;
+    };
 
     setFPS() {
         this.timeStep = 1000 / this.fps;
@@ -89,11 +105,6 @@ class Game {
         }
     }
 
-    onKeyup = (event) => {
-        if (event.keyCode === 32) {
-            this.buttonPressed = false;
-        }
-    }
 
     logAction(action, type, positionX = null, positionY = null) {
         const logEntry = {
