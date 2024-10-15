@@ -1,9 +1,8 @@
 body {
     margin: 0;
     display: flex;
-    justify-content: center;
-    align-items: center;
     min-height: 100vh;
+    background-color: #f2ede9;
 }
 
 .startText {
@@ -11,6 +10,19 @@ body {
     width: 100%;
     top: 20%;
     text-align: center;
+    color: #0E2841;
+    font-family: monospace;
+}
+
+.overlay{
+    position: fixed;
+    width: 1200px;
+    height: 700px;
+    top: 50%;
+    left: 50%;
+    transform-origin: center center;
+    transform: translate(-50%, -50%) scale(var(--canvas-scale, 1));
+    image-rendering: pixelated;
 }
 
 .hide {
@@ -19,7 +31,6 @@ body {
 
 .canvas {
     border-style: solid;
-
 }
 
 canvas {
@@ -32,34 +43,30 @@ canvas {
   }
 
   .highScoreText {
-    position: fixed;
+    position: absolute;
     left: 10vw;
     top: 2vh;
-    font-size: 2vw;
-    font-family: 'Verdana', sans-serif;
-    color: black;
+    font-family: monospace;
+    color: #0E2841;
 }
 
 @media (max-width: 600px) {
     .highScoreText {
         left: 5vw;
-        top: 1vh;
-        font-size: 4vw;
+        top: 10px;
     }
 }
 
 @media (min-width: 601px) and (max-width: 1200px) {
     .highScoreText {
-        left: 7vw;
-        top: 1.5vh;
-        font-size: 3vw;
+        left: 30px;
+        top: 10px;
     }
 }
 
 @media (min-width: 1201px) {
     .highScoreText {
-        left: 11vw;
-        top: 2vh;
-        font-size: 1vw;
+        left: 30px;
+        top: 10px;
     }
 }
