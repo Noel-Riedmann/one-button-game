@@ -11,11 +11,11 @@ class Platform {
 
         this.image = new Image();
         if (this.width <= 150) {
-            this.image.src = 'objects/graphics/plat_150.png';
+            this.image.src = './objects/graphics/plat_150.png';
         } else if (this.width <= 200) {
-            this.image.src = 'objects/graphics/plat_200.png';
+            this.image.src = './objects/graphics/plat_200.png';
         } else if (this.width <=250) {
-            this.image.src = 'objects/graphics/plat_250.png';
+            this.image.src = './objects/graphics/plat_250.png';
         }
     }
 

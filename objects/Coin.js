@@ -9,7 +9,7 @@ class Coin {
         this.velocity = velocity;
         this.collected = false;
         this.image = new Image();
-        this.image.src = 'objects/graphics/star.png'; // Pfad zum Bild
+        this.image.src = './objects/graphics/star.png'; // Pfad zum Bild
     }
 
     draw(c) { 

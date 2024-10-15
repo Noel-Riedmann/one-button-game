@@ -52,7 +52,7 @@ class Game {
         this.gameOver = false;
         this.gameStarted = false;
         this.objects = [
-            new Background("objects/graphics/sky.png", 3),
+            new Background("./objects/graphics/sky.png", 3),
             new Platform(100, this.canvas.width, 0, this.canvas.height - 100, 0),
             new Coin(20, 20, this.canvas.width, 0, this.canvas.height - 100, 0),
             new Enemy(20, 20, 0, 300, "blue", 5),

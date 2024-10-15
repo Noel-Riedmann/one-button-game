@@ -22,7 +22,7 @@ class Player {
         this.updateCollisionPoints();
 
         this.spriteSheet = new Image();
-        this.spriteSheet.src = 'objects/graphics/dudecolor.png';
+        this.spriteSheet.src = './objects/graphics/dudecolor.png';
         this.spriteSheetLoaded = false;
         
         this.spriteSheet.onload = () => {
