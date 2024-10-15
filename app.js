@@ -24,12 +24,9 @@ function checkOrientation() {
   }
 }
 
-
-
-
-window.addEventListener("orientationchange", checkOrientation);
-
 window.addEventListener("resize", onResize)
 init();
 onResize();
+checkOrientation()
+
 
