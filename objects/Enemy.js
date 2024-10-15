@@ -11,18 +11,23 @@ class Enemy {
     }
 
     draw(c) {
-        c.fillStyle = this.color;
+        if (!this.color) {
+            return;
+        }
+        else {
+            c.fillStyle = this.color;
+        }
         c.fillRect(this.position.x, this.position.y, this.width, this.height)
     }
-    update(game){
-         this.position.x -= this.velocity;
+    update(game) {
+        this.position.x -= this.velocity;
 
-         if (this.position.x + this.width < 0) {
-             this.position.x = game.canvas.width;
-             this.position.y = game.seed * 200 + 300
-         }
+        if (this.position.x + this.width < 0) {
+            this.position.x = game.canvas.width;
+            this.position.y = game.seed * 200 + 300
+        }
     }
-    
+
 }
 
 
