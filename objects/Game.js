@@ -96,15 +96,40 @@ class Game {
     calculateFPS(now) {
         this.frameCount++;
         const elapsed = now - this.lastFPSUpdate;
-
+    
         if (elapsed >= 1000) {
             this.fps = (this.frameCount / (elapsed / 1000)) | 0;
             this.frameCount = 0;
             this.lastFPSUpdate = now;
-            if (this.fps >= 58) { this.setFPS(); }
+    
+            switch (true) {
+                case (this.fps >= 58 && this.fps <= 75): 
+                    this.setFPS(this.fps); 
+                    break;
+    
+                case (this.fps > 75 && this.fps <= 120): 
+                    this.setFPS(Math.floor(this.fps / 2)); 
+                    break;
+    
+                case (this.fps > 120): 
+                    this.setFPS(Math.floor(this.fps / 4)); 
+                    break;
+    
+                case (this.fps < 58 && this.fps >= 30): 
+                    this.setFPS(this.fps * 2); 
+                    break;
+    
+                case (this.fps < 30): 
+                    this.setFPS(Math.min(this.fps * 2, 60)); 
+                    break;
+    
+                default:
+                    this.setFPS(this.fps);
+                    break;
+            }
         }
     }
-
+    
 
     logAction(action, type, positionX = null, positionY = null) {
         const logEntry = {
@@ -211,6 +236,8 @@ class Game {
         this.accumulator += deltaTime;
 
         this.calculateFPS(now);
+        console.log(this.fps)
+
 
 
         while (this.accumulator >= this.timeStep) {
