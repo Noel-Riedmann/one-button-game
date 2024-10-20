@@ -20,6 +20,9 @@ class Enemy {
         c.fillRect(this.position.x, this.position.y, this.width, this.height)
     }
     update(game) {
+        if (!game.gameStarted) {
+            return;
+        }
         this.position.x -= this.velocity;
 
         if (this.position.x + this.width < 0) {
