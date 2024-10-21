@@ -57,7 +57,7 @@ class Game {
             new Background("./objects/graphics/sky.png", 3),
             new Platform(100, this.canvas.width, 0, this.canvas.height - 100, 0),
             new Coin(20, 20, this.canvas.width, 0, this.canvas.height - 100, 0),
-            new Enemy(20, 20, -20, 300, "blue", 5),
+            new Enemy(36, 32, -35, 300, "blue", 5),
             new Enemy(20, this.canvas.width, 0, this.canvas.height - 5, null, 0),
             new Player()
         ];
