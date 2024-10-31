@@ -39,6 +39,8 @@ class Game {
         this.fps = 60;
         this.frameCount = 0;
         this.lastFPSUpdate = performance.now();
+        this.tickCount = 0;
+        this.jumpTimestamps = [];
 
         this.animate = this.animate.bind(this);
 
@@ -132,6 +134,29 @@ class Game {
         this.saveLogs();
     }
 
+
+    logJump() {
+        const actionData = {
+            highscore: this.highscore.getCurrentScore(),
+            timestamp: this.tickCount
+        };
+        this.jumpTimestamps.push(actionData);
+
+        fetch("http://localhost:8001/api/log-action", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(actionData)
+        }).then(response => {
+            if (response.ok) {
+                console.log("Jump action logged successfully:", actionData);
+            } else {
+                console.error("Failed to log jump action");
+            }
+        }).catch(error => {
+            console.error("Error logging jump action:", error);
+        });
+    }
+
     saveLogs() {
         try {
             localStorage.setItem('gameLogs', JSON.stringify(this.logs));
@@ -156,11 +181,32 @@ class Game {
     endGame() {
         this.platfformanager.resetValues();
         this.highscore.update();
-        this.highscore.resetCurrentScore();
         this.gameStarted = false;
         this.frameCount = 0;
         this.fps = 60;
-
+    
+        const gameData = {
+            highscore: this.highscore.getHighScore(),
+            jumpTimestamps: this.jumpTimestamps
+        };    
+        
+        fetch("http://localhost:8001/api/log-game", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(gameData)
+        }).then(response => {
+            if (response.ok) {
+                console.log("Game session logged successfully:", gameData);
+                this.jumpTimestamps = [];
+                this.highscore.resetCurrentScore();
+            } else {
+                console.error("Failed to log game session.");
+            }
+        }).catch(error => {
+            console.error("Error logging game session:", error);
+        });
+    
+        
     }
 
     getGamestate() {
@@ -184,9 +230,7 @@ class Game {
     update() {
         if (this.buttonPressed !== this.lastButtonPressedState) {
             if (this.buttonPressed) {
-                this.logAction('jump', 'pressed');
-            } else {
-                this.logAction('jump', 'released');
+                this.logJump();
             }
             this.lastButtonPressedState = this.buttonPressed;
         }
@@ -207,6 +251,7 @@ class Game {
         if (this.gameOver === true) {
             cancelAnimationFrame(this.animationFrameID);
             this.init();
+            this.tickCount = 0;
         }
 
         if (this.gameStarted === false && this.buttonPressed === true) {
@@ -229,6 +274,10 @@ class Game {
         while (this.accumulator >= this.timeStep) {
             this.update(this.timeStep / 1000);
             this.accumulator -= this.timeStep;
+            if (this.gameStarted === true) {
+                this.tickCount++;
+            };
+            
         }
 
         this.draw();
@@ -248,3 +297,8 @@ class Game {
 }
 
 export default Game;
+
+
+
+
+
