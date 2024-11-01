@@ -14,16 +14,15 @@ class Game {
         this.canvas.width = 1200;
         this.canvas.height = 700;
         this.c = this.canvas.getContext('2d');
-        this.platfformanager = new PlatformManager(this)
-        this.coinmanager = new CoinManager(this)
+        this.platfformanager = new PlatformManager(this);
+        this.coinmanager = new CoinManager(this);
 
         this.offScreenCanvas = document.createElement('canvas');
         this.offScreenCanvas.width = 1200;
         this.offScreenCanvas.height = 700;
         this.offScreenC = this.offScreenCanvas.getContext('2d');
 
-        this.logs = [];
-        this.latButtonPressedState = false
+        this.latButtonPressedState = false;
 
         this.lastUpdateTime = performance.now();
         this.accumulator = 0;
@@ -34,7 +33,6 @@ class Game {
         this.generator = new SeedGenerator();
         this.randomGen = this.generator.randomNumbers();
         this.seed;
-
 
         this.fps = 60;
         this.frameCount = 0;
@@ -48,8 +46,6 @@ class Game {
         document.addEventListener('keyup', this.onKeyup);
         document.addEventListener('touchstart', this.onTouchStart);
         document.addEventListener('touchend', this.onTouchEnd);
-
-
     }
 
     init() {
@@ -70,16 +66,15 @@ class Game {
         startText.classList.remove("hide");
     }
 
-
     onKeydown = (event) => {
         if (event.keyCode === 32) {
             this.buttonPressed = true;
         }
     }
+
     onTouchStart = (event) => {
         this.buttonPressed = true;
     };
-
 
     onKeyup = (event) => {
         if (event.keyCode === 32) {
@@ -90,7 +85,6 @@ class Game {
     onTouchEnd = (event) => {
         this.buttonPressed = false;
     };
-
 
     calculateFPS(now) {
         this.frameCount++;
@@ -118,54 +112,28 @@ class Game {
         }
     }
 
-
-    logAction(action, type, positionX = null, positionY = null) {
-        const logEntry = {
-            action: action,
-            type: type
-        };
-
-        if (positionX !== null && positionY !== null) {
-            logEntry.positionX = positionX;
-            logEntry.positionY = positionY;
-        }
-
-        this.logs.push(logEntry);
-        this.saveLogs();
-    }
-
-
     logJump() {
         const actionData = {
             highscore: this.highscore.getCurrentScore(),
             timestamp: this.tickCount
         };
         this.jumpTimestamps.push(actionData);
-
-        fetch("http://localhost:8001/api/log-action", {
+    
+        fetch("http://localhost:8001/api/log-jump", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(actionData)
-        }).then(response => {
-            if (response.ok) {
+        }).then(response => response.json())
+        .then(data => {
+            if (data.message) {
                 console.log("Jump action logged successfully:", actionData);
             } else {
-                console.error("Failed to log jump action");
+                console.error("Failed to log jump action:", data.error);
             }
         }).catch(error => {
             console.error("Error logging jump action:", error);
         });
     }
-
-    saveLogs() {
-        try {
-            localStorage.setItem('gameLogs', JSON.stringify(this.logs));
-            console.log("Logs saved successfully.");
-        } catch (error) {
-            console.error("Error saving logs:", error);
-        }
-    }
-
 
     startGame() {
         if (!this.gameStarted) {
@@ -188,8 +156,8 @@ class Game {
         const gameData = {
             highscore: this.highscore.getHighScore(),
             jumpTimestamps: this.jumpTimestamps
-        };    
-        
+        };
+    
         fetch("http://localhost:8001/api/log-game", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -200,13 +168,11 @@ class Game {
                 this.jumpTimestamps = [];
                 this.highscore.resetCurrentScore();
             } else {
-                console.error("Failed to log game session.");
+                console.error("Failed to log game session:", response.status, response.statusText);
             }
         }).catch(error => {
             console.error("Error logging game session:", error);
         });
-    
-        
     }
 
     getGamestate() {
@@ -239,7 +205,6 @@ class Game {
             object.update(this);
 
             if (object instanceof Coin && object.collected) {
-                this.logAction('coinCollected', 'collect', object.position.x, object.position.y);
                 return false;
             }
             return true;
@@ -267,17 +232,13 @@ class Game {
         this.accumulator += deltaTime;
 
         this.calculateFPS(now);
-        
-
-
 
         while (this.accumulator >= this.timeStep) {
             this.update(this.timeStep / 1000);
             this.accumulator -= this.timeStep;
             if (this.gameStarted === true) {
                 this.tickCount++;
-            };
-            
+            }
         }
 
         this.draw();
@@ -291,14 +252,6 @@ class Game {
             highScoreTextElement.innerHTML = `Highscore: ${this.highscore.getHighScore()}<br>Current Score: ${this.highscore.getCurrentScore()}`;
         }
     }
-
-
-
 }
 
 export default Game;
-
-
-
-
-
