@@ -57,7 +57,8 @@ class Game {
             new Coin(32, 48, this.canvas.width, 0, this.canvas.height - 100, 0),
             new Enemy(31, 32, -100, 300, "blue", 5),
             new Enemy(20, this.canvas.width, 0, this.canvas.height, null, 0),
-            new Player()
+            new Player(),
+            new Platform(25, 150, -50, 550, 0)
         ];
         if (!this.animationFrameID) {
             this.animate();
