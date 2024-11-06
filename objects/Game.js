@@ -14,16 +14,15 @@ class Game {
         this.canvas.width = 1200;
         this.canvas.height = 700;
         this.c = this.canvas.getContext('2d');
-        this.platfformanager = new PlatformManager(this)
-        this.coinmanager = new CoinManager(this)
+        this.platfformanager = new PlatformManager(this);
+        this.coinmanager = new CoinManager(this);
 
         this.offScreenCanvas = document.createElement('canvas');
         this.offScreenCanvas.width = 1200;
         this.offScreenCanvas.height = 700;
         this.offScreenC = this.offScreenCanvas.getContext('2d');
 
-        this.logs = [];
-        this.latButtonPressedState = false
+        this.latButtonPressedState = false;
 
         this.lastUpdateTime = performance.now();
         this.accumulator = 0;
@@ -34,7 +33,6 @@ class Game {
         this.generator = new SeedGenerator();
         this.randomGen = this.generator.randomNumbers();
         this.seed;
-
 
         this.fps = 60;
         this.frameCount = 0;
@@ -56,9 +54,9 @@ class Game {
         this.objects = [
             new Background("./objects/graphics/sky.png", 3),
             new Platform(100, this.canvas.width, 0, this.canvas.height - 100, 0),
-            new Coin(20, 20, this.canvas.width, 0, this.canvas.height - 100, 0),
-            new Enemy(36, 32, -35, 300, "blue", 5),
-            new Enemy(20, this.canvas.width, 0, this.canvas.height - 5, null, 0),
+            new Coin(32, 48, this.canvas.width, 0, this.canvas.height - 100, 0),
+            new Enemy(31, 32, -100, 300, "blue", 5),
+            new Enemy(20, this.canvas.width, 0, this.canvas.height, null, 0),
             new Player()
         ];
         if (!this.animationFrameID) {
@@ -68,16 +66,15 @@ class Game {
         startText.classList.remove("hide");
     }
 
-
     onKeydown = (event) => {
         if (event.keyCode === 32) {
             this.buttonPressed = true;
         }
     }
+
     onTouchStart = (event) => {
         this.buttonPressed = true;
     };
-
 
     onKeyup = (event) => {
         if (event.keyCode === 32) {
@@ -88,7 +85,6 @@ class Game {
     onTouchEnd = (event) => {
         this.buttonPressed = false;
     };
-
 
     calculateFPS(now) {
         this.frameCount++;
@@ -116,33 +112,6 @@ class Game {
         }
     }
 
-
-    logAction(action, type, positionX = null, positionY = null) {
-        const logEntry = {
-            action: action,
-            type: type
-        };
-
-        if (positionX !== null && positionY !== null) {
-            logEntry.positionX = positionX;
-            logEntry.positionY = positionY;
-        }
-
-        this.logs.push(logEntry);
-        this.saveLogs();
-    }
-
-
-    saveLogs() {
-        try {
-            localStorage.setItem('gameLogs', JSON.stringify(this.logs));
-            console.log("Logs saved successfully.");
-        } catch (error) {
-            console.error("Error saving logs:", error);
-        }
-    }
-
-
     startGame() {
         if (!this.gameStarted) {
             this.gameStarted = true;
@@ -154,20 +123,21 @@ class Game {
         }
     }
 
-    endGame() {
+    endGame() {     
+        
+    
+        const gameData = {
+            highscore: this.highscore.getCurrentScore(),
+            jumpTimestamps: this.jumpTimestamps,
+            created_at: new Date().toISOString()
+        };
+
         this.platfformanager.resetValues();
         this.highscore.update();
+        this.highscore.resetCurrentScore();
         this.gameStarted = false;
         this.frameCount = 0;
         this.fps = 60;
-
-        const gameData = {
-            highscore: this.highscore.getHighScore(),
-            jumpTimestamps: this.jumpTimestamps
-        };
-
-
-
         const overlay = document.getElementById('overlay');
         overlay.classList.add('death');
 
@@ -176,6 +146,7 @@ class Game {
         }, 200);
 
 
+        this.fps = 60;  
     }
 
     getGamestate() {
@@ -197,16 +168,10 @@ class Game {
     }
 
     update() {
-        if (this.buttonPressed !== this.lastButtonPressedState) {
-
-            this.lastButtonPressedState = this.buttonPressed;
-        }
-
         this.objects = this.objects.filter(object => {
             object.update(this);
 
             if (object instanceof Coin && object.collected) {
-                this.logAction('coinCollected', 'collect', object.position.x, object.position.y);
                 return false;
             }
             return true;
@@ -235,16 +200,12 @@ class Game {
 
         this.calculateFPS(now);
 
-
-
-
         while (this.accumulator >= this.timeStep) {
             this.update(this.timeStep / 1000);
             this.accumulator -= this.timeStep;
             if (this.gameStarted === true) {
                 this.tickCount++;
-            };
-
+            }
         }
 
         this.draw();
@@ -258,14 +219,6 @@ class Game {
             highScoreTextElement.innerHTML = `Highscore: ${this.highscore.getHighScore()}<br>Current Score: ${this.highscore.getCurrentScore()}`;
         }
     }
-
-
-
 }
 
 export default Game;
-
-
-
-
-

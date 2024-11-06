@@ -9,8 +9,8 @@ class Player {
             x: 50,
             y: 500
         };
-        this.width = 31;
-        this.height = 47;
+        this.width = 32;
+        this.height = 42;
         this.velocity = {
             x: 0,
             y: 1
