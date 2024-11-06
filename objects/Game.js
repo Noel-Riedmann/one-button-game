@@ -48,8 +48,6 @@ class Game {
         document.addEventListener('keyup', this.onKeyup);
         document.addEventListener('touchstart', this.onTouchStart);
         document.addEventListener('touchend', this.onTouchEnd);
-
-
     }
 
     init() {
@@ -102,13 +100,13 @@ class Game {
             this.lastFPSUpdate = now;
 
             switch (true) {
-                case ((this.fps > 70 && this.fps <= 85)||(this.fps > 125 && this.fps <= 150)):
+                case ((this.fps > 70 && this.fps <= 85) || (this.fps > 125 && this.fps <= 150)):
                     this.fps = 75;
                     break;
                 case (this.fps > 85 && this.fps <= 100):
                     this.fps = 90;
                     break;
-                case ((this.fps > 100 && this.fps <= 125)||(this.fps > 150 && this.fps <= 250)):
+                case ((this.fps > 100 && this.fps <= 125) || (this.fps > 150 && this.fps <= 250)):
                     this.fps = 60;
                     break;
                 default:
@@ -134,28 +132,6 @@ class Game {
         this.saveLogs();
     }
 
-
-    logJump() {
-        const actionData = {
-            highscore: this.highscore.getCurrentScore(),
-            timestamp: this.tickCount
-        };
-        this.jumpTimestamps.push(actionData);
-
-        fetch("http://localhost:8001/api/log-action", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(actionData)
-        }).then(response => {
-            if (response.ok) {
-                console.log("Jump action logged successfully:", actionData);
-            } else {
-                console.error("Failed to log jump action");
-            }
-        }).catch(error => {
-            console.error("Error logging jump action:", error);
-        });
-    }
 
     saveLogs() {
         try {
@@ -184,29 +160,22 @@ class Game {
         this.gameStarted = false;
         this.frameCount = 0;
         this.fps = 60;
-    
+
         const gameData = {
             highscore: this.highscore.getHighScore(),
             jumpTimestamps: this.jumpTimestamps
-        };    
-        
-        fetch("http://localhost:8001/api/log-game", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(gameData)
-        }).then(response => {
-            if (response.ok) {
-                console.log("Game session logged successfully:", gameData);
-                this.jumpTimestamps = [];
-                this.highscore.resetCurrentScore();
-            } else {
-                console.error("Failed to log game session.");
-            }
-        }).catch(error => {
-            console.error("Error logging game session:", error);
-        });
-    
-        
+        };
+
+
+
+        const overlay = document.getElementById('overlay');
+        overlay.classList.add('death');
+
+        setTimeout(() => {
+            overlay.classList.remove('death');
+        }, 200);
+
+
     }
 
     getGamestate() {
@@ -229,9 +198,7 @@ class Game {
 
     update() {
         if (this.buttonPressed !== this.lastButtonPressedState) {
-            if (this.buttonPressed) {
-                this.logJump();
-            }
+
             this.lastButtonPressedState = this.buttonPressed;
         }
 
@@ -267,7 +234,7 @@ class Game {
         this.accumulator += deltaTime;
 
         this.calculateFPS(now);
-        
+
 
 
 
@@ -277,7 +244,7 @@ class Game {
             if (this.gameStarted === true) {
                 this.tickCount++;
             };
-            
+
         }
 
         this.draw();

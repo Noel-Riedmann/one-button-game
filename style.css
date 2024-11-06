@@ -14,7 +14,7 @@ body {
     font-family: monospace;
 }
 
-.overlay{
+.overlay {
     position: fixed;
     width: 1200px;
     height: 700px;
@@ -23,6 +23,12 @@ body {
     transform-origin: center center;
     transform: translate(-50%, -50%) scale(var(--canvas-scale, 1));
     image-rendering: pixelated;
+    
+
+}
+
+.death {
+    background-color: rgba(255, 0, 0, 0.5) !important;
 }
 
 .hide {
@@ -40,9 +46,9 @@ canvas {
     transform-origin: center center;
     transform: translate(-50%, -50%) scale(var(--canvas-scale, 1));
     image-rendering: pixelated;
-  }
+}
 
-  .highScoreText {
+.highScoreText {
     position: absolute;
     left: 10vw;
     top: 2vh;
