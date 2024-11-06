@@ -1,14 +1,15 @@
 class Background {
-    constructor(imageSrc,speed) {
+    constructor(imageSrc, speed) {
         this.image = new Image();
         this.image.src = imageSrc;
         this.speed = speed;
+ 
+        
         this.x1 = 0;
-        this.x2 = null;
-        this.xdrawn = 0;
+        this.x2 = null; 
 
         this.image.onload = () => {
-            this.x2 = this.image.width;
+            this.x2 = this.image.width; 
             console.log('Image loaded:', this.image.width, this.image.height);
         };
 
@@ -18,36 +19,23 @@ class Background {
     }
 
     draw(c) {
-        
         if (this.image.complete) {
-            c.drawImage(this.image, this.xdrawn, 0, c.canvas.width, c.canvas.height);
-            //console.log("Background drawn");
-            // this.xdrawn -= this.speed
-            //console.log("Background drawn");
-            //this.xdrawn -= this.speed
+            c.drawImage(this.image, this.x1, 0, this.image.width, c.canvas.height);
+            c.drawImage(this.image, this.x2, 0, this.image.width, c.canvas.height);
         }
-
     }
-    update(game) {
-       //console.log(this.x1, this.x2);
-       //console.log(-this.image.width, -this.image.height);
+
+    update() {
         this.x1 -= this.speed;
         this.x2 -= this.speed;
-       //console.log(this.x1, this.x2);
-       //console.log(-this.image.width, -this.image.height);
-        //this.x1 -= this.speed;
-        //this.x2 -= this.speed;
 
         if (this.x1 <= -this.image.width) {
-            this.x1 = this.image.width + this.x2 - this.speed;
-           // console.log("Background updated");
+            this.x1 = this.x2 + this.image.width;
         }
 
-        /*if (this.x2 <= -this.image.width) {
-            this.x2 = this.image.width + this.x1 - this.speed;
-            //console.log("Background updated");
-
-        }*/
+        if (this.x2 <= -this.image.width) {
+            this.x2 = this.x1 + this.image.width;
+        }
     }
 }
 

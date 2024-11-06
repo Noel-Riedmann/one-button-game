@@ -56,7 +56,9 @@ class Game {
         this.gameOver = false;
         this.gameStarted = false;
         this.objects = [
-            new Background("./objects/graphics/sky.png", 3),
+            new Background("./objects/graphics/clouds.png", 2),
+            new Background("./objects/graphics/mountains.png", 1),
+        
             new Platform(100, this.canvas.width, 0, this.canvas.height - 100, 0),
             new Coin(20, 20, this.canvas.width, 0, this.canvas.height - 100, 0),
             new Enemy(36, 32, -35, 300, "blue", 5),
@@ -181,6 +183,7 @@ class Game {
     endGame() {
         this.platfformanager.resetValues();
         this.highscore.update();
+        this.highscore.resetCurrentScore();
         this.gameStarted = false;
         this.frameCount = 0;
         this.fps = 60;
