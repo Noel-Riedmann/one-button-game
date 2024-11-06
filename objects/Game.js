@@ -120,18 +120,16 @@ class Game {
             if (startText) {
                 startText.classList.add("hide");
             }
+
+            const player = this.objects.filter(obj => obj instanceof Player);
+
+            player.forEach(player => {
+                player.startAnimation();
+            })
         }
     }
 
-    endGame() {     
-        
-    
-        const gameData = {
-            highscore: this.highscore.getCurrentScore(),
-            jumpTimestamps: this.jumpTimestamps,
-            created_at: new Date().toISOString()
-        };
-
+    endGame() {
         this.platfformanager.resetValues();
         this.highscore.update();
         this.highscore.resetCurrentScore();
@@ -143,10 +141,16 @@ class Game {
 
         setTimeout(() => {
             overlay.classList.remove('death');
-        }, 200);
+        }, 150);
 
 
-        this.fps = 60;  
+        this.fps = 60;
+        const player = this.objects.filter(obj => obj instanceof Player);
+
+        player.forEach(player => {
+            player.stopAnimation();
+        })
+
     }
 
     getGamestate() {

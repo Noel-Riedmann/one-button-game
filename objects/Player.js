@@ -21,20 +21,22 @@ class Player {
         this.gameOver = false;
         this.updateCollisionPoints();
 
+        this.isDead = true;
         this.spriteSheet = new Image();
         this.spriteSheet.src = './objects/graphics/dudecolor.png';
         this.spriteSheetLoaded = false;
-        
+
+
         this.spriteSheet.onload = () => {
             this.spriteSheetLoaded = true;
         };
 
-        this.frameIndex = 0;
+        this.frameIndex = 1;
         this.frameSpeed = 10
         this.frameCount = 0;
         this.isJumping = false;
 
-        
+
         this.walkRightFrames = [0, 1, 2, 3];
         this.jumpRightFrame = 1;
 
@@ -74,25 +76,27 @@ class Player {
         if (!this.spriteSheetLoaded) {
             return;
         }
-    
+
         let sourceX;
         const sourceY = 0;
-    
+
 
         if (this.isJumping) {
             sourceX = this.jumpRightFrame * this.width;
         } else {
             sourceX = this.walkRightFrames[this.frameIndex] * this.width;
-    
-            this.frameCount++;
-            if (this.frameCount >= this.frameSpeed) {
-                this.frameIndex = (this.frameIndex + 1) % this.walkRightFrames.length;
-                this.frameCount = 0;
+
+            if (this.isDead === false) {
+                this.frameCount++;
+                if (this.frameCount >= this.frameSpeed) {
+                    this.frameIndex = (this.frameIndex + 1) % this.walkRightFrames.length;
+                    this.frameCount = 0;
+                }
             }
         }
-    
+
         c.save();
-    
+
         if (this.velocity.x > 0) {
             c.translate(this.position.x + this.width, this.position.y);
             c.scale(-1, 1);
@@ -101,13 +105,13 @@ class Player {
 
             c.translate(this.position.x, this.position.y);
         }
-    
+
 
         c.drawImage(
-            this.spriteSheet,   
-            sourceX, sourceY,  
+            this.spriteSheet,
+            sourceX, sourceY,
             this.width, this.height,
-            0, 0,              
+            0, 0,
             this.width, this.height,
         );
 
@@ -211,6 +215,14 @@ class Player {
             this.highscore.update();
             this.highscore.resetCurrentScore();
         }
+    }
+
+    stopAnimation(){
+        this.isDead = true;
+    }
+
+    startAnimation(){
+        this.isDead = false;
     }
 }
 
