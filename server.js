@@ -24,7 +24,7 @@ db.connect((err) => {
 });
 
 app.post('/api/log-jump', (req, res) => {
-    const { highscore, timestamp, gameId } = req.body;
+    const { highscore, timestamp, gameId = 1 } = req.body;
 
     if (highscore == null || timestamp == null || gameId == null) { 
         return res.status(400).json({ error: 'Daten fehlen' });

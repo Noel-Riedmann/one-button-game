@@ -113,9 +113,10 @@ class Game {
     }
 
     logJump() {
-        const actionData = {
+        const actionData = {            
             highscore: this.highscore.getCurrentScore(),
-            timestamp: this.tickCount
+            timestamp: this.tickCount,
+            game_id: 1
         };
         this.jumpTimestamps.push(actionData);
     
@@ -146,16 +147,13 @@ class Game {
         }
     }
 
-    endGame() {
-        this.platfformanager.resetValues();
-        this.highscore.update();
-        this.gameStarted = false;
-        this.frameCount = 0;
-        this.fps = 60;
+    endGame() {     
+        
     
         const gameData = {
-            highscore: this.highscore.getHighScore(),
-            jumpTimestamps: this.jumpTimestamps
+            highscore: this.highscore.getCurrentScore(),
+            jumpTimestamps: this.jumpTimestamps,
+            created_at: new Date().toISOString()
         };
     
         fetch("http://localhost:8001/api/log-game", {
@@ -173,6 +171,13 @@ class Game {
         }).catch(error => {
             console.error("Error logging game session:", error);
         });
+
+        this.platfformanager.resetValues();
+        this.highscore.update();
+        this.highscore.resetCurrentScore();
+        this.gameStarted = false;
+        this.frameCount = 0;
+        this.fps = 60;  
     }
 
     getGamestate() {
