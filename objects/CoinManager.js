@@ -5,8 +5,8 @@ class CoinManager {
     constructor(game) {
         this.game = game;
         this.spacing = 300;
-        this.coinWidth = 20;
-        this.coinHeight = 20;
+        this.coinWidth = 32;
+        this.coinHeight = 46;
         this.spawnChance = 0.02;
     }
 

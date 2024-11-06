@@ -54,9 +54,9 @@ class Game {
         this.objects = [
             new Background("./objects/graphics/sky.png", 3),
             new Platform(100, this.canvas.width, 0, this.canvas.height - 100, 0),
-            new Coin(20, 20, this.canvas.width, 0, this.canvas.height - 100, 0),
-            new Enemy(36, 32, -35, 300, "blue", 5),
-            new Enemy(20, this.canvas.width, 0, this.canvas.height - 5, null, 0),
+            new Coin(32, 48, this.canvas.width, 0, this.canvas.height - 100, 0),
+            new Enemy(31, 32, -100, 300, "blue", 5),
+            new Enemy(20, this.canvas.width, 0, this.canvas.height, null, 0),
             new Player()
         ];
         if (!this.animationFrameID) {
@@ -112,30 +112,6 @@ class Game {
         }
     }
 
-    logJump() {
-        const actionData = {            
-            highscore: this.highscore.getCurrentScore(),
-            timestamp: this.tickCount,
-            game_id: 1
-        };
-        this.jumpTimestamps.push(actionData);
-    
-        fetch("http://localhost:8001/api/log-jump", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(actionData)
-        }).then(response => response.json())
-        .then(data => {
-            if (data.message) {
-                console.log("Jump action logged successfully:", actionData);
-            } else {
-                console.error("Failed to log jump action:", data.error);
-            }
-        }).catch(error => {
-            console.error("Error logging jump action:", error);
-        });
-    }
-
     startGame() {
         if (!this.gameStarted) {
             this.gameStarted = true;
@@ -155,22 +131,6 @@ class Game {
             jumpTimestamps: this.jumpTimestamps,
             created_at: new Date().toISOString()
         };
-    
-        fetch("http://localhost:8001/api/log-game", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(gameData)
-        }).then(response => {
-            if (response.ok) {
-                console.log("Game session logged successfully:", gameData);
-                this.jumpTimestamps = [];
-                this.highscore.resetCurrentScore();
-            } else {
-                console.error("Failed to log game session:", response.status, response.statusText);
-            }
-        }).catch(error => {
-            console.error("Error logging game session:", error);
-        });
 
         this.platfformanager.resetValues();
         this.highscore.update();
@@ -199,13 +159,6 @@ class Game {
     }
 
     update() {
-        if (this.buttonPressed !== this.lastButtonPressedState) {
-            if (this.buttonPressed) {
-                this.logJump();
-            }
-            this.lastButtonPressedState = this.buttonPressed;
-        }
-
         this.objects = this.objects.filter(object => {
             object.update(this);
 
