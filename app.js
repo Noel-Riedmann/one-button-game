@@ -4,6 +4,10 @@ const canvas = document.querySelector('canvas');
 let game;
 
 function init() {
+  if(!localStorage.getItem("username")){
+    window.location.href = "username.html"
+  }
+
   game = new Game(canvas);
   game.init()
 }

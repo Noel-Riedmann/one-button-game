@@ -1,0 +1,8 @@
+body {
+    margin: 0;
+    display: flex;
+    min-height: 100vh;
+    background-color: #f2ede9;
+    color: #0E2841;
+    font-family: monospace;
+}
