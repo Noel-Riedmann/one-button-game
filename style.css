@@ -56,6 +56,16 @@ canvas {
     color: #0E2841;
 }
 
+.account{
+    position: absolute;
+    right: 2vw;
+    top: 2vh;
+}
+
+.account:hover{
+    cursor: pointer;
+}
+
 @media (max-width: 600px) {
     .highScoreText {
         left: 5vw;
