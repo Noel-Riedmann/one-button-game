@@ -1,8 +1,51 @@
 body {
     margin: 0;
     display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
     min-height: 100vh;
     background-color: #f2ede9;
     color: #0E2841;
     font-family: monospace;
+}
+
+.headline {
+    font-size: 24px;
+    overflow: hidden;
+    white-space: nowrap;
+    width: 0;
+    animation: typing 2s steps(40, end) forwards;
+}
+
+@keyframes typing {
+    from { width: 0; }
+    to { width: 100%; }
+}
+
+#usernameInput{
+    border-radius: 10px;
+    height: 35px;
+    border-style: solid;
+    border-color: #0E2841;
+    font-size: 18px;
+    font-family: monospace;
+    color: #0E2841;
+    font-weight: bold;
+    padding-left: 10px;
+}
+
+.submitButton{
+    border-radius: 10px;
+    height: 40px;
+    border-style: solid;
+    border-color: #0E2841;
+    font-size: 18px;
+    color: #0E2841;
+    font-weight: bold;
+}
+
+.submitButton:hover{
+    background-color: #0e284110;
+    cursor: pointer;
 }
