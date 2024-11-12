@@ -37,6 +37,7 @@ class Game {
         this.fps = 60;
         this.frameCount = 0;
         this.lastFPSUpdate = performance.now();
+
         this.tickCount = 0;
         this.jumpTimestamps = [];
 
@@ -124,6 +125,9 @@ class Game {
                 startText.classList.add("hide");
             }
 
+            this.highscore.resetCurrentScore();
+            this.jumpTimestamps = [];
+
             const player = this.objects.filter(obj => obj instanceof Player);
 
             player.forEach(player => {
@@ -132,7 +136,21 @@ class Game {
         }
     }
 
-    endGame() {
+    async endGame() {
+
+        const gameData = {
+            highscore: this.highscore.getCurrentScore(),
+            jumps: this.jumpTimestamps,
+        };
+
+        await fetch("http://localhost:8000/api/gameData", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(gameData)
+        });
+
         this.platfformanager.resetValues();
         this.highscore.update();
         this.highscore.resetCurrentScore();
@@ -156,12 +174,30 @@ class Game {
 
     }
 
+    async getLeaderboard(){
+        const response = await fetch("http://localhost:8000/api/leaderboard");
+        const leaderboard = await response.json();
+        console.log("Leaderboard:", leaderboard);
+        return leaderboard;
+    }
+
+    async loadGame(gameID) {
+        const response = await fetch(`http://localhost:8000/api/getGameData?gameID=${gameID}`);
+        const gameData = await response.json();
+        console.log("Loaded Game Data:", gameData);
+        return gameData;
+    }
+
     getGamestate() {
         return this.gameStarted;
     }
 
     playerCanJump() {
         return this.canJump = true;
+    }
+
+    playerJump(){
+        this.jumpTimestamps.push(this.tickCount);
     }
 
     draw() {
@@ -183,6 +219,8 @@ class Game {
             }
             return true;
         });
+
+        this.tickCount++;
 
         this.platfformanager.update();
         this.coinmanager.update();
