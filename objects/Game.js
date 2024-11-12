@@ -151,6 +151,7 @@ class Game {
         this.platfformanager.resetValues();
         this.highscore.update();
         this.gameStarted = false;
+        this.highscore.resetCurrentScore();
         this.frameCount = 0;
         this.fps = 60;
 
