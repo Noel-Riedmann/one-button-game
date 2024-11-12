@@ -3,7 +3,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const savedUsername = localStorage.getItem('username');
     
     if (savedUsername) {
-        usernameInput.placeholder = savedUsername;
+        usernameInput.value = savedUsername;
+        document.getElementById('headline').innerHTML = "Change your Username"
     }
 
     const form = document.getElementById('usernameForm');
