@@ -1,4 +1,4 @@
-const link = "https://lovelyleap.deno.dev";
+const link = new URL("https://lovelyleap.deno.dev");
 const kv = await Deno.openKv();
 
 
