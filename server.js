@@ -3,6 +3,7 @@ const kv = await Deno.openKv();
 
 const saveGameData = async (request) => {
   const data = await request.json();
+  console.log("Received game data:", data); // Debugging-Log
 
   const gameData = {
     highscore: data.highscore,
@@ -10,11 +11,10 @@ const saveGameData = async (request) => {
     jumpTimestamps: data.jumps,
   };
 
-  console.log("Saving game data:", gameData);
+  await kv.set([`gameData:${data.username}`], gameData); // Verwende einen eindeutigen Schlüssel
+  console.log("Game data successfully saved:", gameData); // Debugging-Log
 
-  await kv.set(["gameData"], gameData);
-
-  return new Response("Game data successfully posted", {
+  return new Response("Data saved", {
     status: 200,
     headers: {
       "Content-Type": "application/json",
@@ -24,69 +24,65 @@ const saveGameData = async (request) => {
     },
   });
 };
-
 
 const getLeaderboard = async () => {
   const leaderboardEntries = [];
 
-  for await (const entry of kv.list({ prefix: ["gameData"] })) {
-    const gameData = await kv.get(entry.key);
+  try {
+    // Durchlaufe alle gespeicherten Spiel-Daten
+    for await (const entry of kv.list({ prefix: ["gameData:"] })) {
+      const gameData = await kv.get(entry.key);
+      console.log("Fetched game data for leaderboard:", gameData.value); // Debugging-Log
 
-    console.log("Leaderboard entry:", gameData.value);
+      const { username, highscore } = gameData.value;
+      leaderboardEntries.push({ username, highscore });
+    }
 
-    const { gameID, username, highscore } = gameData.value;
-    leaderboardEntries.push({ gameID, username, highscore });
+    // Sortiere die Einträge nach Highscore
+    leaderboardEntries.sort((a, b) => b.highscore - a.highscore);
+    console.log("Sorted leaderboard:", leaderboardEntries); // Debugging-Log
+
+    return new Response(JSON.stringify(leaderboardEntries), {
+      status: 200,
+      headers: {
+        "Content-Type": "application/json",
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Methods": "POST, GET, OPTIONS",
+        "Access-Control-Allow-Headers": "Content-Type",
+      },
+    });
+  } catch (error) {
+    console.error("Error fetching leaderboard:", error);
+    return new Response("Failed to fetch leaderboard", { status: 500 });
   }
-
-  leaderboardEntries.sort((a, b) => b.highscore - a.highscore);
-
-  return new Response(JSON.stringify(leaderboardEntries), {
-    status: 200,
-    headers: {
-      "Content-Type": "application/json",
-      "Access-Control-Allow-Origin": "*",
-      "Access-Control-Allow-Methods": "POST, GET, OPTIONS",
-      "Access-Control-Allow-Headers": "Content-Type",
-    },
-  });
 };
-
 
 const handler = async (request) => {
   const { method, url } = request;
   const path = new URL(url).pathname;
 
-  const corsHeaders = {
-    "Access-Control-Allow-Origin": "*",
-    "Access-Control-Allow-Methods": "POST, GET, OPTIONS",
-    "Access-Control-Allow-Headers": "Content-Type",
-  };
-
   if (method === "OPTIONS") {
-    return new Response(null, { headers: corsHeaders });
+    return new Response(null, {
+      headers: {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Methods": "POST, GET, OPTIONS",
+        "Access-Control-Allow-Headers": "Content-Type",
+      },
+    });
   }
 
   switch (path) {
     case "/api/leaderboard":
       if (method === "POST") {
-        const response = await saveGameData(request);
-        return new Response(response.body, {
-          status: response.status,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
+        return saveGameData(request); // POST-Request
       }
       if (method === "GET") {
-        const response = await getLeaderboard();
-        return new Response(response.body, {
-          status: response.status,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
+        return getLeaderboard(); // GET-Request
       }
       break;
   }
 
-  return new Response("Not Found", { status: 404, headers: corsHeaders });
+  return new Response("Not Found", { status: 404 });
 };
-
 
 Deno.serve(handler);
