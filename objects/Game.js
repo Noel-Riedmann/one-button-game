@@ -148,13 +148,26 @@ class Game {
 
         localStorage.setItem('jumpTimestamps', JSON.stringify(this.jumpTimestamps));
 
-        await fetch("https://lovelyleap.deno.dev/api/leaderboard", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify(gameData)
-        });
+        try {
+            const response = await fetch("https://lovelyleap.deno.dev/api/leaderboard", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(gameData)
+            });
+    
+            // Überprüfe, ob die Antwort erfolgreich war
+            if (response.ok) {
+                console.log("Game data successfully posted.");
+            } else {
+                console.error("Failed to post game data:", response.status, response.statusText);
+            }
+        } catch (error) {
+            console.error("Error posting game data:", error);
+        }
+
+        
 
         this.platfformanager.resetValues();
         this.highscore.update();
