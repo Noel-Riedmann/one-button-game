@@ -37,4 +37,4 @@ const handler = async (request) => {
   }
 };
 
-Deno.serve({ link }, handler);
+Deno.serve(handler);
