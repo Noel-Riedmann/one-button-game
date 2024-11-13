@@ -50,24 +50,37 @@ const handler = async (request) => {
   const { method, url } = request;
   const path = new URL(url).pathname;
 
+  const corsHeaders = {
+    "Access-Control-Allow-Origin": "*",
+    "Access-Control-Allow-Methods": "POST, GET, OPTIONS",
+    "Access-Control-Allow-Headers": "Content-Type",
+  };
+
   if (method === "OPTIONS") {
-    return new Response(null, {
-      headers: {
-        "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Methods": "POST, GET, OPTIONS",
-        "Access-Control-Allow-Headers": "Content-Type",
-      },
-    });
+    return new Response(null, { headers: corsHeaders });
   }
 
   switch (path) {
     case "/api/leaderboard":
-      if (method === "POST") return saveGameData(request);
-      if (method === "GET") return getLeaderboard();
+      if (method === "POST") {
+        const response = await saveGameData(request);
+        return new Response(response.body, {
+          status: response.status,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      if (method === "GET") {
+        const response = await getLeaderboard();
+        return new Response(response.body, {
+          status: response.status,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
       break;
   }
 
-  return new Response("Not Found", { status: 404 });
+  return new Response("Not Found", { status: 404, headers: corsHeaders });
 };
+
 
 Deno.serve(handler);
