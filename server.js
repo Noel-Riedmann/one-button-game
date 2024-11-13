@@ -12,7 +12,7 @@ const saveGameData = async (request) => {
     jumpTimestamps: data.jumps,
   };
 
-  await kv.set(["gameData", gameID.toString()], gameData);
+  await kv.set(["gameData"], gameData);
 };
 
 const getLeaderboard = async () => {
