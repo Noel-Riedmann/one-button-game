@@ -3,21 +3,17 @@ const kv = await Deno.openKv();
 
 let gameIDCounter = 1;
 
-const prefs = {
-  username: "ada",
-  theme: "dark",
-  language: "en-US",
-};
-
-await kv.set(["preferences", "ada"], prefs);
-
 const saveGameData = async (request) => {
   const data = await request.json();
+
+  const gameID = gameIDCounter++;
   
-  const gameID = gameIDCounter;
-  gameIDCounter++;
-  
-  const gameData = { ...data, gameID };
+  const gameData = {
+    gameID,
+    highscore: data.highscore,
+    username: data.username,
+    jumpTimestamps: data.jumps,
+  };
 
   await kv.set(["gameData", gameID.toString()], gameData);
 
@@ -30,8 +26,12 @@ const getLeaderboard = async () => {
 
   for await (const entry of kv.list({ prefix: ["gameData"] })) {
     const gameData = await kv.get(entry.key);
-    leaderboardEntries.push(gameData.value);
+
+    const { gameID, username, highscore } = gameData.value;
+    leaderboardEntries.push({ gameID, username, highscore });
   }
+
+  leaderboardEntries.sort((a, b) => b.highscore - a.highscore);
 
   let response = new Response(JSON.stringify(leaderboardEntries));
   return addCORSHeaders(response);
@@ -48,8 +48,7 @@ const handler = async (request) => {
   const url = new URL(request.url);
 
   if (request.method === "OPTIONS") {
-    let response = new Response(null, { status: 204 });
-    return addCORSHeaders(response);
+    return addCORSHeaders(new Response(null, { status: 204 }));
   }
 
   switch (url.pathname) {

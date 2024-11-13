@@ -73,6 +73,7 @@ class Game {
     onKeydown = (event) => {
         if (event.keyCode === 32) {
             this.buttonPressed = true;
+            this.playerJump();
         }
     }
 
@@ -127,6 +128,7 @@ class Game {
 
             this.highscore.resetCurrentScore();
             this.jumpTimestamps = [];
+            this.tickCount = 0;
 
             const player = this.objects.filter(obj => obj instanceof Player);
 
@@ -139,9 +141,12 @@ class Game {
     async endGame() {
 
         const gameData = {
+            username: localStorage.getItem("username"),
             highscore: this.highscore.getCurrentScore(),
             jumps: this.jumpTimestamps,
         };
+
+        localStorage.setItem('jumpTimestamps', JSON.stringify(this.jumpTimestamps));
 
         await fetch("http://localhost:8000/api/gameData", {
             method: "POST",
@@ -197,6 +202,7 @@ class Game {
     }
 
     playerJump(){
+        console.log("asödkfjsösfdlsköf:", this.tickCount);
         this.jumpTimestamps.push(this.tickCount);
     }
 
