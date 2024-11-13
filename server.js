@@ -26,6 +26,7 @@ const getLeaderboard = async () => {
   }
 
   leaderboardEntries.sort((a, b) => b.highscore - a.highscore);
+  return new Response(JSON.stringify(leaderboardEntries), { status: 200, headers: { "Content-Type": "application/json" } });
 };
 
 const handler = async (request) => {
