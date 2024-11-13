@@ -1,4 +1,4 @@
-const port = 8000;
+const link = "https://lovelyleap.deno.dev";
 const kv = await Deno.openKv();
 
 let gameIDCounter = 1;
@@ -45,13 +45,12 @@ const addCORSHeaders = (response) => {
 };
 
 const handler = async (request) => {
-  const url = new URL(request.url);
 
   if (request.method === "OPTIONS") {
     return addCORSHeaders(new Response(null, { status: 204 }));
   }
 
-  switch (url.pathname) {
+  switch (link.pathname) {
     case "/":
       return addCORSHeaders(new Response("Welcome to Deno API Server", { status: 200 }));
 
@@ -68,6 +67,4 @@ const handler = async (request) => {
       return addCORSHeaders(new Response("Not Found", { status: 404 }));
   }
 };
-
-console.log(`HTTP webserver running. Access it at: http://localhost:${port}/`);
-Deno.serve({ port }, handler);
+Deno.serve({ link }, handler);

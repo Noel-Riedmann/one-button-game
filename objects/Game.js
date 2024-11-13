@@ -148,7 +148,7 @@ class Game {
 
         localStorage.setItem('jumpTimestamps', JSON.stringify(this.jumpTimestamps));
 
-        await fetch("http://localhost:8000/api/gameData", {
+        await fetch("https://lovelyleap.deno.dev/api/gameData", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
@@ -179,20 +179,6 @@ class Game {
 
     }
 
-    async getLeaderboard(){
-        const response = await fetch("http://localhost:8000/api/leaderboard");
-        const leaderboard = await response.json();
-        console.log("Leaderboard:", leaderboard);
-        return leaderboard;
-    }
-
-    async loadGame(gameID) {
-        const response = await fetch(`http://localhost:8000/api/getGameData?gameID=${gameID}`);
-        const gameData = await response.json();
-        console.log("Loaded Game Data:", gameData);
-        return gameData;
-    }
-
     getGamestate() {
         return this.gameStarted;
     }
@@ -202,7 +188,6 @@ class Game {
     }
 
     playerJump(){
-        console.log("asödkfjsösfdlsköf:", this.tickCount);
         this.jumpTimestamps.push(this.tickCount);
     }
 
