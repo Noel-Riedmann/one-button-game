@@ -3,7 +3,6 @@ const kv = await Deno.openKv();
 
 const saveGameData = async (request) => {
   const data = await request.json();
-  console.log("Received game data:", data); // Debugging-Log
 
   const gameData = {
     highscore: data.highscore,
@@ -11,8 +10,7 @@ const saveGameData = async (request) => {
     jumpTimestamps: data.jumps,
   };
 
-  await kv.set([`gameData:${data.username}`], gameData); // Verwende einen eindeutigen Schlüssel
-  console.log("Game data successfully saved:", gameData); // Debugging-Log
+  await kv.set(["gameData"], gameData);
 
   return new Response("Data saved", {
     status: 200,
@@ -28,33 +26,24 @@ const saveGameData = async (request) => {
 const getLeaderboard = async () => {
   const leaderboardEntries = [];
 
-  try {
-    // Durchlaufe alle gespeicherten Spiel-Daten
-    for await (const entry of kv.list({ prefix: ["gameData:"] })) {
-      const gameData = await kv.get(entry.key);
-      console.log("Fetched game data for leaderboard:", gameData.value); // Debugging-Log
+  for await (const entry of kv.list({ prefix: ["gameData"] })) {
+    const gameData = await kv.get(entry.key);
 
-      const { username, highscore } = gameData.value;
-      leaderboardEntries.push({ username, highscore });
-    }
-
-    // Sortiere die Einträge nach Highscore
-    leaderboardEntries.sort((a, b) => b.highscore - a.highscore);
-    console.log("Sorted leaderboard:", leaderboardEntries); // Debugging-Log
-
-    return new Response(JSON.stringify(leaderboardEntries), {
-      status: 200,
-      headers: {
-        "Content-Type": "application/json",
-        "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Methods": "POST, GET, OPTIONS",
-        "Access-Control-Allow-Headers": "Content-Type",
-      },
-    });
-  } catch (error) {
-    console.error("Error fetching leaderboard:", error);
-    return new Response("Failed to fetch leaderboard", { status: 500 });
+    const { gameID, username, highscore } = gameData.value;
+    leaderboardEntries.push({ gameID, username, highscore });
   }
+
+  leaderboardEntries.sort((a, b) => b.highscore - a.highscore);
+
+  return new Response(JSON.stringify(leaderboardEntries), {
+    status: 200,
+    headers: {
+      "Content-Type": "application/json",
+      "Access-Control-Allow-Origin": "*",
+      "Access-Control-Allow-Methods": "POST, GET, OPTIONS",
+      "Access-Control-Allow-Headers": "Content-Type",
+    },
+  });
 };
 
 const handler = async (request) => {
@@ -73,12 +62,8 @@ const handler = async (request) => {
 
   switch (path) {
     case "/api/leaderboard":
-      if (method === "POST") {
-        return saveGameData(request); // POST-Request
-      }
-      if (method === "GET") {
-        return getLeaderboard(); // GET-Request
-      }
+      if (method === "POST") return saveGameData(request);
+      if (method === "GET") return getLeaderboard();
       break;
   }
 
