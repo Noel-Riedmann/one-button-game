@@ -10,9 +10,11 @@ const saveGameData = async (request) => {
     jumpTimestamps: data.jumps,
   };
 
+  console.log("Saving game data:", gameData);
+
   await kv.set(["gameData"], gameData);
 
-  return new Response("Data saved", {
+  return new Response("Game data successfully posted", {
     status: 200,
     headers: {
       "Content-Type": "application/json",
@@ -23,11 +25,14 @@ const saveGameData = async (request) => {
   });
 };
 
+
 const getLeaderboard = async () => {
   const leaderboardEntries = [];
 
   for await (const entry of kv.list({ prefix: ["gameData"] })) {
     const gameData = await kv.get(entry.key);
+
+    console.log("Leaderboard entry:", gameData.value);
 
     const { gameID, username, highscore } = gameData.value;
     leaderboardEntries.push({ gameID, username, highscore });
@@ -45,6 +50,7 @@ const getLeaderboard = async () => {
     },
   });
 };
+
 
 const handler = async (request) => {
   const { method, url } = request;

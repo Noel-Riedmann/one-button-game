@@ -156,7 +156,6 @@ class Game {
                 body: JSON.stringify(gameData)
             });
     
-            // Überprüfe, ob die Antwort erfolgreich war
             if (response.ok) {
                 console.log("Game data successfully posted.");
             } else {
