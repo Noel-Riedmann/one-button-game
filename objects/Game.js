@@ -139,15 +139,14 @@ class Game {
     }
 
     async endGame() {
-
         const gameData = {
             username: localStorage.getItem("username"),
             highscore: this.highscore.getCurrentScore(),
             jumps: this.jumpTimestamps,
         };
-
+    
         localStorage.setItem('jumpTimestamps', JSON.stringify(this.jumpTimestamps));
-
+    
         try {
             const response = await fetch("https://lovelyleap.deno.dev/api/leaderboard", {
                 method: "POST",
@@ -166,9 +165,7 @@ class Game {
         } catch (error) {
             console.error("Error posting game data:", error);
         }
-
-        
-
+    
         this.platfformanager.resetValues();
         this.highscore.update();
         this.highscore.resetCurrentScore();
@@ -177,20 +174,19 @@ class Game {
         this.fps = 60;
         const overlay = document.getElementById('overlay');
         overlay.classList.add('death');
-
+    
         setTimeout(() => {
             overlay.classList.remove('death');
         }, 150);
-
-
+    
         this.fps = 60;
         const player = this.objects.filter(obj => obj instanceof Player);
-
+    
         player.forEach(player => {
             player.stopAnimation();
         })
-
     }
+    
 
     getGamestate() {
         return this.gameStarted;
