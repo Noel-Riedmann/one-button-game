@@ -148,7 +148,7 @@ class Game {
 
         localStorage.setItem('jumpTimestamps', JSON.stringify(this.jumpTimestamps));
 
-        await fetch("https://lovelyleap.deno.dev/api/gameData", {
+        await fetch("http://lovelyleap.deno.dev/api/leaderboard", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
