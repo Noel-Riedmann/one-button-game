@@ -14,7 +14,8 @@ const saveGameData = async (request) => {
     jumpTimestamps: data.jumps,
   };
 
-  await kv.set(["gameData", highscore, gameID], gameData);
+  await kv.set(["gameData", data.highscore, gameID], gameData);
+  return new Response(JSON.stringify({response: "ok"}), { status: 200, headers: { "Content-Type": "application/json","Access-Control-Allow-Origin":"*", "Access-Control-Allow-Headers":"content-type"} });
 };
 
 const getLeaderboard = async () => {
@@ -25,15 +26,21 @@ const getLeaderboard = async () => {
     leaderboardEntries.push({username, highscore });
   }
 
-  return new Response(JSON.stringify(leaderboardEntries), { status: 200, headers: { "Content-Type": "application/json" } });
+  return new Response(JSON.stringify(leaderboardEntries), { status: 200, headers: { "Content-Type": "application/json","Access-Control-Allow-Origin":"*", "Access-Control-Allow-Headers":"content-type"} });
 };
 
 const handler = async (request) => {
-
-  switch (link.pathname) {
+const url = new URL(request.url)
+if (request.method === 'OPTIONS'){
+    return new Response(null, {headers: {"Access-Control-Allow-Origin":"*", "Access-Control-Allow-Headers":"content-type"}})
+}
+  switch (url.pathname) {
     case "/api/leaderboard":
       return request.method === 'POST'?saveGameData(request):      
       getLeaderboard();
+
+    default:
+        return new Response("blub");
   }
 };
 
