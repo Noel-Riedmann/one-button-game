@@ -1,73 +1,47 @@
 const link = new URL("https://lovelyleap.deno.dev");
 const kv = await Deno.openKv();
 
+
+
 const saveGameData = async (request) => {
   const data = await request.json();
+  const gameID = crypto.randomUUID();
 
+  
   const gameData = {
     highscore: data.highscore,
     username: data.username,
     jumpTimestamps: data.jumps,
   };
 
-  await kv.set(["gameData"], gameData);
-
-  return new Response("Data saved", {
-    status: 200,
-    headers: {
-      "Content-Type": "application/json",
-      "Access-Control-Allow-Origin": "*",
-      "Access-Control-Allow-Methods": "POST, GET, OPTIONS",
-      "Access-Control-Allow-Headers": "Content-Type",
-    },
-  });
+  await kv.set(["gameData", data.highscore, gameID], gameData);
+  return new Response(JSON.stringify({response: "ok"}), { status: 200, headers: { "Content-Type": "application/json","Access-Control-Allow-Origin":"*", "Access-Control-Allow-Headers":"content-type"} });
 };
 
 const getLeaderboard = async () => {
   const leaderboardEntries = [];
 
-  for await (const entry of kv.list({ prefix: ["gameData"] })) {
-    const gameData = await kv.get(entry.key);
-
-    const { gameID, username, highscore } = gameData.value;
-    leaderboardEntries.push({ gameID, username, highscore });
+  for await (const entry of kv.list({ prefix: ["gameData"]}, {limit: 10, reverse: true })) {
+    const {username, highscore } = entry.value;
+    leaderboardEntries.push({username, highscore });
   }
 
-  leaderboardEntries.sort((a, b) => b.highscore - a.highscore);
-
-  return new Response(JSON.stringify(leaderboardEntries), {
-    status: 200,
-    headers: {
-      "Content-Type": "application/json",
-      "Access-Control-Allow-Origin": "*",
-      "Access-Control-Allow-Methods": "POST, GET, OPTIONS",
-      "Access-Control-Allow-Headers": "Content-Type",
-    },
-  });
+  return new Response(JSON.stringify(leaderboardEntries), { status: 200, headers: { "Content-Type": "application/json","Access-Control-Allow-Origin":"*", "Access-Control-Allow-Headers":"content-type"} });
 };
 
 const handler = async (request) => {
-  const { method, url } = request;
-  const path = new URL(url).pathname;
-
-  if (method === "OPTIONS") {
-    return new Response(null, {
-      headers: {
-        "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Methods": "POST, GET, OPTIONS",
-        "Access-Control-Allow-Headers": "Content-Type",
-      },
-    });
-  }
-
-  switch (path) {
+const url = new URL(request.url)
+if (request.method === 'OPTIONS'){
+    return new Response(null, {headers: {"Access-Control-Allow-Origin":"*", "Access-Control-Allow-Headers":"content-type"}})
+}
+  switch (url.pathname) {
     case "/api/leaderboard":
-      if (method === "POST") return saveGameData(request);
-      if (method === "GET") return getLeaderboard();
-      break;
-  }
+      return request.method === 'POST'?saveGameData(request):      
+      getLeaderboard();
 
-  return new Response("Not Found", { status: 404 });
+    default:
+        return new Response("blub");
+  }
 };
 
 Deno.serve(handler);
