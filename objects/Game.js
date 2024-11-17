@@ -7,6 +7,7 @@ import Background from "./Background.js";
 import Coin from "./Coin.js";
 import CoinManager from "./CoinManager.js";
 import SeedGenerator from "./SeedGenerator.js";
+import Ground from "./Ground.js";
 
 class Game {
     constructor(canvas) {
@@ -61,7 +62,8 @@ class Game {
             new Enemy(31, 32, -100, 300, "blue", 5),
             new Enemy(20, this.canvas.width, 0, this.canvas.height, null, 0),
             new Player(),
-            new Platform(25, 150, -50, 550, 0)
+            new Platform(25, 150, -50, 550, 0),
+            new Ground("./objects/graphics/ground_1200.png", 2, this)
         ];
         if (!this.animationFrameID) {
             this.animate();

@@ -2,6 +2,7 @@ import Enemy from "./Enemy.js";
 import Platform from "./Platform.js";
 import Highscore from "./Highscore.js";
 import Coin from "./Coin.js";
+import Ground from "./Ground.js";
 
 class Player {
     constructor() {
@@ -137,6 +138,7 @@ class Player {
         this.collisionDetectionPlatforms(game);
         this.collisionDetectionEnemies(game);
         this.collisionDetectionCoins(game);
+        this.collisionDetectionGround(game);
         this.checkDead(game);
 
         if (this.canJump && this.velocity.y === 0 && game.buttonPressed) {
@@ -209,6 +211,38 @@ class Player {
             }
         });
     }
+
+    collisionDetectionGround(game) {
+        game.objects.forEach(object => {
+            if (object instanceof Ground) {
+                const ground = object;
+    
+                const isOnFirstGround = (
+                    this.position.x < ground.x1 + ground.image.width &&
+                    this.position.x + this.width > ground.x1 &&
+                    this.position.y + this.height >= game.canvas.height - ground.image.height
+                );
+    
+                const isOnSecondGround = (
+                    this.position.x < ground.x2 + ground.image.width &&
+                    this.position.x + this.width > ground.x2 &&
+                    this.position.y + this.height >= game.canvas.height - ground.image.height
+                );
+    
+                if (isOnFirstGround || isOnSecondGround) {
+                    this.isOnGround = true;
+                    this.canJump = true;
+                    this.isJumping = false;
+    
+                    this.position.y = game.canvas.height - ground.image.height - this.height;
+                } else {
+                    this.isOnGround = false;
+                }
+            }
+        });
+    }
+    
+    
 
     checkDead(game) {
         if (game.gameOver) {
