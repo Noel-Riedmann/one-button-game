@@ -55,7 +55,7 @@ class PlatformManager {
             this.groundAreaStage -= 1;
         }
 
-        if (this.speed <= 7) { this.speed += 0.02; }
+        if (this.speed <= 7) { this.speed += 0.05; }
 
 
 
