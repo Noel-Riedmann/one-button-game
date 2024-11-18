@@ -87,3 +87,9 @@ canvas {
         top: 10px;
     }
 }
+
+.TdoT{
+    position: absolute;
+    left: 50%;
+    background-color: red   ;
+}
