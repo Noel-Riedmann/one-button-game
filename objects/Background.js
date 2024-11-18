@@ -36,6 +36,9 @@ class Background {
         if (this.x2 <= -this.image.width) {
             this.x2 = this.x1 + this.image.width;
         }
+        if (this.x2 - this.x1 > this.image.width) {
+            this.x1 = this.x2 - this.image.width;
+        }
     }
 }
 
