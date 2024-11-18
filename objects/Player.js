@@ -125,31 +125,40 @@ class Player {
             this.isJumping = true;
         } else {
             this.velocity.y = 0;
+            this.position.y = game.canvas.height - this.height;
+    
+            if (!this.isDead) {
+                game.gameOver = true;
+                game.endGame();
+                this.isDead = true;
+            }
+    
             this.isJumping = false;
+            this.canJump = true;
         }
-
+    
         this.position.x += this.velocity.x;
         if (this.position.x + this.width >= game.canvas.width) {
             this.position.x = 0;
         }
-
+    
         this.updateCollisionPoints();
         this.collisionDetectionPlatforms(game);
         this.collisionDetectionEnemies(game);
         this.collisionDetectionCoins(game);
         this.checkDead(game);
-
+    
         if (this.canJump && this.velocity.y === 0 && game.buttonPressed) {
             this.canJump = false;
             this.velocity.y -= 15;
             this.isJumping = true;
         }
     }
-
+    
     collisionDetectionPlatforms(game) {
         game.objects.forEach(platform => {
             if (!(platform instanceof Platform)) return;
-
+    
             if (
                 this.collisionPointBelow.y >= platform.position.y &&
                 this.collisionPointBelow.y < platform.position.y + platform.height &&
@@ -162,7 +171,7 @@ class Player {
                 this.canJump = true;
                 this.isJumping = false;
             }
-
+    
             if (
                 this.collisionPointAbove.y <= platform.position.y + platform.height &&
                 this.collisionPointAbove.y > platform.position.y &&
@@ -172,9 +181,9 @@ class Player {
             ) {
                 this.velocity.y = 0;
             }
-
         });
     }
+    
 
     collisionDetectionEnemies(game) {
         game.objects.forEach(enemy => {
