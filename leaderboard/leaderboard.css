@@ -121,26 +121,36 @@ button:active {
 }
 
 .qrcodeIMG {
-    width: 150px;
-    height: 150px;
+    width: 200px;
+    height: 200px;
+    border: 5px solid #000;
+    border-radius: 10px;
 }
 
 .scan-text {
     position: absolute;
-    top: -20px;
+    top: -40px;
     left: 50%;
     transform: translateX(-50%);
-    font-size: 18px;
+    font-size: 24px;
     font-weight: bold;
     color: #ff4500;
-    animation: bounce 1.5s infinite ease-in-out;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+    animation: fade-bounce 2s infinite;
 }
 
-@keyframes bounce {
-    0%, 100% {
-        transform: translate(-50%, 0);
+@keyframes fade-bounce {
+    0% {
+        opacity: 0.5;
+        transform: translate(-50%, -10px);
     }
     50% {
+        opacity: 1;
+        transform: translate(-50%, -20px);
+    }
+    100% {
+        opacity: 0.5;
         transform: translate(-50%, -10px);
     }
 }
+
