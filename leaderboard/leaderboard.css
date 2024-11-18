@@ -1,0 +1,83 @@
+/* General styles */
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f2ede9;
+    color: #0E2841;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+}
+
+/* Leaderboard container */
+#leaderboard {
+    width: 80%;
+    max-width: 600px;
+    text-align: center;
+    
+}
+
+/* Header */
+#leaderboard h2 {
+    margin: 0 0 20px;
+    margin-bottom: 50px;
+    font-size: 60px;
+    color: #0E2841;
+
+}
+
+/* Table styles */
+#leaderboard-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+#leaderboard-table th,
+#leaderboard-table td {
+    padding: 12px;
+    font-size: 30px;
+    text-align: center;
+    border: 1px solid #0E2841;
+;
+}
+
+#leaderboard-table th {
+    background-color: #0E2841;
+    color: #ffffff;
+    font-weight: bold;
+}
+
+#leaderboard-table tr:nth-child(even) {
+    background-color: #0e284125;
+}
+
+#leaderboard-table tr:nth-child(odd) {
+    background-color: #0e28410e;
+}
+
+#leaderboard-table tr:hover {
+    background-color: #f1f1f1;
+}
+
+#leaderboard-table td {
+    color: #0E2841;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 600px) {
+    #leaderboard {
+        width: 100%;
+        padding: 15px;
+    }
+
+    #leaderboard-table th,
+    #leaderboard-table td {
+        padding: 8px;
+    }
+
+    #leaderboard h2 {
+        font-size: 20px;
+    }
+}
