@@ -39,7 +39,7 @@ class PlatformManager {
         }
 
         if (this.groundAreaStage === 0 && shiftedSeed <= 5) {
-            this.groundArea = true;
+            this.groundArea = false; //w.i.p.
             this.groundAreaStage = 6
         }
 
