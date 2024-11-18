@@ -3,11 +3,9 @@ async function fetchLeaderboard() {
         const response = await fetch("https://lovelyleap.deno.dev/api/leaderboard");
         const data = await response.json();
 
-        // Get the table body element
         const leaderboardTableBody = document.querySelector("#leaderboard-table tbody");
-        leaderboardTableBody.innerHTML = ""; // Clear existing content
+        leaderboardTableBody.innerHTML = "";
 
-        // Populate the table with leaderboard data
         data.forEach(({ username, highscore }, index) => {
             const row = document.createElement("tr");
 
@@ -31,5 +29,4 @@ async function fetchLeaderboard() {
     }
 }
 
-// Call the function to fetch and display the leaderboard
 fetchLeaderboard();
