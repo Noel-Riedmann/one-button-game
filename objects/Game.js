@@ -54,7 +54,7 @@ class Game {
         this.gameStarted = false;
         this.objects = [
             new Background("./objects/graphics/clouds.png", 2),
-            new Background("./objects/graphics/planet.png", 5),
+            new Background("./objects/graphics/zeichnung21.png", 5),
             new Background("./objects/graphics/mountains.png", 1),
             
         
