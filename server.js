@@ -1,4 +1,4 @@
-const link = new URL("https://lovelyleap.deno.dev");
+const link = new URL("https://lovelyleap-onebutton.deno.dev");
 const kv = await Deno.openKv();
 
 const saveGameData = async (request) => {

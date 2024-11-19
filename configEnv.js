@@ -1,1 +1,1 @@
-export const API_URL = "https://lovelyleap.deno.dev/api/leaderboard";
+export const API_URL = "https://lovelyleap-onebutton.deno.dev/api/leaderboard";
