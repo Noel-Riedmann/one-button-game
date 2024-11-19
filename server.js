@@ -2,25 +2,52 @@ const link = new URL("https://lovelyleap.deno.dev");
 const kv = await Deno.openKv();
 
 const saveGameData = async (request) => {
-  const data = await request.json();
-  const gameID = crypto.randomUUID();
+  try {
+    const data = await request.json();
 
-  const gameData = {
-    highscore: data.highscore,
-    username: data.username,
-    jumpTimestamps: data.jumps,
-  };
+    if (
+      typeof data.username !== "string" || data.username.trim() === "" ||
+      typeof data.highscore !== "number" || data.highscore < 0 ||        
+      !Array.isArray(data.jumps) ||                                      
+      data.jumps.some((jump) => typeof jump !== "number" || jump < 0) || 
+      data.jumps.length === 0                                            
+    ) {
+      return new Response(
+        JSON.stringify({ error: "Invalid data: jumpTimestamps array is empty or invalid" }),
+        { status: 400 }
+      );
+    }
 
-  await kv.set(["gameData", data.highscore, gameID], gameData);
-  return new Response(JSON.stringify({ response: "ok" }), {
-    status: 200,
-    headers: {
-      "Content-Type": "application/json",
-      "Access-Control-Allow-Origin": "*",
-      "Access-Control-Allow-Headers": "content-type",
-    },
-  });
+    const MAX_HIGHSCORE = 999999;
+    if (data.highscore > MAX_HIGHSCORE) {
+      return new Response(
+        JSON.stringify({ error: "Highscore exceeds limit" }),
+        { status: 400 }
+      );
+    }
+
+    const gameID = crypto.randomUUID();
+    const gameData = {
+      highscore: data.highscore,
+      username: data.username.trim(),
+      jumpTimestamps: data.jumps,
+    };
+
+    await kv.set(["gameData", data.highscore, gameID], gameData);
+
+    return new Response(
+      JSON.stringify({ response: "ok", id: gameID }),
+      { status: 200, headers: { "Content-Type": "application/json" } }
+    );
+  } catch (error) {
+    console.error("Error saving game data:", error);
+    return new Response(
+      JSON.stringify({ error: "Internal server error" }),
+      { status: 500 }
+    );
+  }
 };
+
 
 const getLeaderboard = async () => {
   const leaderboardEntries = [];
