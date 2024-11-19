@@ -56,8 +56,8 @@ class Game {
             new Background("./objects/graphics/clouds.png", 2),
             new Background("./objects/graphics/zeichnung21.png", 5),
             new Background("./objects/graphics/mountains.png", 1),
-            
-        
+
+
             new Platform(100, this.canvas.width, 0, this.canvas.height - 100, 0),
             new Coin(32, 48, this.canvas.width, 0, this.canvas.height - 100, 0),
             new Enemy(31, 32, -100, 300, "blue", 5),
@@ -146,18 +146,19 @@ class Game {
             highscore: this.highscore.getCurrentScore(),
             jumps: this.jumpTimestamps,
         };
-    
-        localStorage.setItem('jumpTimestamps', JSON.stringify(this.jumpTimestamps));
-    
+
         try {
-            const response = await fetch("https://lovelyleap-onebutton.deno.dev/api/leaderboard", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify(gameData)
-            });
-    
+            const response = await fetch(
+                "https://lovelyleap-onebutton.deno.dev/api/leaderboard",
+                {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify(gameData),
+                }
+            );
+
             if (response.ok) {
                 console.log("Game data successfully posted.");
             } else {
@@ -166,7 +167,7 @@ class Game {
         } catch (error) {
             console.error("Error posting game data:", error);
         }
-    
+
         this.platfformanager.resetValues();
         this.highscore.update();
         this.highscore.resetCurrentScore();
@@ -175,19 +176,41 @@ class Game {
         this.fps = 60;
         const overlay = document.getElementById('overlay');
         overlay.classList.add('death');
-    
+
         setTimeout(() => {
             overlay.classList.remove('death');
         }, 150);
-    
+
         this.fps = 60;
         const player = this.objects.filter(obj => obj instanceof Player);
-    
+
         player.forEach(player => {
             player.stopAnimation();
         })
     }
-    
+
+    async generateSignature(data, secret) {
+        const encoder = new TextEncoder();
+        const key = await crypto.subtle.importKey(
+            "raw",
+            encoder.encode(secret),
+            { name: "HMAC", hash: "SHA-256" },
+            false,
+            ["sign"]
+        );
+
+        const message = JSON.stringify(data);
+        const signature = await crypto.subtle.sign(
+            "HMAC",
+            key,
+            encoder.encode(message)
+        );
+
+        return btoa(
+            String.fromCharCode(...new Uint8Array(signature))
+        );
+    }
+
 
     getGamestate() {
         return this.gameStarted;
@@ -197,7 +220,7 @@ class Game {
         return this.canJump = true;
     }
 
-    playerJump(){
+    playerJump() {
         this.jumpTimestamps.push(this.tickCount);
     }
 

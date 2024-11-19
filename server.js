@@ -1,9 +1,56 @@
 const link = new URL("https://lovelyleap-onebutton.deno.dev");
 const kv = await Deno.openKv();
+const API_KEY = Deno.env.get("API_KEY");
+
+if (!API_KEY) {
+  console.error("API key missing!");
+  Deno.exit(1);
+};
+
+async function verifySignature(data, clientSignature) {
+  const encoder = new TextEncoder();
+  const key = await crypto.subtle.importKey(
+    "raw",
+    encoder.encode(SHARED_SECRET),
+    { name: "HMAC", hash: "SHA-256" },
+    false,
+    ["verify"]
+  );
+
+  const message = JSON.stringify(data);
+  const decodedSignature = Uint8Array.from(
+    atob(clientSignature),
+    char => char.charCodeAt(0)
+  );
+
+  return await crypto.subtle.verify(
+    "HMAC",
+    key,
+    decodedSignature,
+    encoder.encode(message)
+  );
+}
 
 const saveGameData = async (request) => {
   try {
     const data = await request.json();
+    const clientSignature = request.headers.get("x-signature");
+
+    if (!clientSignature) {
+      return new Response(JSON.stringify({ error: "Missing signature" }), {
+        status: 400,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+
+    const isValid = await verifySignature(data, clientSignature);
+
+    if (!isValid) {
+      return new Response(JSON.stringify({ error: "Invalid signature" }), {
+        status: 403,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
 
     if (!data.jumps || data.jumps.length < data.highscore) {
       return new Response(
