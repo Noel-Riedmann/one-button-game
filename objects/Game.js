@@ -7,7 +7,7 @@ import Background from "./Background.js";
 import Coin from "./Coin.js";
 import CoinManager from "./CoinManager.js";
 import SeedGenerator from "./SeedGenerator.js";
-import { API_URL } from "../configENV.js";
+import { API_URL } from "../configEnv.js";
 
 class Game {
     constructor(canvas) {
