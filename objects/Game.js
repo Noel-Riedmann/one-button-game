@@ -7,7 +7,6 @@ import Background from "./Background.js";
 import Coin from "./Coin.js";
 import CoinManager from "./CoinManager.js";
 import SeedGenerator from "./SeedGenerator.js";
-import { API_URL } from "../configEnv.js";
 
 class Game {
     constructor(canvas) {
@@ -151,7 +150,7 @@ class Game {
         localStorage.setItem('jumpTimestamps', JSON.stringify(this.jumpTimestamps));
     
         try {
-            const response = await fetch(API_URL, {
+            const response = await fetch("https://lovelyleap-onebutton.deno.dev/api/leaderboard", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"

@@ -5,31 +5,17 @@ const saveGameData = async (request) => {
   try {
     const data = await request.json();
 
-    if (
-      typeof data.username !== "string" || data.username.trim() === "" ||
-      typeof data.highscore !== "number" || data.highscore < 0 ||        
-      !Array.isArray(data.jumps) ||                                      
-      data.jumps.some((jump) => typeof jump !== "number" || jump < 0) || 
-      data.jumps.length === 0                                            
-    ) {
+    if (!data.jumps || data.jumps.length < data.highscore) {
       return new Response(
-        JSON.stringify({ error: "Invalid data: jumpTimestamps array is empty or invalid" }),
-        { status: 400 }
-      );
-    }
-
-    const MAX_HIGHSCORE = 999999;
-    if (data.highscore > MAX_HIGHSCORE) {
-      return new Response(
-        JSON.stringify({ error: "Highscore exceeds limit" }),
-        { status: 400 }
+        JSON.stringify({ error: "Invalid data" }),
+        { status: 400, headers: { "Content-Type": "application/json" } }
       );
     }
 
     const gameID = crypto.randomUUID();
     const gameData = {
       highscore: data.highscore,
-      username: data.username.trim(),
+      username: data.username,
       jumpTimestamps: data.jumps,
     };
 
