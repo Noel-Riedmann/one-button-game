@@ -1,120 +1,81 @@
 const link = new URL("https://lovelyleap-onebutton.deno.dev");
 const kv = await Deno.openKv();
 
-// Seed-Generator Funktion
-function* randomNumbers(seed) {
-  let state = Math.floor(seed * 10000);
-
-  const a = 1103515245;
-  const c = 12345;
-  const m = 2 ** 31;
-
-  while (true) {
-    state = (a * state + c) % m;
-    yield state / m;
-  }
-}
-
-// Spielsimulation für Validierung
-function simulateGame(seed, jumpTicks) {
-  let randomGen = randomNumbers(seed);
-  let tickCount = 0;
-  let score = 0;
-
-  // Beispiel: einfache Spielphysik
-  let playerY = 0;
-  let gravity = 0.98;
-  let jumpStrength = -10;
-  let velocity = 0;
-  let gameOver = false;
-
-  // Set für schnelleren Zugriff auf Sprünge
-  const jumpSet = new Set(jumpTicks);
-
-  while (!gameOver) {
-    // Simuliere Tick
-    if (jumpSet.has(tickCount)) {
-      velocity = jumpStrength;
-    }
-
-    velocity += gravity;
-    playerY += velocity;
-
-    // Score erhöhen, wenn der Spieler im Spiel bleibt
-    score++;
-
-    // Spiel-Ende Bedingung (z. B. Spieler fällt zu tief)
-    if (playerY > 1000 || playerY < -100) {
-      gameOver = true;
-    }
-
-    // Nächsten Tick vorbereiten
-    tickCount++;
-
-    // Optional: Seed voranschreiten lassen
-    randomGen.next();
-  }
-
-  return score;
-}
-
-// Highscore speichern mit Validierung
 const saveGameData = async (request) => {
   const data = await request.json();
-  const { seed, jumps, highscore, username } = data;
+  const gameID = crypto.randomUUID();
 
-  console.log("Received data from client:", data);
+  const gameData = {
+    highscore: data.highscore,
+    username: data.username,
+    jumpTimestamps: data.jumps,
+  };
 
-  // Simuliere das Spiel
+  await kv.set(["gameData", data.highscore, gameID], gameData);
+  return new Response(JSON.stringify({ response: "ok" }), {
+    status: 200,
+    headers: {
+      "Content-Type": "application/json",
+      "Access-Control-Allow-Origin": "*",
+      "Access-Control-Allow-Headers": "content-type",
+    },
+  });
+};
+
+const getLeaderboard = async () => {
+  const leaderboardEntries = [];
+
+  for await (const entry of kv.list(
+    { prefix: ["gameData"] },
+    { limit: 10, reverse: true }
+  )) {
+    const { username, highscore } = entry.value;
+    const gameID = entry.key[2];
+    leaderboardEntries.push({ id: gameID, username, highscore });
+  }
+
+  return new Response(JSON.stringify(leaderboardEntries), {
+    status: 200,
+    headers: {
+      "Content-Type": "application/json",
+      "Access-Control-Allow-Origin": "*",
+      "Access-Control-Allow-Headers": "content-type",
+    },
+  });
+};
+
+const deleteGameData = async (request, id) => {
   try {
-    const calculatedScore = simulateGame(seed, jumps);
-
-    // Validierung
-    if (calculatedScore !== highscore) {
-      return new Response(
-        JSON.stringify({ error: "Invalid highscore." }),
-        {
-          status: 400,
+    for await (const entry of kv.list({ prefix: ["gameData"] })) {
+      if (entry.key[2] === id) {
+        await kv.delete(entry.key);
+        return new Response("Deleted successfully", {
+          status: 200,
           headers: {
-            "Content-Type": "application/json",
             "Access-Control-Allow-Origin": "*",
+            "Access-Control-Allow-Headers": "content-type",
           },
-        }
-      );
+        });
+      }
     }
-
-    // Daten speichern, wenn gültig
-    const gameID = crypto.randomUUID();
-    const gameData = {
-      username,
-      highscore,
-      jumpTimestamps: jumps,
-    };
-
-    await kv.set(["gameData", highscore, gameID], gameData);
-    return new Response(JSON.stringify({ response: "ok" }), {
-      status: 200,
+    return new Response("Entry not found", {
+      status: 404,
       headers: {
-        "Content-Type": "application/json",
         "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Headers": "content-type",
       },
     });
   } catch (error) {
-    console.error("Simulation error:", error);
-    return new Response(
-      JSON.stringify({ error: "Server validation error." }),
-      {
-        status: 500,
-        headers: {
-          "Content-Type": "application/json",
-          "Access-Control-Allow-Origin": "*",
-        },
-      }
-    );
+    return new Response("Error deleting entry", {
+      status: 500,
+      headers: {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Headers": "content-type",
+      },
+    });
   }
 };
 
-// Highscore-API Handler
 const handler = async (request) => {
   const url = new URL(request.url);
   if (request.method === "OPTIONS") {
@@ -134,10 +95,7 @@ const handler = async (request) => {
         : getLeaderboard();
 
     default:
-      if (
-        request.method === "DELETE" &&
-        url.pathname.startsWith("/api/leaderboard/")
-      ) {
+      if (request.method === "DELETE" && url.pathname.startsWith("/api/leaderboard/")) {
         const id = url.pathname.split("/").pop();
         return deleteGameData(request, id);
       }

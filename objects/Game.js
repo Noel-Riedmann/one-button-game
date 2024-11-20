@@ -150,15 +150,8 @@ class Game {
             username: localStorage.getItem("username"),
             highscore: this.highscore.getCurrentScore(),
             jumps: this.jumpTimestamps,
-            seed: this.seed,
+            seed: this.initialSeed,
         };
-
-        console.log("seed before game end:", this.seed);
-
-        if (typeof this.seed === 'undefined') {
-            console.error("Seed is not defined in endGame function!");
-            return;
-        }
 
         try {
             const response = await fetch(
