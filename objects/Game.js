@@ -33,7 +33,7 @@ class Game {
         this.generator = new SeedGenerator();
         this.initialSeed = Math.random();
         this.randomGen = this.generator.randomNumbers(this.initialSeed);
-        this.seed;
+        this.seed = this.initialSeed;
 
         this.fps = 60;
         this.frameCount = 0;
@@ -150,7 +150,7 @@ class Game {
             username: localStorage.getItem("username"),
             highscore: this.highscore.getCurrentScore(),
             jumps: this.jumpTimestamps,
-            seed: this.initialSeed,
+            seed: this.seed,
         };
 
         console.log("seed before game end:", this.seed);
