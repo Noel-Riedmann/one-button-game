@@ -44,10 +44,22 @@ const getLeaderboard = async () => {
   });
 };
 
-const deleteGameData = async (request, id) => {
+const deleteGameData = async (request, id, key) => {
+  const FIXED_SECURITY_KEY = "oweztrzwuie23453623z6?!asdf3457";
+
+  if (key !== FIXED_SECURITY_KEY) {
+    return new Response("Invalid security key", {
+      status: 403,
+      headers: {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Headers": "content-type",
+      },
+    });
+  }
+
   try {
     for await (const entry of kv.list({ prefix: ["gameData"] })) {
-      if (entry.key[2] === id && entry.key[3].toString() === "oweztrzwuie23453623z6?!asdf3457") {
+      if (entry.key[2] === id) {
         await kv.delete(entry.key);
         return new Response("Deleted successfully", {
           status: 200,
@@ -58,6 +70,7 @@ const deleteGameData = async (request, id) => {
         });
       }
     }
+
     return new Response("Entry not found", {
       status: 404,
       headers: {
@@ -76,8 +89,10 @@ const deleteGameData = async (request, id) => {
   }
 };
 
+
 const handler = async (request) => {
   const url = new URL(request.url);
+  const segments = url.pathname.split("/");
   if (request.method === "OPTIONS") {
     return new Response(null, {
       headers: {
@@ -88,6 +103,7 @@ const handler = async (request) => {
     });
   }
 
+
   switch (url.pathname) {
     case "/api/leaderboard":
       return request.method === "POST"
@@ -96,8 +112,9 @@ const handler = async (request) => {
 
     default:
       if (request.method === "DELETE" && url.pathname.startsWith("/api/leaderboard/")) {
+        const key = segments[4];
         const id = url.pathname.split("/").pop();
-        return deleteGameData(request, id);
+        return deleteGameData(request, id, key);
       }
       return new Response("blub");
   }
