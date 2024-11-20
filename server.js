@@ -44,10 +44,10 @@ const getLeaderboard = async () => {
   });
 };
 
-const deleteGameData = async (request, id, key) => {
+const deleteGameData = async (request, id, deleteKey) => {
   const FIXED_SECURITY_KEY = "oweztrzwuie23453623z6asdf34571234241ewrt";
 
-  if (key !== FIXED_SECURITY_KEY) {
+  if (deleteKey !== FIXED_SECURITY_KEY) {
     return new Response("Invalid security key", {
       status: 403,
       headers: {
