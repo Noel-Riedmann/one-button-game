@@ -55,7 +55,7 @@ class PlatformManager {
         //     this.groundAreaStage -= 1;
         // }
 
-        if (this.speed <= 7) { this.speed += 0.05; }
+        if (this.speed <= 5.5) { this.speed += 0.05; }
 
 
 
@@ -64,6 +64,8 @@ class PlatformManager {
     }
 
     update() {
+        console.log(this.speed);
+        
         if (!this.game.gameStarted) {
             return;
         }
