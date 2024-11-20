@@ -63,9 +63,7 @@ class PlatformManager {
         this.game.objects.push(platform);
     }
 
-    update() {
-        console.log(this.speed);
-        
+    update() {        
         if (!this.game.gameStarted) {
             return;
         }
