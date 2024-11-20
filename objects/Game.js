@@ -142,6 +142,9 @@ class Game {
     async endGame() {
         const overlay = document.getElementById('overlay');
         overlay.classList.add('death');
+        setTimeout(() => {
+            overlay.classList.remove('death');
+        }, 150);
         const gameData = {
             username: localStorage.getItem("username"),
             highscore: this.highscore.getCurrentScore(),
@@ -176,9 +179,6 @@ class Game {
         this.frameCount = 0;
         this.fps = 60;
 
-        setTimeout(() => {
-            overlay.classList.remove('death');
-        }, 150);
 
         this.fps = 60;
         const player = this.objects.filter(obj => obj instanceof Player);
