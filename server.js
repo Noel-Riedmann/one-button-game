@@ -5,6 +5,13 @@ const saveGameData = async (request) => {
   const data = await request.json();
   const gameID = crypto.randomUUID();
 
+  if (!data.jumps || data.jumps.length < data.highscore) {
+    return new Response(
+      JSON.stringify({ error: "Invalid data" }),
+      { status: 400, headers: { "Content-Type": "application/json" } }
+    );
+  }
+
   const gameData = {
     highscore: data.highscore,
     username: data.username,

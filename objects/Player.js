@@ -179,15 +179,19 @@ class Player {
     collisionDetectionEnemies(game) {
         game.objects.forEach(enemy => {
             if (!(enemy instanceof Enemy)) return;
-
+    
+            // Prüfen, ob der Spieler mit einem Enemy kollidiert (inklusive Boden-Enemy)
             if (
                 this.position.x < enemy.position.x + enemy.width &&
                 this.position.x + this.width > enemy.position.x &&
-                this.position.y + 20 < enemy.position.y + enemy.height &&
-                this.position.y + this.height > enemy.position.y
+                this.position.y + this.height > enemy.position.y &&
+                this.position.y < enemy.position.y + enemy.height
             ) {
-                game.gameOver = true;
-                game.endGame();
+                if (!this.isDead) {
+                    game.gameOver = true; // Spiel sofort beenden
+                    game.endGame();
+                    this.isDead = true;  // Spieler ist tot, weitere Aktionen verhindern
+                }
             }
         });
     }
