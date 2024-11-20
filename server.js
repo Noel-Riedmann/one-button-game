@@ -31,20 +31,6 @@ const saveGameData = async (request) => {
 
   const gameID = crypto.randomUUID();
 
-  if (!data.jumps || data.jumps.length < data.highscore) {
-    return new Response(
-      JSON.stringify({ error: "Invalid data" }),
-      { status: 400, headers: { "Content-Type": "application/json" } }
-    );
-  }
-
-  if (!data.jumps || data.jumps.length < data.highscore) {
-    return new Response(
-      JSON.stringify({ error: "Invalid data" }),
-      { status: 400, headers: { "Content-Type": "application/json" } }
-    );
-  }
-
   await kv.set(["gameData", gameData.highscore, gameID], gameData);
 
   return new Response(JSON.stringify({ response: "ok" }), {
