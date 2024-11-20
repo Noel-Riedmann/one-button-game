@@ -1,4 +1,4 @@
-import virtualGame from "./virtualGame.js"; // Importiere die virtualGame-Klasse
+import virtualGame from "./Game.js"; // Importiere die virtualGame-Klasse
 
 const link = new URL("https://lovelyleap-onebutton.deno.dev");
 const kv = await Deno.openKv();
