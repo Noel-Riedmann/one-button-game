@@ -1,6 +1,6 @@
 async function fetchLeaderboard() {
     try {
-        const response = await fetch("https://lovelyleap.deno.dev/api/leaderboard");
+        const response = await fetch("https://lovelyleap-onebutton.deno.dev/api/leaderboard");
         const data = await response.json();
 
         const leaderboardTableBody = document.querySelector("#leaderboard-table tbody");
