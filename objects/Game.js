@@ -140,6 +140,7 @@ class Game {
     }
 
     async endGame() {
+        const overlay = document.getElementById('overlay');
         overlay.classList.add('death');
         const gameData = {
             username: localStorage.getItem("username"),
@@ -174,7 +175,6 @@ class Game {
         this.gameStarted = false;
         this.frameCount = 0;
         this.fps = 60;
-        const overlay = document.getElementById('overlay');
 
         setTimeout(() => {
             overlay.classList.remove('death');
