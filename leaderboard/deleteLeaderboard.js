@@ -22,7 +22,7 @@ async function fetchLeaderboard() {
             const actionCell = document.createElement("td");
             const deleteButton = document.createElement("button");
             deleteButton.textContent = "Delete";
-            deleteButton.addEventListener("click", () => deleteLeaderboardEntry(id, row, DELETE_KEY));
+            deleteButton.addEventListener("click", () => deleteLeaderboardEntry(id, row));
 
             actionCell.appendChild(deleteButton);
             row.appendChild(rankCell);
