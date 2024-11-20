@@ -38,22 +38,22 @@ class PlatformManager {
             this.width = 250;
         }
 
-        if (this.groundAreaStage === 0 && shiftedSeed <= 5) {
-            this.groundArea = false; //w.i.p.
-            this.groundAreaStage = 6
-        }
+        // if (this.groundAreaStage === 0 && shiftedSeed <= 5) {
+        //     this.groundArea = false; //w.i.p.
+        //     this.groundAreaStage = 6
+        // }
 
-        if (this.groundAreaStage == 1) {
-            this.groundArea = false;
-            this.groundAreaStage = 0;
-            this.height = 25;
-        }
+        // if (this.groundAreaStage == 1) {
+        //     this.groundArea = false;
+        //     this.groundAreaStage = 0;
+        //     this.height = 25;
+        // }
 
-        if (this.groundArea === true) {
-            positionY = this.game.canvas.height - 100;
-            this.height = 100
-            this.groundAreaStage -= 1;
-        }
+        // if (this.groundArea === true) {
+        //     positionY = this.game.canvas.height - 100;
+        //     this.height = 100
+        //     this.groundAreaStage -= 1;
+        // }
 
         if (this.speed <= 7) { this.speed += 0.05; }
 
