@@ -45,7 +45,7 @@ const getLeaderboard = async () => {
 };
 
 const deleteGameData = async (request, id, key) => {
-  const FIXED_SECURITY_KEY = "oweztrzwuie23453623z6?!asdf3457";
+  const FIXED_SECURITY_KEY = "oweztrzwuie23453623z6asdf34571234241ewrt";
 
   if (key !== FIXED_SECURITY_KEY) {
     return new Response("Invalid security key", {
