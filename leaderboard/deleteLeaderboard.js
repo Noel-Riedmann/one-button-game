@@ -38,7 +38,7 @@ async function fetchLeaderboard() {
 
 async function deleteLeaderboardEntry(id, row) {
     try {
-        const response = await fetch(`https://lovelyleap.deno.dev/api/leaderboard/${id}`, {
+        const response = await fetch(`https://lovelyleap-onebutton.deno.dev/api/leaderboard/${id}`, {
             method: "DELETE",
         });
 
