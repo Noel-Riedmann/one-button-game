@@ -163,7 +163,10 @@ class Game {
                     },
                     body: JSON.stringify(gameData),
                 }
+                
             );
+            console.log("Game Data sent to server:", gameData);
+
 
             if (response.ok) {
                 console.log("Game data successfully posted.");
