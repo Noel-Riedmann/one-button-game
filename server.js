@@ -1,5 +1,3 @@
-import virtualGame from "./Game.js"; // Importiere die virtualGame-Klasse
-
 const link = new URL("https://lovelyleap-onebutton.deno.dev");
 const kv = await Deno.openKv();
 
@@ -7,46 +5,21 @@ const saveGameData = async (request) => {
   const data = await request.json();
   const gameID = crypto.randomUUID();
 
-  // Validierungslogik: Prüfen, ob die Daten korrekt sind
-  // if (!data.jumps || data.jumps.length < data.highscore) {
-  //   return new Response(
-  //     JSON.stringify({ error: "Invalid data: jumps do not match highscore" }),
-  //     { status: 400, headers: { "Content-Type": "application/json" } }
-  //   );
-  // }
+  const gameData = {
+    highscore: data.highscore,
+    username: data.username,
+    jumpTimestamps: data.jumps,
+  };
 
-  try {
-    // Starte die Simulation
-    const gameSimulator = new virtualGame(data);
-    gameSimulator.animate(); // Simuliere das Spiel bis zur Validierung
-
-    // Prüfe, ob die Highscore-Berechnung korrekt war
-    if (!gameSimulator.highscoreValidated) {
-      throw new Error("Highscore validation failed!");
-    }
-
-    // Wenn die Simulation erfolgreich ist, speichere die Daten
-    const gameData = {
-      highscore: data.highscore,
-      username: data.username,
-      jumpTimestamps: data.jumps,
-    };
-
-    await kv.set(["gameData", data.highscore, gameID], gameData);
-    return new Response(JSON.stringify({ response: "ok" }), {
-      status: 200,
-      headers: {
-        "Content-Type": "application/json",
-        "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Headers": "content-type",
-      },
-    });
-  } catch (error) {
-    return new Response(
-      JSON.stringify({ error: `Simulation failed: ${error.message}` }),
-      { status: 400, headers: { "Content-Type": "application/json" } }
-    );
-  }
+  await kv.set(["gameData", data.highscore, gameID], gameData);
+  return new Response(JSON.stringify({ response: "ok" }), {
+    status: 200,
+    headers: {
+      "Content-Type": "application/json",
+      "Access-Control-Allow-Origin": "*",
+      "Access-Control-Allow-Headers": "content-type",
+    },
+  });
 };
 
 const getLeaderboard = async () => {
@@ -126,7 +99,7 @@ const handler = async (request) => {
         const id = url.pathname.split("/").pop();
         return deleteGameData(request, id);
       }
-      return new Response("Invalid endpoint", { status: 404 });
+      return new Response("blub");
   }
 };
 
