@@ -63,6 +63,8 @@ const saveGameData = async (request) => {
   const data = await request.json();
   const { seed, jumps, highscore, username } = data;
 
+  console.log("Received data from client:", data);
+
   // Simuliere das Spiel
   try {
     const calculatedScore = simulateGame(seed, jumps);
