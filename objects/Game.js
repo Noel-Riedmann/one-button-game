@@ -178,7 +178,7 @@ class Game {
 
         setTimeout(() => {
             overlay.classList.remove('death');
-        }, 150);
+        }, 0);
 
         this.fps = 60;
         const player = this.objects.filter(obj => obj instanceof Player);
@@ -187,29 +187,6 @@ class Game {
             player.stopAnimation();
         })
     }
-
-    async generateSignature(data, secret) {
-        const encoder = new TextEncoder();
-        const key = await crypto.subtle.importKey(
-            "raw",
-            encoder.encode(secret),
-            { name: "HMAC", hash: "SHA-256" },
-            false,
-            ["sign"]
-        );
-
-        const message = JSON.stringify(data);
-        const signature = await crypto.subtle.sign(
-            "HMAC",
-            key,
-            encoder.encode(message)
-        );
-
-        return btoa(
-            String.fromCharCode(...new Uint8Array(signature))
-        );
-    }
-
 
     getGamestate() {
         return this.gameStarted;
