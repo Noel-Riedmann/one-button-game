@@ -31,7 +31,8 @@ class Game {
 
         this.highscore = new Highscore();
         this.generator = new SeedGenerator();
-        this.randomGen = this.generator.randomNumbers();
+        this.initialSeed = Math.random();
+        this.randomGen = this.generator.randomNumbers(this.initialSeed);
         this.seed;
 
         this.fps = 60;
@@ -144,6 +145,7 @@ class Game {
             username: localStorage.getItem("username"),
             highscore: this.highscore.getCurrentScore(),
             jumps: this.jumpTimestamps,
+            seed: this.initialSeed,
         };
 
         try {
@@ -269,7 +271,7 @@ class Game {
         this.calculateFPS(now);
 
         while (this.accumulator >= this.timeStep) {
-            this.update(this.timeStep / 1000);
+            this.update();
             this.accumulator -= this.timeStep;
             if (this.gameStarted === true) {
                 this.tickCount++;
@@ -290,3 +292,65 @@ class Game {
 }
 
 export default Game;
+
+
+class virtualGame extends Game {
+    constructor(gameData) {
+        super(null); // Keine Canvas-Initialisierung
+        this.gameData = gameData;
+        this.generator = new SeedGenerator();
+        this.randomGen = this.generator.randomNumbers(gameData.seed);
+        this.expectedJumps = gameData.jumps;
+        this.highscoreValidated = false;
+
+        this.removeInputListeners(); // Entferne Event-Listener
+
+        this.init(); // Initialisiere Spiel
+        this.gameStarted = true; // Setze Spielzustand
+    }
+
+    removeInputListeners() {
+        document.removeEventListener('keydown', this.onKeydown);
+        document.removeEventListener('keyup', this.onKeyup);
+        document.removeEventListener('touchstart', this.onTouchStart);
+        document.removeEventListener('touchend', this.onTouchEnd);
+    }
+
+    onKeydown = () => {};
+    onKeyup = () => {};
+    onTouchStart = () => {};
+    onTouchEnd = () => {};
+
+    calculateFPS() {
+        // Keine FPS-Berechnung notwendig
+    }
+
+    draw() {
+        // Keine grafische Darstellung notwendig
+    }
+
+    update() {
+        // Simuliere Sprungaktionen
+        this.buttonPressed = this.expectedJumps.includes(this.tickCount);
+        if (this.buttonPressed) {
+            this.playerJump();
+        }
+
+        super.update(); // Aktualisiere Spielwelt
+
+        // Validierung: Stoppe nach letztem Sprung
+        if (this.tickCount > this.expectedJumps[this.expectedJumps.length - 1]) {
+            this.validateGameState();
+        }
+    }
+
+    validateGameState() {
+        const serverCalculatedHighscore = this.highscore.getCurrentScore();
+        if (serverCalculatedHighscore !== this.gameData.highscore) {
+            throw new Error(`Highscore mismatch! Expected: ${this.gameData.highscore}, Got: ${serverCalculatedHighscore}`);
+        }
+
+        this.highscoreValidated = true;
+    }
+}
+
