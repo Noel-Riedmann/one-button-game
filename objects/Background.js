@@ -10,7 +10,6 @@ class Background {
 
         this.image.onload = () => {
             this.x2 = this.image.width; 
-            console.log('Image loaded:', this.image.width, this.image.height);
         };
 
         this.image.onerror = () => {

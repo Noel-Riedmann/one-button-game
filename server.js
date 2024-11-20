@@ -8,12 +8,12 @@ const saveGameData = async (request) => {
   const gameID = crypto.randomUUID();
 
   // Validierungslogik: Prüfen, ob die Daten korrekt sind
-  if (!data.jumps || data.jumps.length < data.highscore) {
-    return new Response(
-      JSON.stringify({ error: "Invalid data: jumps do not match highscore" }),
-      { status: 400, headers: { "Content-Type": "application/json" } }
-    );
-  }
+  // if (!data.jumps || data.jumps.length < data.highscore) {
+  //   return new Response(
+  //     JSON.stringify({ error: "Invalid data: jumps do not match highscore" }),
+  //     { status: 400, headers: { "Content-Type": "application/json" } }
+  //   );
+  // }
 
   try {
     // Starte die Simulation
