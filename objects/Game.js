@@ -152,7 +152,14 @@ class Game {
             jumps: this.jumpTimestamps,
             seed: this.initialSeed,
         };
-        
+
+        console.log("seed before game end:", this.seed);
+
+        if (typeof this.seed === 'undefined') {
+            console.error("Seed is not defined in endGame function!");
+            return;
+        }
+
         try {
             const response = await fetch(
                 "https://lovelyleap-onebutton.deno.dev/api/leaderboard",
