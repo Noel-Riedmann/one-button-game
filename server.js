@@ -113,7 +113,7 @@ const handler = async (request) => {
     default:
       if (request.method === "DELETE" && url.pathname.startsWith("/api/leaderboard/")) {
         const key = segments[4];
-        const id = url.pathname.split("/").pop();
+        const id = segments[3];
         return deleteGameData(request, id, key);
       }
       return new Response("blub");
