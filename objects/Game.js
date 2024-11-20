@@ -152,7 +152,7 @@ class Game {
             jumps: this.jumpTimestamps,
             seed: this.initialSeed,
         };
-
+        console.log("Game Data sent to server:", gameData);
         try {
             const response = await fetch(
                 "https://lovelyleap-onebutton.deno.dev/api/leaderboard",
@@ -165,8 +165,6 @@ class Game {
                 }
                 
             );
-            console.log("Game Data sent to server:", gameData);
-
 
             if (response.ok) {
                 console.log("Game data successfully posted.");
