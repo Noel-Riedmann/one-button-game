@@ -44,10 +44,10 @@ const getLeaderboard = async () => {
   });
 };
 
-const deleteGameData = async (request, id) => {
+const deleteGameData = async (request, id, DELETE_KEY) => {
   try {
     for await (const entry of kv.list({ prefix: ["gameData"] })) {
-      if (entry.key[2] === id) {
+      if (entry.key[2] === id && DELETE_KEY === "oweztrzwuie23453623z6?!asdf3457") {
         await kv.delete(entry.key);
         return new Response("Deleted successfully", {
           status: 200,
