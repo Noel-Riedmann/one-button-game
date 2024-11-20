@@ -124,14 +124,16 @@ class Player {
             this.velocity.y += this.gravity;
             this.isJumping = true;
         } else {
-            this.velocity.y = 0;
-            this.isJumping = false;
+            game.gameOver = true;
+            this.isDead = true; 
+            game.endGame();
         }
 
         this.position.x += this.velocity.x;
         if (this.position.x + this.width >= game.canvas.width) {
             this.position.x = 0;
         }
+
 
         this.updateCollisionPoints();
         this.collisionDetectionPlatforms(game);
@@ -143,7 +145,7 @@ class Player {
             this.canJump = false;
             this.velocity.y -= 15;
             this.isJumping = true;
-        }
+        }        
     }
 
     collisionDetectionPlatforms(game) {
@@ -155,7 +157,7 @@ class Player {
                 this.collisionPointBelow.y < platform.position.y + platform.height &&
                 this.position.x + this.width > platform.position.x &&
                 this.position.x < platform.position.x + platform.width &&
-                this.velocity.y >= 0
+                this.velocity.y >= 0 && this.position.y 
             ) {
                 this.velocity.y = 0;
                 this.position.y = platform.position.y - this.height;
@@ -189,8 +191,8 @@ class Player {
             ) {
                 if (!this.isDead) {
                     game.gameOver = true; // Spiel sofort beenden
-                    game.endGame();
                     this.isDead = true;  // Spieler ist tot, weitere Aktionen verhindern
+                    game.endGame();
                 }
             }
         });
