@@ -31,6 +31,17 @@ class CoinManager {
             return !(object instanceof Coin && object.collected);
         });
     }
+
+    deleteMovingCoins(){
+        this.game.objects.forEach(coin => {
+            if (coin instanceof Coin) {
+                if ( coin.velocity != 0) {
+                    coin.velocity = 3;
+                    console.log("assaklfasflsöfslfs");
+                }
+            }
+        });
+    }
 }
 
 export default CoinManager;

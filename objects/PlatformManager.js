@@ -15,6 +15,7 @@ class PlatformManager {
         this.groundArea = false;
         this.groundAreaStage = 0;
         this.speed = 3;
+        this.deleteMovingPlatforms();
     }
     createPlatform() {
         let lastPlatformX = 0;
@@ -89,6 +90,18 @@ class PlatformManager {
                 }
             }
             return true;
+        });
+    }
+
+    deleteMovingPlatforms(){
+        this.game.objects.forEach(platform => {
+            if (platform instanceof Platform) {
+                if ( platform.velocity != 0) {
+                    platform.velocity = this.speed;
+                    console.log("assaklfasflsöfslfs");
+
+                }
+            }
         });
     }
 }
