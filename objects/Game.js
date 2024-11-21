@@ -33,7 +33,7 @@ class Game {
         this.generator = new SeedGenerator();
         this.initialSeed = Math.random();
         this.randomGen = this.generator.randomNumbers(this.initialSeed);
-        this.seed;
+        this.seed = this.initialSeed;
 
         this.fps = 60;
         this.frameCount = 0;
@@ -163,6 +163,7 @@ class Game {
                     },
                     body: JSON.stringify(gameData),
                 }
+                
             );
 
             if (response.ok) {

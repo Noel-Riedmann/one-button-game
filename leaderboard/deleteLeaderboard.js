@@ -1,4 +1,5 @@
 async function fetchLeaderboard() {
+
     try {
         const response = await fetch("https://lovelyleap-onebutton.deno.dev/api/leaderboard");
         const data = await response.json();
@@ -37,8 +38,26 @@ async function fetchLeaderboard() {
 }
 
 async function deleteLeaderboardEntry(id, row) {
+    let DELETE_KEY = null; // Verwende let, da der Wert geändert wird
+
     try {
-        const response = await fetch(`https://lovelyleap-onebutton.deno.dev/api/leaderboard/${id}`, {
+        // Warte auf den Fetch-Aufruf, um den Schlüssel abzurufen
+        const response = await fetch('deleteKey.txt');
+        if (!response.ok) {
+            throw new Error('File not found or no access to deleteKey.txt');
+        }
+        DELETE_KEY = await response.text(); // Setze den DELETE_KEY nach Abruf
+    } catch (error) {
+        console.error('Error fetching delete key:', error.message);
+        if (error.message.includes('deleteKey.txt')) {
+            console.error('Ensure that the deleteKey.txt file exists and has the correct permissions.');
+        }
+        return; // Beende die Funktion, wenn der Schlüssel nicht abgerufen werden konnte
+    }
+
+    try {
+        // Verwende den DELETE_KEY für den DELETE-Request
+        const response = await fetch(`https://lovelyleap-onebutton.deno.dev/api/leaderboard/${id}/${DELETE_KEY}`, {
             method: "DELETE",
         });
 
