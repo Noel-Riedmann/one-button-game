@@ -29,4 +29,8 @@ async function fetchLeaderboard() {
     }
 }
 
-fetchLeaderboard();
+document.addEventListener('DOMContentLoaded', () => {
+    fetchLeaderboard(); 
+    setInterval(fetchLeaderboard, 15000);
+});
+

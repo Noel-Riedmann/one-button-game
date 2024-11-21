@@ -56,16 +56,25 @@ canvas {
     color: #0E2841;
 }
 
-.account{
+.icons{
     position: absolute;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
     right: 2vw;
     top: 2vh;
     margin: 0.67em;
 }
 
-.account:hover{
+.icon:hover{
     cursor: pointer;
 }
+
+.icon{
+    margin-left: .6rem;
+}
+
 
 @media (max-width: 600px) {
     .highScoreText {
