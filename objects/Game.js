@@ -185,51 +185,72 @@ class Game {
     const overlay = document.getElementById("overlay");
     overlay.classList.add("death");
     setTimeout(() => {
-      overlay.classList.remove("death");
+        overlay.classList.remove("death");
     }, 150);
 
     const gameData = {
-      username: localStorage.getItem("username"),
-      highscore: this.highscore.getCurrentScore(),
-      jumps: this.jumpTimestamps,
-      seed: this.initialSeed,
+        username: localStorage.getItem("username"),
+        highscore: this.highscore.getCurrentScore(),
+        jumps: this.jumpTimestamps,
+        seed: this.initialSeed,
     };
 
     let endScore = this.highscore.getCurrentScore();
     const secretKey = "yourSecretKey"; // Dein geheimer Schlüssel
 
-    // Highscore verschlüsseln
-    const encryptedHighscore = await encryptData(
-      endScore.toString(),
-      secretKey
-    );
-    console.log("Verschlüsselter Highscore:", encryptedHighscore);
-
-    gameData.encryptedHighscore = encryptedHighscore;
-
+    // Direkt in der endGame-Funktion verschlüsseln
+    const encoder = new TextEncoder();
     try {
-      const response = await fetch(
-        "https://lovelyleap-onebutton.deno.dev/api/leaderboard",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(gameData),
-        }
-      );
-
-      if (response.ok) {
-        console.log("Game data successfully posted.");
-      } else {
-        console.error(
-          "Failed to post game data:",
-          response.status,
-          response.statusText
+        const keyHash = await crypto.subtle.digest("SHA-256", encoder.encode(secretKey));
+        const cryptoKey = await window.crypto.subtle.importKey(
+            "raw",
+            keyHash, // Verwenden des SHA-256-gehashten Schlüssels
+            { name: "AES-GCM" },
+            false,
+            ["encrypt", "decrypt"]
         );
-      }
+
+        // Die zu verschlüsselnden Daten
+        const encodedData = encoder.encode(endScore.toString());
+
+        // Initialisierungsvektor (IV) für die Verschlüsselung generieren
+        const iv = window.crypto.getRandomValues(new Uint8Array(12));
+
+        // Verschlüsselung durchführen
+        const encryptedData = await window.crypto.subtle.encrypt(
+            { name: "AES-GCM", iv: iv },
+            cryptoKey,
+            encodedData
+        );
+
+        // Verschlüsseltes Ergebnis und IV (Base64-kodiert) zurückgeben
+        const ivBase64 = btoa(String.fromCharCode(...iv));
+        const encryptedBase64 = btoa(String.fromCharCode(...new Uint8Array(encryptedData)));
+
+        gameData.encryptedHighscore = { iv: ivBase64, data: encryptedBase64 };
+
+        console.log("Verschlüsselter Highscore:", gameData.encryptedHighscore);
+
+        // Versuch, die Daten zu senden
+        const response = await fetch(
+            "https://lovelyleap-onebutton.deno.dev/api/leaderboard",
+            {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify(gameData),
+            }
+        );
+
+        if (response.ok) {
+            console.log("Game data successfully posted.");
+        } else {
+            console.error("Failed to post game data:", response.status, response.statusText);
+        }
+
     } catch (error) {
-      console.error("Error posting game data:", error);
+        console.error("Error during encryption or posting game data:", error);
     }
 
     // Reset Values
@@ -240,7 +261,8 @@ class Game {
     this.gameStarted = false;
     this.frameCount = 0;
     this.fps = 60;
-  }
+}
+
 
   getGamestate() {
     return this.gameStarted;
