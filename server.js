@@ -2,27 +2,32 @@ const kv = await Deno.openKv();
 
 // Funktion zum Entschlüsseln des Highscores
 async function decryptHighscore(ciphertext, iv, passphrase) {
-  const encoder = new TextEncoder();
+  try {
+    const encoder = new TextEncoder();
 
-  // Passphrase in einen 256-Bit-Schlüssel umwandeln
-  const keyMaterial = await crypto.subtle.digest("SHA-256", encoder.encode(passphrase));
-  const key = await crypto.subtle.importKey(
-    "raw",
-    keyMaterial,
-    { name: "AES-CBC" },
-    false,
-    ["decrypt"]
-  );
+    // Passphrase in einen 256-Bit-Schlüssel umwandeln
+    const keyMaterial = await crypto.subtle.digest("SHA-256", encoder.encode(passphrase));
+    const key = await crypto.subtle.importKey(
+      "raw",
+      keyMaterial,
+      { name: "AES-CBC" },
+      false,
+      ["decrypt"]
+    );
 
-  // Entschlüsseln des Ciphertexts mit dem IV
-  const plaintext = await crypto.subtle.decrypt(
-    { name: "AES-CBC", iv: new Uint8Array(iv) },
-    key,
-    new Uint8Array(ciphertext)
-  );
+    // Entschlüsseln des Ciphertexts mit dem IV
+    const plaintext = await crypto.subtle.decrypt(
+      { name: "AES-CBC", iv: new Uint8Array(iv) },
+      key,
+      new Uint8Array(ciphertext)
+    );
 
-  // Den entschlüsselten Wert (Integer) extrahieren
-  return new Uint8Array(plaintext)[0];
+    // Den entschlüsselten Wert (Integer) extrahieren
+    return new Uint8Array(plaintext)[0];
+  } catch (error) {
+    console.error("Decryption failed:", error);
+    return "Error"; // Rückgabe bei Fehler
+  }
 }
 
 // Funktion zum Verschlüsseln des Highscores
@@ -58,32 +63,6 @@ const saveGameData = async (request) => {
   const data = await request.json();
   const gameID = crypto.randomUUID();
 
-  /*if (!data.highscore || !data.username || !Array.isArray(data.jumps)) {
-    return new Response(
-      JSON.stringify({ error: "Missing or invalid fields in the data." }),
-      {
-        status: 400,
-        headers: {
-          "Content-Type": "application/json",
-          "Access-Control-Allow-Origin": "*",
-        },
-      }
-    );
-  }
-
-  if (data.jumps.length < data.highscore) {
-    return new Response(
-      JSON.stringify({ error: "High score is invalid or potentially cheated." }),
-      {
-        status: 400,
-        headers: {
-          "Content-Type": "application/json",
-          "Access-Control-Allow-Origin": "*",
-        },
-      }
-    );
-  }*/
-
   // Highscore verschlüsseln, bevor es gespeichert wird
   const passphrase = "this.highscore.getCurrentScore()"; // Sicherstellen, dass der Schlüssel sicher ist
   const { ciphertext, iv } = await encryptHighscore(data.highscore, passphrase);
@@ -105,6 +84,7 @@ const saveGameData = async (request) => {
   });
 };
 
+// Funktion zum Abrufen des Leaderboards
 const getLeaderboard = async () => {
   try {
     const leaderboardEntries = [];
@@ -120,10 +100,15 @@ const getLeaderboard = async () => {
       // Highscore entschlüsseln, bevor es angezeigt wird
       let decryptedHighscore;
       try {
-        decryptedHighscore = await decryptHighscore(highscore, iv, passphrase);
+        // Sicherstellen, dass highscore und iv als Uint8Array verarbeitet werden
+        decryptedHighscore = await decryptHighscore(
+          new Uint8Array(highscore), // Umwandlung in Uint8Array
+          new Uint8Array(iv),        // Umwandlung in Uint8Array
+          passphrase
+        );
       } catch (decryptionError) {
         console.error("Decryption failed for entry:", entry, decryptionError);
-        decryptedHighscore = "Error";
+        decryptedHighscore = "Error"; // Falls Entschlüsselung fehlschlägt
       }
 
       leaderboardEntries.push({ id: gameID, username, highscore: decryptedHighscore });
@@ -151,7 +136,6 @@ const getLeaderboard = async () => {
     );
   }
 };
-
 
 // Funktion zum Löschen eines Eintrags
 const deleteGameData = async (request, id, deleteKey) => {
