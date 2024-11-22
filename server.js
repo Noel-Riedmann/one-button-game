@@ -5,20 +5,8 @@ const saveGameData = async (request) => {
   const data = await request.json();
   const gameID = crypto.randomUUID();
 
-  // Hardcodierter privater RSA-Schlüssel im pkcs8-Format
-  const rsaPrivateKey = Uint8Array.from([
-    100, 56, 205, 17, 23, 203, 193, 194, 129, 45, 116, 251, 59, 54, 98, 34,
-    89, 44, 14, 183, 9, 22, 116, 163, 77, 238, 240, 103, 54, 160, 121, 53
-    // Füge den vollständigen Schlüssel hier ein...
-  ]);
-
-  if (
-    !data.highscore ||
-    !data.username ||
-    !Array.isArray(data.jumps) ||
-    !data.aesKey ||
-    !data.iv
-  ) {
+  // Validate highscore and jumpTimestamps
+  if (!data.highscore || !data.username || !Array.isArray(data.jumps)) {
     return new Response(
       JSON.stringify({ error: "Missing or invalid fields in the data." }),
       {
@@ -31,75 +19,11 @@ const saveGameData = async (request) => {
     );
   }
 
-  try {
-    // Importiere Private Key
-    const privateKey = await crypto.subtle.importKey(
-      "pkcs8",
-      rsaPrivateKey.buffer,
-      { name: "RSA-OAEP", hash: "SHA-256" },
-      false,
-      ["decrypt"]
-    );
-
-    // Entschlüssele AES-Schlüssel
-    const encryptedAesKey = new Uint8Array(data.aesKey);
-    const aesKeyRaw = await crypto.subtle.decrypt(
-      { name: "RSA-OAEP" },
-      privateKey,
-      encryptedAesKey
-    );
-
-    const aesKey = await crypto.subtle.importKey(
-      "raw",
-      aesKeyRaw,
-      { name: "AES-CBC" },
-      false,
-      ["decrypt"]
-    );
-
-    // Entschlüssele Highscore
-    const iv = new Uint8Array(data.iv);
-    const encryptedHighscore = new Uint8Array(data.highscore);
-    const decryptedHighscore = await crypto.subtle.decrypt(
-      { name: "AES-CBC", iv },
-      aesKey,
-      encryptedHighscore
-    );
-
-    const decodedHighscore = new TextDecoder().decode(decryptedHighscore);
-    const highscore = parseInt(decodedHighscore, 10);
-
-    if (isNaN(highscore) || data.jumps.length < highscore) {
-      return new Response(
-        JSON.stringify({
-          error: "Invalid highscore or data tampering detected.",
-        }),
-        { status: 400 }
-      );
-    }
-
-    // Speichere Spiel-Daten
-    const gameData = {
-      highscore,
-      username: data.username,
-      jumpTimestamps: data.jumps,
-    };
-
-    await kv.set(["gameData", highscore, gameID], gameData);
-
-    return new Response(JSON.stringify({ response: "ok" }), {
-      status: 200,
-      headers: {
-        "Content-Type": "application/json",
-        "Access-Control-Allow-Origin": "*",
-      },
-    });
-  } catch (error) {
-    console.error("Error processing game data:", error);
+  if (data.jumps.length < data.highscore) {
     return new Response(
-      JSON.stringify({ error: "An error occurred while processing the data." }),
+      JSON.stringify({ error: "High score is invalid or potentially cheated." }),
       {
-        status: 500,
+        status: 400,
         headers: {
           "Content-Type": "application/json",
           "Access-Control-Allow-Origin": "*",
@@ -107,6 +31,21 @@ const saveGameData = async (request) => {
       }
     );
   }
+
+  const gameData = {
+    highscore: data.highscore,
+    username: data.username,
+    jumpTimestamps: data.jumps,
+  };
+
+  await kv.set(["gameData", data.highscore, gameID], gameData);
+  return new Response(JSON.stringify({ response: "ok" }), {
+    status: 200,
+    headers: {
+      "Content-Type": "application/json",
+      "Access-Control-Allow-Origin": "*",
+    },
+  });
 };
 
 const getLeaderboard = async () => {
