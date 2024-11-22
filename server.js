@@ -123,6 +123,7 @@ const getLeaderboard = async () => {
         decryptedHighscore = await decryptHighscore(highscore, iv, passphrase);
       } catch (decryptionError) {
         console.error("Decryption failed for entry:", entry, decryptionError);
+        console.log(highscore);
         decryptedHighscore = "Error";
       }
 
