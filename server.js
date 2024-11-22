@@ -1,6 +1,5 @@
 const kv = await Deno.openKv();
 
-// Highscore entschlüsseln
 async function decryptHighscore(ciphertext, iv, passphrase) {
   try {
     const encoder = new TextEncoder();
@@ -22,14 +21,13 @@ async function decryptHighscore(ciphertext, iv, passphrase) {
   }
 }
 
-// Spiel-Daten speichern
 const saveGameData = async (request) => {
   const data = await request.json();
   const gameID = crypto.randomUUID();
 
   const gameData = {
-    highscore: data.highscore, // Bereits verschlüsselt vom Client
-    iv: data.iv,              // Bereits verschlüsselt vom Client
+    highscore: data.highscore,
+    iv: data.iv,
     username: data.username,
     jumpTimestamps: data.jumps,
   };
@@ -44,11 +42,10 @@ const saveGameData = async (request) => {
   });
 };
 
-// Leaderboard abrufen
 const getLeaderboard = async () => {
   try {
     const leaderboardEntries = [];
-    const passphrase = "my_static_secure_passphrase"; // Übereinstimmung mit dem Client
+    const passphrase = "my_static_secure_passphrase";
 
     for await (const entry of kv.list({ prefix: ["gameData"] }, { limit: 10, reverse: true })) {
       const { username, highscore, iv } = entry.value;
@@ -56,22 +53,31 @@ const getLeaderboard = async () => {
 
       let decryptedHighscore = null;
 
-      // Prüfen, ob der Highscore verschlüsselt ist (iv vorhanden)
-      if (iv && highscore) {
-        decryptedHighscore = await decryptHighscore(
-          highscore,
-          iv,
-          passphrase
-        );
-      } else {
-        console.warn("Unverschlüsselter Highscore erkannt:", highscore);
-        decryptedHighscore = highscore; // Unverschlüsselten Wert verwenden
+      if (!iv) {
+        console.warn("Alte unverschlüsselte Daten erkannt:", highscore);
+        decryptedHighscore = typeof highscore === "number" ? highscore : null;
+      } 
+      else if (iv && !Array.isArray(highscore)) {
+        console.error("Fehlerhafte neue unverschlüsselte Daten:", highscore);
+        decryptedHighscore = null;
+      } 
+      else {
+        try {
+          decryptedHighscore = await decryptHighscore(
+            new Uint8Array(highscore),
+            new Uint8Array(iv),  
+            passphrase
+          );
+        } catch (error) {
+          console.error("Fehler bei der Entschlüsselung:", error);
+          decryptedHighscore = null;
+        }
       }
 
       leaderboardEntries.push({
         id: gameID,
         username,
-        highscore: decryptedHighscore ?? "N/A", // Fehlerhafte Werte behandeln
+        highscore: decryptedHighscore ?? "N/A",
       });
     }
 
@@ -83,7 +89,7 @@ const getLeaderboard = async () => {
       },
     });
   } catch (error) {
-    console.error("Error in getLeaderboard:", error);
+    console.error("Fehler in getLeaderboard:", error);
     return new Response(
       JSON.stringify({ error: "Internal Server Error", details: error.message }),
       {
@@ -97,7 +103,7 @@ const getLeaderboard = async () => {
   }
 };
 
-// Eintrag löschen
+
 const deleteGameData = async (request, id, deleteKey) => {
   const FIXED_SECURITY_KEY = "oweztrzwuie23453623z6asdf34571234241ewrt";
 
@@ -139,7 +145,6 @@ const deleteGameData = async (request, id, deleteKey) => {
   }
 };
 
-// Haupt-Handler
 const handler = async (request) => {
   const url = new URL(request.url);
   const segments = url.pathname.split("/");
@@ -174,5 +179,4 @@ const handler = async (request) => {
   }
 };
 
-// Server starten
 Deno.serve(handler);

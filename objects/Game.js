@@ -309,17 +309,17 @@ export default Game;
 
 class virtualGame extends Game {
     constructor(gameData) {
-        super(null); // Keine Canvas-Initialisierung
+        super(null);
         this.gameData = gameData;
         this.generator = new SeedGenerator();
         this.randomGen = this.generator.randomNumbers(gameData.seed);
         this.expectedJumps = gameData.jumps;
         this.highscoreValidated = false;
 
-        this.removeInputListeners(); // Entferne Event-Listener
+        this.removeInputListeners();
 
-        this.init(); // Initialisiere Spiel
-        this.gameStarted = true; // Setze Spielzustand
+        this.init();
+        this.gameStarted = true;
     }
 
     removeInputListeners() {
@@ -335,23 +335,19 @@ class virtualGame extends Game {
     onTouchEnd = () => {};
 
     calculateFPS() {
-        // Keine FPS-Berechnung notwendig
     }
 
     draw() {
-        // Keine grafische Darstellung notwendig
     }
 
     update() {
-        // Simuliere Sprungaktionen
         this.buttonPressed = this.expectedJumps.includes(this.tickCount);
         if (this.buttonPressed) {
             this.playerJump();
         }
 
-        super.update(); // Aktualisiere Spielwelt
+        super.update();
 
-        // Validierung: Stoppe nach letztem Sprung
         if (this.tickCount > this.expectedJumps[this.expectedJumps.length - 1]) {
             this.validateGameState();
         }
