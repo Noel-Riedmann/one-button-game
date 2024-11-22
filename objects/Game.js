@@ -184,7 +184,7 @@ class Game {
         const highscore = this.highscore.getCurrentScore();
         try {
             const encryptedResult = await this.encryptInteger(highscore, "my_static_secure_passphrase");
-            console.log("Verschlüsselung erfolgreich:", encryptedResult);
+            console.log("Verschlüsselung erfolgreich:");
         } catch (error) {
             console.error("Fehler bei der Verschlüsselung:", error);
         }
