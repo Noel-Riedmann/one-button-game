@@ -5,11 +5,10 @@ const saveGameData = async (request) => {
   const data = await request.json();
   const gameID = crypto.randomUUID();
 
-  // Hardcodierter privater RSA-Schlüssel (pkcs8-Format, Base64-Daten als Uint8Array)
+  // Hardcodierter privater RSA-Schlüssel im pkcs8-Format
   const rsaPrivateKey = Uint8Array.from([
-      // Dein private key in Base64 dekodiert, hier als Beispiel:
       48, 130, 2, 92, 2, 1, 0, 2, 129, 129, 0, 176, 110, 35, 177, 203,
-      // Füge den vollständigen Schlüssel als Byte-Array hinzu
+      // Füge den vollständigen Schlüssel hier ein...
   ]);
 
   if (!data.highscore || !data.username || !Array.isArray(data.jumps) || !data.aesKey || !data.iv) {
@@ -26,16 +25,16 @@ const saveGameData = async (request) => {
   }
 
   try {
-      // 1. Importiere den Private Key für RSA
+      // Importiere Private Key
       const privateKey = await crypto.subtle.importKey(
           "pkcs8",
-          rsaPrivateKey.buffer, // ArrayBuffer des Schlüssels
+          rsaPrivateKey.buffer,
           { name: "RSA-OAEP", hash: "SHA-256" },
           false,
           ["decrypt"]
       );
 
-      // 2. AES-Schlüssel entschlüsseln
+      // Entschlüssele AES-Schlüssel
       const encryptedAesKey = new Uint8Array(data.aesKey);
       const aesKeyRaw = await crypto.subtle.decrypt(
           { name: "RSA-OAEP" },
@@ -51,7 +50,7 @@ const saveGameData = async (request) => {
           ["decrypt"]
       );
 
-      // 3. Highscore entschlüsseln
+      // Entschlüssele Highscore
       const iv = new Uint8Array(data.iv);
       const encryptedHighscore = new Uint8Array(data.highscore);
       const decryptedHighscore = await crypto.subtle.decrypt(
@@ -63,21 +62,14 @@ const saveGameData = async (request) => {
       const decodedHighscore = new TextDecoder().decode(decryptedHighscore);
       const highscore = parseInt(decodedHighscore, 10);
 
-      // 4. Validierung des Highscores
       if (isNaN(highscore) || data.jumps.length < highscore) {
           return new Response(
-              JSON.stringify({ error: "High score is invalid or potentially cheated." }),
-              {
-                  status: 400,
-                  headers: {
-                      "Content-Type": "application/json",
-                      "Access-Control-Allow-Origin": "*",
-                  },
-              }
+              JSON.stringify({ error: "Invalid highscore or data tampering detected." }),
+              { status: 400 }
           );
       }
 
-      // 5. Spiel-Daten speichern
+      // Speichere Spiel-Daten
       const gameData = {
           highscore,
           username: data.username,
