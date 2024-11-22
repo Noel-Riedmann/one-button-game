@@ -58,7 +58,7 @@ const saveGameData = async (request) => {
   const data = await request.json();
   const gameID = crypto.randomUUID();
 
-  if (!data.highscore || !data.username || !Array.isArray(data.jumps)) {
+  /*if (!data.highscore || !data.username || !Array.isArray(data.jumps)) {
     return new Response(
       JSON.stringify({ error: "Missing or invalid fields in the data." }),
       {
@@ -82,7 +82,7 @@ const saveGameData = async (request) => {
         },
       }
     );
-  }
+  }*/
 
   // Highscore verschlüsseln, bevor es gespeichert wird
   const passphrase = "this.highscore.getCurrentScore()"; // Sicherstellen, dass der Schlüssel sicher ist
@@ -105,12 +105,11 @@ const saveGameData = async (request) => {
   });
 };
 
-// Funktion zum Abrufen des Leaderboards und Entschlüsseln der Highscores
 const getLeaderboard = async () => {
-  const leaderboardEntries = [];
-  const passphrase = "this.highscore.getCurrentScore()"; // Sicherstellen, dass der Schlüssel sicher ist
-
   try {
+    const leaderboardEntries = [];
+    const passphrase = "this.highscore.getCurrentScore()"; // Sicherstellen, dass der Schlüssel sicher ist
+
     for await (const entry of kv.list(
       { prefix: ["gameData"] },
       { limit: 10, reverse: true }
@@ -119,7 +118,13 @@ const getLeaderboard = async () => {
       const gameID = entry.key[2];
 
       // Highscore entschlüsseln, bevor es angezeigt wird
-      const decryptedHighscore = await decryptHighscore(highscore, iv, passphrase);
+      let decryptedHighscore;
+      try {
+        decryptedHighscore = await decryptHighscore(highscore, iv, passphrase);
+      } catch (decryptionError) {
+        console.error("Decryption failed for entry:", entry, decryptionError);
+        decryptedHighscore = "Error";
+      }
 
       leaderboardEntries.push({ id: gameID, username, highscore: decryptedHighscore });
     }
@@ -132,15 +137,21 @@ const getLeaderboard = async () => {
       },
     });
   } catch (error) {
-    console.error("Fehler beim Abrufen des Leaderboards:", error);
-    return new Response("Interner Serverfehler", {
-      status: 500,
-      headers: {
-        "Access-Control-Allow-Origin": "*",
-      },
-    });
+    console.error("Error in getLeaderboard:", error);
+
+    return new Response(
+      JSON.stringify({ error: "Internal Server Error", details: error.message }),
+      {
+        status: 500,
+        headers: {
+          "Content-Type": "application/json",
+          "Access-Control-Allow-Origin": "*",
+        },
+      }
+    );
   }
 };
+
 
 // Funktion zum Löschen eines Eintrags
 const deleteGameData = async (request, id, deleteKey) => {
