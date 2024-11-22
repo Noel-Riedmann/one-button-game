@@ -42,6 +42,8 @@ class Game {
         this.tickCount = 0;
         this.jumpTimestamps = [];
 
+        this.encoder = new TextEncoder();
+
         this.animate = this.animate.bind(this);
 
         document.addEventListener('keydown', this.onKeydown);
@@ -140,6 +142,31 @@ class Game {
         }
     }
 
+
+    async encryptInteger(integer, passphrase) {
+        const integerBytes = new Uint8Array([integer]);
+
+        const keyMaterial = await crypto.subtle.digest("SHA-256", this.encoder.encode(passphrase));
+        const key = await crypto.subtle.importKey(
+            "raw",
+            keyMaterial,
+            { name: "AES-CBC" },
+            false,
+            ["encrypt"]
+        );
+
+        const iv = crypto.getRandomValues(new Uint8Array(16));
+
+        const ciphertext = await crypto.subtle.encrypt(
+            { name: "AES-CBC", iv },
+            key,
+            integerBytes
+        );
+
+        return { ciphertext: new Uint8Array(ciphertext), iv };
+    }
+    
+
     async endGame() {
         const overlay = document.getElementById('overlay');
         overlay.classList.add('death');
@@ -152,6 +179,10 @@ class Game {
             jumps: this.jumpTimestamps,
             seed: this.initialSeed,
         };
+
+        encryptInteger(this.highscore.getCurrentScore(), "this.highscore.getCurrentScore()").then((result) => {
+            console.log("SuperDuper");
+        });
 
         try {
             const response = await fetch(
