@@ -141,46 +141,6 @@ class Game {
     }
   }
 
-  async encryptData(data, secretKey) {
-    const encoder = new TextEncoder();
-
-    // Hashen des geheimen Schlüssels auf 256 bits mit SHA-256
-    const keyHash = await crypto.subtle.digest(
-      "SHA-256",
-      encoder.encode(secretKey)
-    );
-
-    // Erstellen des AES-Schlüssels aus dem gehashten Wert
-    const cryptoKey = await window.crypto.subtle.importKey(
-      "raw",
-      keyHash, // Verwenden des SHA-256-gehashten Schlüssels
-      { name: "AES-GCM" },
-      false,
-      ["encrypt", "decrypt"]
-    );
-
-    // Die zu verschlüsselnden Daten
-    const encodedData = encoder.encode(data);
-
-    // Initialisierungsvektor (IV) für die Verschlüsselung generieren
-    const iv = window.crypto.getRandomValues(new Uint8Array(12));
-
-    // Verschlüsselung durchführen
-    const encryptedData = await window.crypto.subtle.encrypt(
-      { name: "AES-GCM", iv: iv },
-      cryptoKey,
-      encodedData
-    );
-
-    // Verschlüsseltes Ergebnis und IV (Base64-kodiert) zurückgeben
-    const ivBase64 = btoa(String.fromCharCode(...iv));
-    const encryptedBase64 = btoa(
-      String.fromCharCode(...new Uint8Array(encryptedData))
-    );
-
-    return { iv: ivBase64, data: encryptedBase64 };
-  }
-
   async endGame() {
     const overlay = document.getElementById("overlay");
     overlay.classList.add("death");
@@ -262,6 +222,7 @@ class Game {
     this.frameCount = 0;
     this.fps = 60;
 }
+
 
 
   getGamestate() {
