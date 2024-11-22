@@ -34,6 +34,7 @@ const saveGameData = async (request) => {
   const data = await request.json();
   const gameID = crypto.randomUUID();
 
+  if (!data.highscore || !data.username || !Array.isArray(data.jumps)) {
   if (!data.encryptedScore || !data.encryptedIV || !data.username) {
     return new Response(
       JSON.stringify({ error: "Missing or invalid encrypted data." }),
