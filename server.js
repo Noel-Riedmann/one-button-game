@@ -1,64 +1,75 @@
 const link = new URL("https://lovelyleap-onebutton.deno.dev");
 const kv = await Deno.openKv();
 
-const crypto = globalThis.crypto;
+import { crypto } from "https://deno.land/std@0.201.0/crypto/mod.ts";
 
-// Geheimer Schlüssel (dieser sollte sicher gespeichert werden, z.B. als Umgebungsvariable)
-const secretKey = "oweztrzwuie23453623z6asdf34571234241ewrt"; // Beispiel-Schlüssel (32 Bytes für AES-256)
-const algorithm = "aes-256-cbc"; // AES mit CBC-Modus
+const SECRET_KEY = "supersecretkey1234567890";
 
-// Funktion zum Erzeugen eines AES-Schlüssels aus einem geheimen String
-const getKey = async () => {
-  const encoder = new TextEncoder();
-  return await crypto.subtle.importKey(
-    "raw",
-    encoder.encode(secretKey),
-    { name: "AES-CBC" },
-    false,
-    ["encrypt", "decrypt"]
-  );
-};
+async function createKey(secret) {
+    const encoder = new TextEncoder();
+    const keyData = encoder.encode(secret);
+    return await crypto.subtle.importKey(
+        "raw",
+        keyData,
+        { name: "AES-GCM" },
+        false,
+        ["encrypt", "decrypt"]
+    );
+}
 
-// Funktion zum Entschlüsseln des Highscores
-const decryptHighscore = async (encryptedData, iv) => {
-  const key = await getKey();
-  
-  // Umwandeln des Base64-Strings in ArrayBuffer
-  const encryptedBuffer = new Uint8Array(atob(encryptedData).split("").map(c => c.charCodeAt(0)));
-  const ivBuffer = new Uint8Array(atob(iv).split("").map(c => c.charCodeAt(0)));
+async function encrypt(data) {
+    const key = await createKey(SECRET_KEY);
+    const encoder = new TextEncoder();
+    const encodedData = encoder.encode(data);
+    const iv = crypto.getRandomValues(new Uint8Array(12));
+    const encrypted = await crypto.subtle.encrypt(
+        { name: "AES-GCM", iv },
+        key,
+        encodedData
+    );
+    return {
+        iv: Array.from(iv),
+        encryptedData: Array.from(new Uint8Array(encrypted)),
+    };
+}
 
-  // Entschlüsseln der Daten
-  const decryptedData = await crypto.subtle.decrypt(
-    { name: "AES-CBC", iv: ivBuffer },
-    key,
-    encryptedBuffer
-  );
+async function decrypt(encryptedData, iv) {
+    const key = await createKey(SECRET_KEY);
+    const ivArray = new Uint8Array(iv);
+    const dataArray = new Uint8Array(encryptedData);
+    const decrypted = await crypto.subtle.decrypt(
+        { name: "AES-GCM", iv: ivArray },
+        key,
+        dataArray
+    );
+    const decoder = new TextDecoder();
+    return decoder.decode(decrypted);
+}
 
-  return new TextDecoder().decode(decryptedData);
-};
 
 const saveGameData = async (request) => {
   const data = await request.json();
+
+  // Highscore verschlüsseln
+  const encryptedHighscore = await encrypt(data.highscore);
+
   const gameID = crypto.randomUUID();
-
-  // Entschlüsselung des Highscores
-  const decryptedHighscore = await decryptHighscore(data.highscore, data.iv);
-
   const gameData = {
-    highscore: decryptedHighscore, // Hier speichern wir den entschlüsselten Highscore
-    username: data.username,
-    jumpTimestamps: data.jumps,
+      username: data.username,
+      highscore: encryptedHighscore.encryptedData, // Verschlüsselter Hash
+      iv: encryptedHighscore.iv, // Initialisierungsvektor
+      jumpTimestamps: data.jumps,
   };
 
-  await kv.set(["gameData", data.highscore, gameID], gameData);
+  await kv.set(["gameData", gameID], gameData);
 
   return new Response(JSON.stringify({ response: "ok" }), {
-    status: 200,
-    headers: {
-      "Content-Type": "application/json",
-      "Access-Control-Allow-Origin": "*",
-      "Access-Control-Allow-Headers": "content-type",
-    },
+      status: 200,
+      headers: {
+          "Content-Type": "application/json",
+          "Access-Control-Allow-Origin": "*",
+          "Access-Control-Allow-Headers": "content-type",
+      },
   });
 };
 
@@ -67,21 +78,26 @@ const getLeaderboard = async () => {
   const leaderboardEntries = [];
 
   for await (const entry of kv.list({ prefix: ["gameData"] }, { limit: 10, reverse: true })) {
-    const { username, highscore, iv } = entry.value;
-    const gameID = entry.key[2];
+      const { username, highscore, iv } = entry.value;
+      const gameID = entry.key[1];
 
-    const decryptedHighscore = await decryptHighscore(highscore, new Uint8Array(iv));
+      // Highscore entschlüsseln
+      const decryptedHighscore = await decrypt(highscore, iv);
 
-    leaderboardEntries.push({ id: gameID, username, highscore: decryptedHighscore });
+      leaderboardEntries.push({
+          id: gameID,
+          username,
+          highscore: decryptedHighscore, // Entschlüsselter Highscore
+      });
   }
 
   return new Response(JSON.stringify(leaderboardEntries), {
-    status: 200,
-    headers: {
-      "Content-Type": "application/json",
-      "Access-Control-Allow-Origin": "*",
-      "Access-Control-Allow-Headers": "content-type",
-    },
+      status: 200,
+      headers: {
+          "Content-Type": "application/json",
+          "Access-Control-Allow-Origin": "*",
+          "Access-Control-Allow-Headers": "content-type",
+      },
   });
 };
 
