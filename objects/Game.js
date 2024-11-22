@@ -177,8 +177,6 @@ class Game {
         } catch (error) {
             console.error("Error posting game data:", error);
         }
-    
-        this.resetGameState();
     }
     
     async hashHighscore(score) {
