@@ -97,6 +97,7 @@ const saveGameData = async (request) => {
     },
   });
 };
+}
 
 const getLeaderboard = async () => {
   const leaderboardEntries = [];
