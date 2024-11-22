@@ -255,6 +255,7 @@ class Game {
   }
 
   update() {
+    if (!this.canvas || !this.offScreenCanvas) return;
     this.objects = this.objects.filter((object) => {
       object.update(this);
 
@@ -282,6 +283,7 @@ class Game {
   }
 
   animate() {
+    if (!this.canvas || !this.offScreenCanvas) return;
     const now = performance.now();
     const deltaTime = now - this.lastUpdateTime;
     this.lastUpdateTime = now;
