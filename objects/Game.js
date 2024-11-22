@@ -318,6 +318,10 @@ class virtualGame extends Game {
     draw() {
     }
 
+    updateHighscoreDisplay(){
+        
+    }
+
     update() {
         const player = this.objects.find(obj => obj instanceof Player);
 
