@@ -86,7 +86,7 @@ const saveGameData = async (request) => {
   }
 
   // Highscore verschlüsseln, bevor es gespeichert wird
-  const passphrase = "my_secure_key"; // Sicherstellen, dass der Schlüssel sicher ist
+  const passphrase = "this.highscore.getCurrentScore()"; // Sicherstellen, dass der Schlüssel sicher ist
   const { ciphertext, iv } = await encryptHighscore(data.highscore, passphrase);
 
   const gameData = {
