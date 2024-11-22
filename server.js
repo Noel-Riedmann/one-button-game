@@ -2,28 +2,34 @@ const kv = await Deno.openKv();
 
 // Funktion zum Entschlüsseln des Highscores
 async function decryptHighscore(ciphertext, iv, passphrase) {
-  const encoder = new TextEncoder();
+  try {
+    const encoder = new TextEncoder();
 
-  // Passphrase in einen 256-Bit-Schlüssel umwandeln
-  const keyMaterial = await crypto.subtle.digest("SHA-256", encoder.encode(passphrase));
-  const key = await crypto.subtle.importKey(
-    "raw",
-    keyMaterial,
-    { name: "AES-CBC" },
-    false,
-    ["decrypt"]
-  );
+    // Passphrase in einen 256-Bit-Schlüssel umwandeln
+    const keyMaterial = await crypto.subtle.digest("SHA-256", encoder.encode(passphrase));
+    const key = await crypto.subtle.importKey(
+      "raw",
+      keyMaterial,
+      { name: "AES-CBC" },
+      false,
+      ["decrypt"]
+    );
 
-  // Entschlüsseln des Ciphertexts mit dem IV
-  const plaintext = await crypto.subtle.decrypt(
-    { name: "AES-CBC", iv: new Uint8Array(iv) },
-    key,
-    new Uint8Array(ciphertext)
-  );
+    // Entschlüsseln des Ciphertexts mit dem IV
+    const plaintext = await crypto.subtle.decrypt(
+      { name: "AES-CBC", iv: new Uint8Array(iv) },
+      key,
+      new Uint8Array(ciphertext)
+    );
 
-  // Den entschlüsselten Wert (Integer) extrahieren
-  return new Uint8Array(plaintext)[0];
+    // Den entschlüsselten Wert (Integer) extrahieren
+    return new Uint8Array(plaintext)[0];
+  } catch (error) {
+    console.error("Decryption failed:", error);
+    throw new Error("Invalid encryption data or passphrase");
+  }
 }
+
 
 // Funktion zum Verschlüsseln des Highscores
 async function encryptHighscore(highscore, passphrase) {
@@ -88,6 +94,7 @@ const saveGameData = async (request) => {
   const passphrase = "this.highscore.getCurrentScore()"; // Sicherstellen, dass der Schlüssel sicher ist
   const { ciphertext, iv } = await encryptHighscore(data.highscore, passphrase);
 
+  console.log("Saving game data:", gameData);
   const gameData = {
     highscore: Array.from(ciphertext), // Umwandeln in ein speicherbares Array
     iv: Array.from(iv), // Umwandeln in ein speicherbares Array
