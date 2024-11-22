@@ -88,13 +88,14 @@ const saveGameData = async (request) => {
   const passphrase = "this.highscore.getCurrentScore()"; // Sicherstellen, dass der Schlüssel sicher ist
   const { ciphertext, iv } = await encryptHighscore(data.highscore, passphrase);
 
-  console.log("Saving game data:", gameData);
   const gameData = {
     highscore: Array.from(ciphertext), // Umwandeln in ein speicherbares Array
     iv: Array.from(iv), // Umwandeln in ein speicherbares Array
     username: data.username,
     jumpTimestamps: data.jumps,
   };
+
+  console.log("Spieldaten", gameData);
 
   await kv.set(["gameData", data.highscore, gameID], gameData);
   return new Response(JSON.stringify({ response: "ok" }), {
@@ -124,7 +125,6 @@ const getLeaderboard = async () => {
         decryptedHighscore = await decryptHighscore(highscore, iv, passphrase);
       } catch (decryptionError) {
         console.error("Decryption failed for entry:", entry, decryptionError);
-        console.log(highscore);
         decryptedHighscore = "Error";
       }
 
