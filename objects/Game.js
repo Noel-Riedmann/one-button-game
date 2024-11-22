@@ -232,6 +232,9 @@ class Game {
   }
 
   draw() {
+
+    if (!this.offScreenC || !this.c) return;
+
     this.offScreenC.clearRect(
       0,
       0,
