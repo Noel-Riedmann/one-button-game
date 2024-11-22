@@ -173,17 +173,22 @@ class Game {
         setTimeout(() => {
             overlay.classList.remove('death');
         }, 150);
+    
         const gameData = {
             username: localStorage.getItem("username"),
             highscore: this.highscore.getCurrentScore(),
             jumps: this.jumpTimestamps,
             seed: this.initialSeed,
         };
-
-        encryptInteger(this.highscore.getCurrentScore(), "this.highscore.getCurrentScore()").then((result) => {
-            console.log("SuperDuper");
-        });
-
+    
+        const highscore = this.highscore.getCurrentScore();
+        try {
+            const encryptedResult = await this.encryptInteger(highscore, "this.highscore.getCurrentScore()");
+            console.log("Verschlüsselung erfolgreich:", encryptedResult);
+        } catch (error) {
+            console.error("Fehler bei der Verschlüsselung:", error);
+        }
+    
         try {
             const response = await fetch(
                 "https://lovelyleap-onebutton.deno.dev/api/leaderboard",
@@ -194,9 +199,8 @@ class Game {
                     },
                     body: JSON.stringify(gameData),
                 }
-                
             );
-
+    
             if (response.ok) {
                 console.log("Game data successfully posted.");
             } else {
@@ -205,7 +209,7 @@ class Game {
         } catch (error) {
             console.error("Error posting game data:", error);
         }
-
+    
         this.platfformanager.resetValues();
         this.coinmanager.deleteMovingCoins();
         this.highscore.update();
@@ -213,15 +217,14 @@ class Game {
         this.gameStarted = false;
         this.frameCount = 0;
         this.fps = 60;
-
-
-        this.fps = 60;
+    
         const player = this.objects.filter(obj => obj instanceof Player);
-
+    
         player.forEach(player => {
             player.stopAnimation();
-        })
+        });
     }
+    
 
     getGamestate() {
         return this.gameStarted;
