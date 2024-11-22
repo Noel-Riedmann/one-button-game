@@ -56,11 +56,9 @@ const saveGameData = async (request) => {
   // Entschlüsselung des Highscores
   let decryptedHighscore;
   try {
-      decryptedHighscore = await decryptData(
-          data.encryptedHighscore.data,
-          data.encryptedHighscore.iv,
-          secretKey
-      );
+      // Der Highscore wird aus den Base64-codierten Teilen (iv und data) entpackt
+      const [ivBase64, encryptedHighscore] = data.encryptedHighscore.split(':');
+      decryptedHighscore = await decryptData(encryptedHighscore, ivBase64, secretKey);
       decryptedHighscore = parseInt(decryptedHighscore); // Umwandeln in eine Zahl
   } catch (error) {
       return new Response(
@@ -102,13 +100,17 @@ const saveGameData = async (request) => {
       );
   }
 
+  // Game-Daten speichern
   const gameData = {
       highscore: decryptedHighscore, // Entschlüsselter Highscore wird gespeichert
       username: data.username,
       jumpTimestamps: data.jumps,
   };
 
+  // GameData in der Datenbank speichern
   await kv.set(["gameData", decryptedHighscore, gameID], gameData);
+  
+  // Erfolg zurückgeben
   return new Response(JSON.stringify({ response: "ok" }), {
       status: 200,
       headers: {
@@ -117,6 +119,7 @@ const saveGameData = async (request) => {
       },
   });
 };
+
 
 
 const getLeaderboard = async () => {

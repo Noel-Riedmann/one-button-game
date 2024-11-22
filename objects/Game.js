@@ -158,40 +158,17 @@ class Game {
     let endScore = this.highscore.getCurrentScore();
     const secretKey = "yourSecretKey"; // Dein geheimer Schlüssel
 
-    // Direkt in der endGame-Funktion verschlüsseln
-    const encoder = new TextEncoder();
+    // Highscore verschlüsseln
+    const encryptedHighscore = await encryptData(endScore.toString(), secretKey);
+    console.log("Verschlüsselter Highscore:", encryptedHighscore);
+
+    // Hier wird das Format des verschlüsselten Highscores zu einem Base64-codierten String angepasst:
+    // Die IV und die verschlüsselten Daten werden kombiniert
+    const encryptedHighscoreString = `${encryptedHighscore.iv}:${encryptedHighscore.data}`;
+    gameData.encryptedHighscore = encryptedHighscoreString;
+
     try {
-        const keyHash = await crypto.subtle.digest("SHA-256", encoder.encode(secretKey));
-        const cryptoKey = await window.crypto.subtle.importKey(
-            "raw",
-            keyHash, // Verwenden des SHA-256-gehashten Schlüssels
-            { name: "AES-GCM" },
-            false,
-            ["encrypt", "decrypt"]
-        );
-
-        // Die zu verschlüsselnden Daten
-        const encodedData = encoder.encode(endScore.toString());
-
-        // Initialisierungsvektor (IV) für die Verschlüsselung generieren
-        const iv = window.crypto.getRandomValues(new Uint8Array(12));
-
-        // Verschlüsselung durchführen
-        const encryptedData = await window.crypto.subtle.encrypt(
-            { name: "AES-GCM", iv: iv },
-            cryptoKey,
-            encodedData
-        );
-
-        // Verschlüsseltes Ergebnis und IV (Base64-kodiert) zurückgeben
-        const ivBase64 = btoa(String.fromCharCode(...iv));
-        const encryptedBase64 = btoa(String.fromCharCode(...new Uint8Array(encryptedData)));
-
-        gameData.encryptedHighscore = { iv: ivBase64, data: encryptedBase64 };
-
-        console.log("Verschlüsselter Highscore:", gameData.encryptedHighscore);
-
-        // Versuch, die Daten zu senden
+        // GameData wird an den Server gesendet
         const response = await fetch(
             "https://lovelyleap-onebutton.deno.dev/api/leaderboard",
             {
@@ -208,9 +185,8 @@ class Game {
         } else {
             console.error("Failed to post game data:", response.status, response.statusText);
         }
-
     } catch (error) {
-        console.error("Error during encryption or posting game data:", error);
+        console.error("Error posting game data:", error);
     }
 
     // Reset Values
@@ -222,7 +198,6 @@ class Game {
     this.frameCount = 0;
     this.fps = 60;
 }
-
 
 
   getGamestate() {
