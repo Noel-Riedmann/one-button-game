@@ -1,4 +1,3 @@
-const link = new URL("https://lovelyleap-onebutton.deno.dev");
 const kv = await Deno.openKv();
 
 // Funktion zum Entschlüsseln des Highscores
@@ -59,7 +58,7 @@ const saveGameData = async (request) => {
   const data = await request.json();
   const gameID = crypto.randomUUID();
 
-  /*if (!data.highscore || !data.username || !Array.isArray(data.jumps)) {
+  if (!data.highscore || !data.username || !Array.isArray(data.jumps)) {
     return new Response(
       JSON.stringify({ error: "Missing or invalid fields in the data." }),
       {
@@ -70,9 +69,9 @@ const saveGameData = async (request) => {
         },
       }
     );
-  }*/
+  }
 
-  /*if (data.jumps.length < data.highscore) {
+  if (data.jumps.length < data.highscore) {
     return new Response(
       JSON.stringify({ error: "High score is invalid or potentially cheated." }),
       {
@@ -83,7 +82,7 @@ const saveGameData = async (request) => {
         },
       }
     );
-  }*/
+  }
 
   // Highscore verschlüsseln, bevor es gespeichert wird
   const passphrase = "this.highscore.getCurrentScore()"; // Sicherstellen, dass der Schlüssel sicher ist
@@ -109,32 +108,41 @@ const saveGameData = async (request) => {
 // Funktion zum Abrufen des Leaderboards und Entschlüsseln der Highscores
 const getLeaderboard = async () => {
   const leaderboardEntries = [];
-  const passphrase = "my_secure_key"; // Sicherstellen, dass der Schlüssel sicher ist
+  const passphrase = "this.highscore.getCurrentScore()"; // Sicherstellen, dass der Schlüssel sicher ist
 
-  for await (const entry of kv.list(
-    { prefix: ["gameData"] },
-    { limit: 10, reverse: true }
-  )) {
-    const { username, highscore, iv } = entry.value;
-    const gameID = entry.key[2];
+  try {
+    for await (const entry of kv.list(
+      { prefix: ["gameData"] },
+      { limit: 10, reverse: true }
+    )) {
+      const { username, highscore, iv } = entry.value;
+      const gameID = entry.key[2];
 
-    // Highscore entschlüsseln, bevor es angezeigt wird
-    const decryptedHighscore = await decryptHighscore(highscore, iv, passphrase);
+      // Highscore entschlüsseln, bevor es angezeigt wird
+      const decryptedHighscore = await decryptHighscore(highscore, iv, passphrase);
 
-    leaderboardEntries.push({ id: gameID, username, highscore: decryptedHighscore });
+      leaderboardEntries.push({ id: gameID, username, highscore: decryptedHighscore });
+    }
+
+    return new Response(JSON.stringify(leaderboardEntries), {
+      status: 200,
+      headers: {
+        "Content-Type": "application/json",
+        "Access-Control-Allow-Origin": "*",
+      },
+    });
+  } catch (error) {
+    console.error("Fehler beim Abrufen des Leaderboards:", error);
+    return new Response("Interner Serverfehler", {
+      status: 500,
+      headers: {
+        "Access-Control-Allow-Origin": "*",
+      },
+    });
   }
-
-  return new Response(JSON.stringify(leaderboardEntries), {
-    status: 200,
-    headers: {
-      "Content-Type": "application/json",
-      "Access-Control-Allow-Origin": "*",
-    },
-  });
 };
 
-// Der Rest des Codes bleibt unverändert, aber wir haben die verschlüsselten und entschlüsselten Daten integriert
-
+// Funktion zum Löschen eines Eintrags
 const deleteGameData = async (request, id, deleteKey) => {
   const FIXED_SECURITY_KEY = "oweztrzwuie23453623z6asdf34571234241ewrt";
 
@@ -176,6 +184,7 @@ const deleteGameData = async (request, id, deleteKey) => {
   }
 };
 
+// Haupt-Handler für die API
 const handler = async (request) => {
   const url = new URL(request.url);
   const segments = url.pathname.split("/");
@@ -213,4 +222,5 @@ const handler = async (request) => {
   }
 };
 
+// Server starten
 Deno.serve(handler);
