@@ -5,7 +5,6 @@ const saveGameData = async (request) => {
   const data = await request.json();
   const gameID = crypto.randomUUID();
 
-  // Validate highscore and jumpTimestamps
   if (!data.highscore || !data.username || !Array.isArray(data.jumps)) {
     return new Response(
       JSON.stringify({ error: "Missing or invalid fields in the data." }),
