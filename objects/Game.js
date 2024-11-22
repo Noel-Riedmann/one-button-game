@@ -340,6 +340,33 @@ class virtualGame extends Game {
 
   draw() {}
 
+  animate() {
+    const simulationSteps = 10000; // Begrenzung für Simulations-Ticks (anpassen nach Bedarf)
+    let step = 0;
+
+    while (step < simulationSteps && !this.highscoreValidated) {
+      const now = performance.now();
+      const deltaTime = now - this.lastUpdateTime;
+      this.lastUpdateTime = now;
+      this.accumulator += deltaTime;
+
+      // Tick-Logik ausführen
+      while (this.accumulator >= this.timeStep) {
+        this.update();
+        this.accumulator -= this.timeStep;
+        if (this.gameStarted === true) {
+          this.tickCount++;
+        }
+      }
+
+      step++; // Schrittzähler erhöhen
+    }
+
+    if (!this.highscoreValidated) {
+      throw new Error("Simulation konnte nicht erfolgreich abgeschlossen werden.");
+    }
+  }
+
   updateHighscoreDisplay() {}
 
   update() {
