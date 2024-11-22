@@ -54,11 +54,19 @@ const getLeaderboard = async () => {
       const { username, highscore, iv } = entry.value;
       const gameID = entry.key[1];
 
-      const decryptedHighscore = await decryptHighscore(
-        highscore,
-        iv,
-        passphrase
-      );
+      let decryptedHighscore = null;
+
+      // Prüfen, ob der Highscore verschlüsselt ist (iv vorhanden)
+      if (iv && highscore) {
+        decryptedHighscore = await decryptHighscore(
+          highscore,
+          iv,
+          passphrase
+        );
+      } else {
+        console.warn("Unverschlüsselter Highscore erkannt:", highscore);
+        decryptedHighscore = highscore; // Unverschlüsselten Wert verwenden
+      }
 
       leaderboardEntries.push({
         id: gameID,
