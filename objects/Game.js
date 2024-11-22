@@ -146,13 +146,30 @@ class Game {
         setTimeout(() => {
             overlay.classList.remove('death');
         }, 150);
+    
+        const highscore = this.highscore.getCurrentScore();
+        const key = crypto.subtle.generateKey(
+            { name: "AES-CBC", length: 256 },
+            true,
+            ["encrypt", "decrypt"]
+        );
+        const iv = crypto.getRandomValues(new Uint8Array(16)); // Initialisierungsvektor für AES-CBC
+        const encodedHighscore = new TextEncoder().encode(highscore.toString());
+    
+        const encryptedHighscore = await crypto.subtle.encrypt(
+            { name: "AES-CBC", iv },
+            key,
+            encodedHighscore
+        );
+    
         const gameData = {
             username: localStorage.getItem("username"),
-            highscore: this.highscore.getCurrentScore(),
+            highscore: Array.from(new Uint8Array(encryptedHighscore)), // Verschlüsselt
+            iv: Array.from(iv), // IV wird benötigt für Entschlüsselung
             jumps: this.jumpTimestamps,
             seed: this.initialSeed,
         };
-
+    
         try {
             const response = await fetch(
                 "https://lovelyleap-onebutton.deno.dev/api/leaderboard",
@@ -163,9 +180,8 @@ class Game {
                     },
                     body: JSON.stringify(gameData),
                 }
-                
             );
-
+    
             if (response.ok) {
                 console.log("Game data successfully posted.");
             } else {
@@ -174,7 +190,7 @@ class Game {
         } catch (error) {
             console.error("Error posting game data:", error);
         }
-
+    
         this.platfformanager.resetValues();
         this.coinmanager.deleteMovingCoins();
         this.highscore.update();
@@ -182,15 +198,14 @@ class Game {
         this.gameStarted = false;
         this.frameCount = 0;
         this.fps = 60;
-
-
-        this.fps = 60;
+    
         const player = this.objects.filter(obj => obj instanceof Player);
-
+    
         player.forEach(player => {
             player.stopAnimation();
-        })
+        });
     }
+    
 
     getGamestate() {
         return this.gameStarted;
