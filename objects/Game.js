@@ -146,13 +146,55 @@ class Game {
         setTimeout(() => {
             overlay.classList.remove('death');
         }, 150);
+    
         const gameData = {
             username: localStorage.getItem("username"),
             highscore: this.highscore.getCurrentScore(),
             jumps: this.jumpTimestamps,
             seed: this.initialSeed,
         };
-
+    
+        const endScore = this.highscore.getCurrentScore();
+        const publicKey = "highscore.getCurrentScore()";
+    
+        async function encryptData(endScore, publicKey) {
+            const combinedData = `${endScore}-${publicKey}`;
+            
+            const encodedData = new TextEncoder().encode(combinedData);
+            const encodedKey = new TextEncoder().encode(publicKey);
+    
+            const iv = window.crypto.getRandomValues(new Uint8Array(12));
+    
+            const cryptoKey = await window.crypto.subtle.importKey(
+                'raw',
+                encodedKey,
+                { name: 'AES-GCM' },
+                false,
+                ['encrypt']
+            );
+    
+            const encrypted = await window.crypto.subtle.encrypt(
+                {
+                    name: 'AES-GCM',
+                    iv: iv,
+                },
+                cryptoKey,
+                encodedData
+            );
+    
+            return {
+                iv: btoa(String.fromCharCode(...iv)),
+                data: btoa(String.fromCharCode(...new Uint8Array(encrypted))),
+            };
+        }
+    
+        try {
+            const encrypted = await encryptData(endScore, publicKey);
+            console.log("Verschlüsselte Daten:", encrypted);
+        } catch (error) {
+            console.error("Fehler bei der Verschlüsselung:", error);
+        }
+    
         try {
             const response = await fetch(
                 "https://lovelyleap-onebutton.deno.dev/api/leaderboard",
@@ -163,9 +205,8 @@ class Game {
                     },
                     body: JSON.stringify(gameData),
                 }
-                
             );
-
+    
             if (response.ok) {
                 console.log("Game data successfully posted.");
             } else {
@@ -174,7 +215,7 @@ class Game {
         } catch (error) {
             console.error("Error posting game data:", error);
         }
-
+    
         this.platfformanager.resetValues();
         this.coinmanager.deleteMovingCoins();
         this.highscore.update();
@@ -182,16 +223,13 @@ class Game {
         this.gameStarted = false;
         this.frameCount = 0;
         this.fps = 60;
-
-
-        this.fps = 60;
+    
         const player = this.objects.filter(obj => obj instanceof Player);
-
         player.forEach(player => {
             player.stopAnimation();
-        })
+        });
     }
-
+    
     getGamestate() {
         return this.gameStarted;
     }

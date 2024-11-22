@@ -1,14 +1,42 @@
 const link = new URL("https://lovelyleap-onebutton.deno.dev");
 const kv = await Deno.openKv();
 
+const decryptData = async (encryptedScore, encryptedIV, publicKey) => {
+  const encryptedBytes = Uint8Array.from(atob(encryptedScore), char =>
+    char.charCodeAt(0)
+  );
+  const ivBytes = Uint8Array.from(atob(encryptedIV), char =>
+    char.charCodeAt(0)
+  );
+
+  const encodedKey = new TextEncoder().encode(publicKey);
+  const cryptoKey = await crypto.subtle.importKey(
+    "raw",
+    encodedKey,
+    { name: "AES-GCM" },
+    false,
+    ["decrypt"]
+  );
+
+  const decrypted = await crypto.subtle.decrypt(
+    {
+      name: "AES-GCM",
+      iv: ivBytes,
+    },
+    cryptoKey,
+    encryptedBytes
+  );
+
+  return new TextDecoder().decode(decrypted);
+};
+
 const saveGameData = async (request) => {
   const data = await request.json();
   const gameID = crypto.randomUUID();
 
-  // Validate highscore and jumpTimestamps
-  if (!data.highscore || !data.username || !Array.isArray(data.jumps)) {
+  if (!data.encryptedScore || !data.encryptedIV || !data.username) {
     return new Response(
-      JSON.stringify({ error: "Missing or invalid fields in the data." }),
+      JSON.stringify({ error: "Missing or invalid encrypted data." }),
       {
         status: 400,
         headers: {
@@ -19,9 +47,30 @@ const saveGameData = async (request) => {
     );
   }
 
-  if (data.jumps.length < data.highscore) {
+  let decryptedData;
+  const publicKey = "highscore.getCurrentScore()";
+
+  try {
+    decryptedData = await decryptData(data.encryptedScore, data.encryptedIV, publicKey);
+    console.log("Entschlüsselte Daten:", decryptedData);
+  } catch (error) {
+    console.error("Fehler bei der Entschlüsselung:", error);
     return new Response(
-      JSON.stringify({ error: "High score is invalid or potentially cheated." }),
+      JSON.stringify({ error: "Failed to decrypt the data." }),
+      {
+        status: 500,
+        headers: {
+          "Content-Type": "application/json",
+          "Access-Control-Allow-Origin": "*",
+        },
+      }
+    );
+  }
+
+  const [highscore, key] = decryptedData.split("-");
+  if (!highscore || !key || key !== publicKey) {
+    return new Response(
+      JSON.stringify({ error: "Decrypted data is invalid or tampered." }),
       {
         status: 400,
         headers: {
@@ -33,12 +82,12 @@ const saveGameData = async (request) => {
   }
 
   const gameData = {
-    highscore: data.highscore,
+    highscore: parseInt(highscore, 10),
     username: data.username,
     jumpTimestamps: data.jumps,
   };
 
-  await kv.set(["gameData", data.highscore, gameID], gameData);
+  await kv.set(["gameData", gameData.highscore, gameID], gameData);
   return new Response(JSON.stringify({ response: "ok" }), {
     status: 200,
     headers: {
@@ -113,6 +162,7 @@ const deleteGameData = async (request, id, deleteKey) => {
 const handler = async (request) => {
   const url = new URL(request.url);
   const segments = url.pathname.split("/");
+
   if (request.method === "OPTIONS") {
     return new Response(null, {
       headers: {
