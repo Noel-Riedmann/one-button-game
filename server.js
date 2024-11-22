@@ -95,8 +95,6 @@ const saveGameData = async (request) => {
     jumpTimestamps: data.jumps,
   };
 
-  console.log("Spieldaten", gameData);
-
   await kv.set(["gameData", data.highscore, gameID], gameData);
   return new Response(JSON.stringify({ response: "ok" }), {
     status: 200,

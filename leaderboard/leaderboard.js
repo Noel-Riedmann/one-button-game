@@ -14,6 +14,7 @@ async function fetchLeaderboard() {
         if (!Array.isArray(data)) {
             throw new Error("Unexpected server response format");
         }
+        console.log(data);
 
         const leaderboardTableBody = document.querySelector("#leaderboard-table tbody");
         leaderboardTableBody.innerHTML = "";
