@@ -5,6 +5,33 @@ const saveGameData = async (request) => {
   const data = await request.json();
   const gameID = crypto.randomUUID();
 
+  // Validate highscore and jumpTimestamps
+  if (!data.highscore || !data.username || !Array.isArray(data.jumps)) {
+    return new Response(
+      JSON.stringify({ error: "Missing or invalid fields in the data." }),
+      {
+        status: 400,
+        headers: {
+          "Content-Type": "application/json",
+          "Access-Control-Allow-Origin": "*",
+        },
+      }
+    );
+  }
+
+  if (data.jumps.length < data.highscore) {
+    return new Response(
+      JSON.stringify({ error: "High score is invalid or potentially cheated." }),
+      {
+        status: 400,
+        headers: {
+          "Content-Type": "application/json",
+          "Access-Control-Allow-Origin": "*",
+        },
+      }
+    );
+  }
+
   const gameData = {
     highscore: data.highscore,
     username: data.username,
@@ -17,7 +44,6 @@ const saveGameData = async (request) => {
     headers: {
       "Content-Type": "application/json",
       "Access-Control-Allow-Origin": "*",
-      "Access-Control-Allow-Headers": "content-type",
     },
   });
 };
@@ -39,7 +65,6 @@ const getLeaderboard = async () => {
     headers: {
       "Content-Type": "application/json",
       "Access-Control-Allow-Origin": "*",
-      "Access-Control-Allow-Headers": "content-type",
     },
   });
 };
@@ -52,7 +77,6 @@ const deleteGameData = async (request, id, deleteKey) => {
       status: 403,
       headers: {
         "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Headers": "content-type",
       },
     });
   }
@@ -65,7 +89,6 @@ const deleteGameData = async (request, id, deleteKey) => {
           status: 200,
           headers: {
             "Access-Control-Allow-Origin": "*",
-            "Access-Control-Allow-Headers": "content-type",
           },
         });
       }
@@ -75,7 +98,6 @@ const deleteGameData = async (request, id, deleteKey) => {
       status: 404,
       headers: {
         "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Headers": "content-type",
       },
     });
   } catch (error) {
@@ -83,12 +105,10 @@ const deleteGameData = async (request, id, deleteKey) => {
       status: 500,
       headers: {
         "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Headers": "content-type",
       },
     });
   }
 };
-
 
 const handler = async (request) => {
   const url = new URL(request.url);
@@ -103,7 +123,6 @@ const handler = async (request) => {
     });
   }
 
-
   switch (url.pathname) {
     case "/api/leaderboard":
       return request.method === "POST"
@@ -111,12 +130,20 @@ const handler = async (request) => {
         : getLeaderboard();
 
     default:
-      if (request.method === "DELETE" && url.pathname.startsWith("/api/leaderboard/")) {
+      if (
+        request.method === "DELETE" &&
+        url.pathname.startsWith("/api/leaderboard/")
+      ) {
         const key = segments[4];
         const id = segments[3];
         return deleteGameData(request, id, key);
       }
-      return new Response("blub");
+      return new Response("Endpoint not found", {
+        status: 404,
+        headers: {
+          "Access-Control-Allow-Origin": "*",
+        },
+      });
   }
 };
 
