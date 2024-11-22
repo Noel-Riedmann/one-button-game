@@ -1,52 +1,123 @@
 const link = new URL("https://lovelyleap-onebutton.deno.dev");
 const kv = await Deno.openKv();
 
+const decryptData = async (encryptedData, ivBase64, secretKey) => {
+  const encoder = new TextEncoder();
+  const decoder = new TextDecoder();
+
+  // Hashen des geheimen Schlüssels auf 256 bits mit SHA-256
+  const keyHash = await crypto.subtle.digest("SHA-256", encoder.encode(secretKey));
+
+  // Erstellen des AES-Schlüssels aus dem gehashten Wert
+  const cryptoKey = await crypto.subtle.importKey(
+      "raw",
+      keyHash, // Verwenden des SHA-256-gehashten Schlüssels
+      { name: "AES-GCM" },
+      false,
+      ["decrypt"]
+  );
+
+  // IV und verschlüsselten Text dekodieren
+  const iv = new Uint8Array(atob(ivBase64).split('').map(c => c.charCodeAt(0)));
+  const encrypted = new Uint8Array(atob(encryptedData).split('').map(c => c.charCodeAt(0)));
+
+  // Daten entschlüsseln
+  const decryptedData = await crypto.subtle.decrypt(
+      { name: "AES-GCM", iv: iv },
+      cryptoKey,
+      encrypted
+  );
+
+  // Entschlüsselte Daten in Text umwandeln
+  return decoder.decode(decryptedData);
+};
+
 const saveGameData = async (request) => {
   const data = await request.json();
   const gameID = crypto.randomUUID();
 
-  // Validate highscore and jumpTimestamps
-  if (!data.highscore || !data.username || !Array.isArray(data.jumps)) {
-    return new Response(
-      JSON.stringify({ error: "Missing or invalid fields in the data." }),
-      {
-        status: 400,
-        headers: {
-          "Content-Type": "application/json",
-          "Access-Control-Allow-Origin": "*",
-        },
-      }
-    );
+  // Überprüfen, ob der verschlüsselte Highscore vorhanden ist
+  if (!data.encryptedHighscore || !data.username || !Array.isArray(data.jumps)) {
+      return new Response(
+          JSON.stringify({ error: "Missing or invalid fields in the data." }),
+          {
+              status: 400,
+              headers: {
+                  "Content-Type": "application/json",
+                  "Access-Control-Allow-Origin": "*",
+              },
+          }
+      );
   }
 
-  if (data.jumps.length < data.highscore) {
-    return new Response(
-      JSON.stringify({ error: "High score is invalid or potentially cheated." }),
-      {
-        status: 400,
-        headers: {
-          "Content-Type": "application/json",
-          "Access-Control-Allow-Origin": "*",
-        },
-      }
-    );
+  // Geheimen Schlüssel verwenden (muss der gleiche sein wie auf dem Client)
+  const secretKey = "yourSecretKey";
+
+  // Entschlüsselung des Highscores
+  let decryptedHighscore;
+  try {
+      decryptedHighscore = await decryptData(
+          data.encryptedHighscore.data,
+          data.encryptedHighscore.iv,
+          secretKey
+      );
+      decryptedHighscore = parseInt(decryptedHighscore); // Umwandeln in eine Zahl
+  } catch (error) {
+      return new Response(
+          JSON.stringify({ error: "Error decrypting highscore." }),
+          {
+              status: 500,
+              headers: {
+                  "Content-Type": "application/json",
+                  "Access-Control-Allow-Origin": "*",
+              },
+          }
+      );
+  }
+
+  // Überprüfen des Highscores
+  if (!decryptedHighscore || !data.username || !Array.isArray(data.jumps)) {
+      return new Response(
+          JSON.stringify({ error: "Missing or invalid fields in the data." }),
+          {
+              status: 400,
+              headers: {
+                  "Content-Type": "application/json",
+                  "Access-Control-Allow-Origin": "*",
+              },
+          }
+      );
+  }
+
+  if (data.jumps.length < decryptedHighscore) {
+      return new Response(
+          JSON.stringify({ error: "High score is invalid or potentially cheated." }),
+          {
+              status: 400,
+              headers: {
+                  "Content-Type": "application/json",
+                  "Access-Control-Allow-Origin": "*",
+              },
+          }
+      );
   }
 
   const gameData = {
-    highscore: data.highscore,
-    username: data.username,
-    jumpTimestamps: data.jumps,
+      highscore: decryptedHighscore, // Entschlüsselter Highscore wird gespeichert
+      username: data.username,
+      jumpTimestamps: data.jumps,
   };
 
-  await kv.set(["gameData", data.highscore, gameID], gameData);
+  await kv.set(["gameData", decryptedHighscore, gameID], gameData);
   return new Response(JSON.stringify({ response: "ok" }), {
-    status: 200,
-    headers: {
-      "Content-Type": "application/json",
-      "Access-Control-Allow-Origin": "*",
-    },
+      status: 200,
+      headers: {
+          "Content-Type": "application/json",
+          "Access-Control-Allow-Origin": "*",
+      },
   });
 };
+
 
 const getLeaderboard = async () => {
   const leaderboardEntries = [];
