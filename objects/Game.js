@@ -8,6 +8,36 @@ import Coin from "./Coin.js";
 import CoinManager from "./CoinManager.js";
 import SeedGenerator from "./SeedGenerator.js";
 
+const crypto = window.crypto;
+const secretKey = "oweztrzwuie23453623z6asdf34571234241ewrt"; // Der geheime Schlüssel für AES
+const algorithm = "aes-256-cbc"; // AES CBC Modus
+
+// Funktion zur Erzeugung eines AES Schlüssels
+const getKey = async () => {
+  const encoder = new TextEncoder();
+  return await crypto.subtle.importKey(
+    "raw",
+    encoder.encode(secretKey),
+    { name: "AES-CBC" },
+    false,
+    ["encrypt", "decrypt"]
+  );
+};
+
+// Funktion zum Verschlüsseln des Highscores
+const encryptHighscore = async (highscore) => {
+  const key = await getKey();
+  const iv = crypto.getRandomValues(new Uint8Array(16)); // Initialisierungsvektor (IV) für AES
+
+  const encryptedData = await crypto.subtle.encrypt(
+    { name: "AES-CBC", iv },
+    key,
+    new TextEncoder().encode(highscore.toString())
+  );
+
+  return { encryptedData, iv };
+};
+
 class Game {
     constructor(canvas) {
         this.canvas = canvas;
@@ -146,25 +176,36 @@ class Game {
         setTimeout(() => {
             overlay.classList.remove('death');
         }, 150);
+        
         const gameData = {
             username: localStorage.getItem("username"),
-            highscore: this.highscore.getCurrentScore(),
+            highscore: this.highscore.getCurrentScore(),  // Unverschlüsselter Highscore
             jumps: this.jumpTimestamps,
             seed: this.initialSeed,
         };
 
         try {
-            const response = await fetch(
-                "https://lovelyleap-onebutton.deno.dev/api/leaderboard",
-                {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify(gameData),
-                }
-                
-            );
+            // Verschlüsselung des Highscores
+            const { encryptedData, iv } = await encryptHighscore(gameData.highscore);
+
+            // Umwandlung der verschlüsselten Daten in Base64 für den sicheren Transport
+            const encryptedBase64 = btoa(String.fromCharCode(...new Uint8Array(encryptedData)));
+            const ivBase64 = btoa(String.fromCharCode(...new Uint8Array(iv)));
+
+            // Senden der verschlüsselten Daten an den Server
+            const response = await fetch("https://lovelyleap-onebutton.deno.dev/api/leaderboard", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    username: gameData.username,
+                    highscore: encryptedBase64, // Verschlüsselte Highscore-Daten
+                    iv: ivBase64, // Verschlüsselter IV
+                    jumps: gameData.jumps, // Sprungzeitstempel (optional)
+                    seed: gameData.seed,
+                }),
+            });
 
             if (response.ok) {
                 console.log("Game data successfully posted.");
@@ -183,15 +224,11 @@ class Game {
         this.frameCount = 0;
         this.fps = 60;
 
-
-        this.fps = 60;
         const player = this.objects.filter(obj => obj instanceof Player);
-
         player.forEach(player => {
             player.stopAnimation();
-        })
+        });
     }
-
     getGamestate() {
         return this.gameStarted;
     }
