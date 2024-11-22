@@ -176,6 +176,7 @@ class Game {
         }
 
         this.platfformanager.resetValues();
+        this.coinmanager.deleteMovingCoins();
         this.highscore.update();
         this.highscore.resetCurrentScore();
         this.gameStarted = false;

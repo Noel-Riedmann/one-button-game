@@ -19,6 +19,19 @@ class Platform {
         }
     }
 
+    isPlayerOnPlatform(player) {
+        const playerBottomY = player.position.y + player.height;
+        const platformTopY = this.position.y;
+        const platformLeftX = this.position.x;
+        const platformRightX = this.position.x + this.width;
+
+        return (
+            playerBottomY === platformTopY &&
+            player.position.x + player.width >= platformLeftX &&
+            player.position.x <= platformRightX
+        );
+    }
+
     draw(c) { 
         if (this.image && this.image.complete) {
             c.drawImage(this.image, this.position.x, this.position.y, this.width, this.height);
