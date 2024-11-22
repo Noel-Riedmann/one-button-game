@@ -5,7 +5,14 @@ const saveGameData = async (request) => {
   const data = await request.json();
   const gameID = crypto.randomUUID();
 
-  if (!data.highscore || !data.username || !Array.isArray(data.jumps) || !data.iv) {
+  // Hardcodierter privater RSA-Schlüssel (pkcs8-Format, Base64-Daten als Uint8Array)
+  const rsaPrivateKey = Uint8Array.from([
+      // Dein private key in Base64 dekodiert, hier als Beispiel:
+      48, 130, 2, 92, 2, 1, 0, 2, 129, 129, 0, 176, 110, 35, 177, 203,
+      // Füge den vollständigen Schlüssel als Byte-Array hinzu
+  ]);
+
+  if (!data.highscore || !data.username || !Array.isArray(data.jumps) || !data.aesKey || !data.iv) {
       return new Response(
           JSON.stringify({ error: "Missing or invalid fields in the data." }),
           {
@@ -18,35 +25,46 @@ const saveGameData = async (request) => {
       );
   }
 
-  const key = /* Der gleiche Schlüssel wie beim Client. Dies könnte entweder ein fester Wert oder durch einen sicheren Key-Austausch bereitgestellt werden. */;
-  const iv = new Uint8Array(data.iv);
-  const encryptedHighscore = new Uint8Array(data.highscore);
-
   try {
+      // 1. Importiere den Private Key für RSA
+      const privateKey = await crypto.subtle.importKey(
+          "pkcs8",
+          rsaPrivateKey.buffer, // ArrayBuffer des Schlüssels
+          { name: "RSA-OAEP", hash: "SHA-256" },
+          false,
+          ["decrypt"]
+      );
+
+      // 2. AES-Schlüssel entschlüsseln
+      const encryptedAesKey = new Uint8Array(data.aesKey);
+      const aesKeyRaw = await crypto.subtle.decrypt(
+          { name: "RSA-OAEP" },
+          privateKey,
+          encryptedAesKey
+      );
+
+      const aesKey = await crypto.subtle.importKey(
+          "raw",
+          aesKeyRaw,
+          { name: "AES-CBC" },
+          false,
+          ["decrypt"]
+      );
+
+      // 3. Highscore entschlüsseln
+      const iv = new Uint8Array(data.iv);
+      const encryptedHighscore = new Uint8Array(data.highscore);
       const decryptedHighscore = await crypto.subtle.decrypt(
           { name: "AES-CBC", iv },
-          key,
+          aesKey,
           encryptedHighscore
       );
 
       const decodedHighscore = new TextDecoder().decode(decryptedHighscore);
-
-      if (isNaN(decodedHighscore)) {
-          return new Response(
-              JSON.stringify({ error: "Highscore decryption failed." }),
-              {
-                  status: 400,
-                  headers: {
-                      "Content-Type": "application/json",
-                      "Access-Control-Allow-Origin": "*",
-                  },
-              }
-          );
-      }
-
       const highscore = parseInt(decodedHighscore, 10);
 
-      if (data.jumps.length < highscore) {
+      // 4. Validierung des Highscores
+      if (isNaN(highscore) || data.jumps.length < highscore) {
           return new Response(
               JSON.stringify({ error: "High score is invalid or potentially cheated." }),
               {
@@ -59,6 +77,7 @@ const saveGameData = async (request) => {
           );
       }
 
+      // 5. Spiel-Daten speichern
       const gameData = {
           highscore,
           username: data.username,
@@ -66,6 +85,7 @@ const saveGameData = async (request) => {
       };
 
       await kv.set(["gameData", highscore, gameID], gameData);
+
       return new Response(JSON.stringify({ response: "ok" }), {
           status: 200,
           headers: {
@@ -74,9 +94,9 @@ const saveGameData = async (request) => {
           },
       });
   } catch (error) {
-      console.error("Error decrypting highscore:", error);
+      console.error("Error processing game data:", error);
       return new Response(
-          JSON.stringify({ error: "Highscore decryption failed." }),
+          JSON.stringify({ error: "An error occurred while processing the data." }),
           {
               status: 500,
               headers: {
@@ -87,6 +107,7 @@ const saveGameData = async (request) => {
       );
   }
 };
+
 
 
 const getLeaderboard = async () => {

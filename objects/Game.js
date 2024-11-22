@@ -148,24 +148,55 @@ class Game {
         }, 150);
     
         const highscore = this.highscore.getCurrentScore();
-        const key = crypto.subtle.generateKey(
+    
+        // Hardcodierter öffentlicher RSA-Schlüssel (spki-Format, Base64-Daten als Uint8Array)
+        const rsaPublicKey = Uint8Array.from([
+            // Dein public key in Base64 dekodiert, hier als Beispiel:
+            48, 130, 1, 34, 48, 13, 6, 9, 42, 134, 72, 134, 247, 13, 1, 1, 1, 5, 0, 3,
+            // Füge den vollständigen Schlüssel als Byte-Array hinzu
+        ]);
+    
+        // 1. Erzeuge AES-Schlüssel und IV
+        const aesKey = await crypto.subtle.generateKey(
             { name: "AES-CBC", length: 256 },
             true,
             ["encrypt", "decrypt"]
         );
-        const iv = crypto.getRandomValues(new Uint8Array(16)); // Initialisierungsvektor für AES-CBC
-        const encodedHighscore = new TextEncoder().encode(highscore.toString());
+        const iv = crypto.getRandomValues(new Uint8Array(16));
     
+        // 2. Highscore verschlüsseln
+        const highscoreData = new TextEncoder().encode(highscore.toString());
         const encryptedHighscore = await crypto.subtle.encrypt(
             { name: "AES-CBC", iv },
-            key,
-            encodedHighscore
+            aesKey,
+            highscoreData
         );
     
+        // 3. AES-Schlüssel exportieren
+        const exportedAesKey = await crypto.subtle.exportKey("raw", aesKey);
+    
+        // 4. Importiere den Public Key für RSA
+        const publicKey = await crypto.subtle.importKey(
+            "spki",
+            rsaPublicKey.buffer, // ArrayBuffer des Schlüssels
+            { name: "RSA-OAEP", hash: "SHA-256" },
+            false,
+            ["encrypt"]
+        );
+    
+        // 5. AES-Schlüssel mit RSA verschlüsseln
+        const encryptedAesKey = await crypto.subtle.encrypt(
+            { name: "RSA-OAEP" },
+            publicKey,
+            exportedAesKey
+        );
+    
+        // 6. Erstelle die Daten für den POST
         const gameData = {
             username: localStorage.getItem("username"),
-            highscore: Array.from(new Uint8Array(encryptedHighscore)), // Verschlüsselt
-            iv: Array.from(iv), // IV wird benötigt für Entschlüsselung
+            highscore: Array.from(new Uint8Array(encryptedHighscore)), // Verschlüsselter Highscore
+            aesKey: Array.from(new Uint8Array(encryptedAesKey)), // Verschlüsselter AES-Schlüssel
+            iv: Array.from(iv), // IV für AES
             jumps: this.jumpTimestamps,
             seed: this.initialSeed,
         };
@@ -205,6 +236,8 @@ class Game {
             player.stopAnimation();
         });
     }
+    
+    
     
 
     getGamestate() {
