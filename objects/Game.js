@@ -163,13 +163,25 @@ class Game {
                     },
                     body: JSON.stringify(gameData),
                 }
-                
             );
-
+    
             if (response.ok) {
                 console.log("Game data successfully posted.");
             } else {
                 console.error("Failed to post game data:", response.status, response.statusText);
+            }
+    
+            try {
+                const simulatedGame = new virtualGame(gameData);
+                simulatedGame.startGame();
+    
+                while (!simulatedGame.highscoreValidated) {
+                    simulatedGame.update();
+                }
+    
+                console.log("Simulation erfolgreich validiert.");
+            } catch (error) {
+                console.error("Fehler bei der Spielvalidierung:", error.message);
             }
         } catch (error) {
             console.error("Error posting game data:", error);
@@ -275,17 +287,17 @@ export default Game;
 
 class virtualGame extends Game {
     constructor(gameData) {
-        super(null); // Keine Canvas-Initialisierung
+        super(null);
         this.gameData = gameData;
         this.generator = new SeedGenerator();
         this.randomGen = this.generator.randomNumbers(gameData.seed);
         this.expectedJumps = gameData.jumps;
         this.highscoreValidated = false;
 
-        this.removeInputListeners(); // Entferne Event-Listener
+        this.removeInputListeners();
 
-        this.init(); // Initialisiere Spiel
-        this.gameStarted = true; // Setze Spielzustand
+        this.init();
+        this.gameStarted = true;
     }
 
     removeInputListeners() {
@@ -301,35 +313,42 @@ class virtualGame extends Game {
     onTouchEnd = () => {};
 
     calculateFPS() {
-        // Keine FPS-Berechnung notwendig
     }
 
     draw() {
-        // Keine grafische Darstellung notwendig
     }
 
     update() {
-        // Simuliere Sprungaktionen
-        this.buttonPressed = this.expectedJumps.includes(this.tickCount);
-        if (this.buttonPressed) {
+        const player = this.objects.find(obj => obj instanceof Player);
+
+        const canJump = this.canPlayerJump(player);
+
+        if (this.expectedJumps.includes(this.tickCount)) {
+            if (!canJump) {
+                throw new Error(`Ungültiger Sprung bei Tick ${this.tickCount}: Spieler konnte nicht springen.`);
+            }
             this.playerJump();
         }
 
-        super.update(); // Aktualisiere Spielwelt
+        super.update();
 
-        // Validierung: Stoppe nach letztem Sprung
         if (this.tickCount > this.expectedJumps[this.expectedJumps.length - 1]) {
             this.validateGameState();
         }
     }
 
+    canPlayerJump(player) {
+        return this.objects.some(platform => {
+            return platform instanceof Platform && platform.isPlayerOnPlatform(player);
+        });
+    }
+
     validateGameState() {
         const serverCalculatedHighscore = this.highscore.getCurrentScore();
         if (serverCalculatedHighscore !== this.gameData.highscore) {
-            throw new Error(`Highscore mismatch! Expected: ${this.gameData.highscore}, Got: ${serverCalculatedHighscore}`);
+            throw new Error(`Highscore-Mismatch! Erwartet: ${this.gameData.highscore}, Bekommen: ${serverCalculatedHighscore}`);
         }
 
         this.highscoreValidated = true;
     }
 }
-
