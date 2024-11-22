@@ -152,7 +152,8 @@ class Game {
 
     // Hardcodierter Public Key im spki-Format
     const rsaPublicKey = Uint8Array.from([
-      48, 130, 1, 34, 48, 13, 6, 9, 42, 134, 72, 134, 247, 13, 1, 1, 1, 5, 0,
+        100, 56, 205, 17, 23, 203, 193, 194, 129, 45, 116, 251, 59, 54, 98, 34,
+        89, 44, 14, 183, 9, 22, 116, 163, 77, 238, 240, 103, 54, 160, 121, 53
       // Füge alle Byte-Werte des Schlüssels ein...
     ]);
 
