@@ -1,80 +1,40 @@
 const kv = await Deno.openKv();
 
-// Funktion zum Entschlüsseln des Highscores
+// Highscore entschlüsseln
 async function decryptHighscore(ciphertext, iv, passphrase) {
   try {
     const encoder = new TextEncoder();
-
-    // Passphrase in einen 256-Bit-Schlüssel umwandeln
     const keyMaterial = await crypto.subtle.digest("SHA-256", encoder.encode(passphrase));
-    const key = await crypto.subtle.importKey(
-      "raw",
-      keyMaterial,
-      { name: "AES-CBC" },
-      false,
-      ["decrypt"]
-    );
+    const key = await crypto.subtle.importKey("raw", keyMaterial, { name: "AES-CBC" }, false, ["decrypt"]);
 
-    // Entschlüsseln des Ciphertexts mit dem IV
     const plaintext = await crypto.subtle.decrypt(
       { name: "AES-CBC", iv: new Uint8Array(iv) },
       key,
       new Uint8Array(ciphertext)
     );
 
-    // Den entschlüsselten Wert (Integer) extrahieren
-    return new Uint8Array(plaintext)[0];
+    const value = new Uint8Array(plaintext)[0];
+    if (isNaN(value)) throw new Error("Invalid decrypted value");
+    return value;
   } catch (error) {
     console.error("Decryption failed:", error);
-    return "Error"; // Rückgabe bei Fehler
+    return null;
   }
 }
 
-// Funktion zum Verschlüsseln des Highscores
-async function encryptHighscore(highscore, passphrase) {
-  const encoder = new TextEncoder();
-  const highscoreBytes = new Uint8Array([highscore]);
-
-  // Passphrase in einen 256-Bit-Schlüssel umwandeln
-  const keyMaterial = await crypto.subtle.digest("SHA-256", encoder.encode(passphrase));
-  const key = await crypto.subtle.importKey(
-    "raw",
-    keyMaterial,
-    { name: "AES-CBC" },
-    false,
-    ["encrypt"]
-  );
-
-  // Initialisierungsvektor (IV) generieren
-  const iv = crypto.getRandomValues(new Uint8Array(16));
-
-  // Verschlüsseln des Highscores
-  const ciphertext = await crypto.subtle.encrypt(
-    { name: "AES-CBC", iv },
-    key,
-    highscoreBytes
-  );
-
-  return { ciphertext: new Uint8Array(ciphertext), iv };
-}
-
-// Funktion zum Speichern der Spiel-Daten mit Verschlüsselung des Highscores
+// Spiel-Daten speichern
 const saveGameData = async (request) => {
   const data = await request.json();
   const gameID = crypto.randomUUID();
 
-  // Highscore verschlüsseln, bevor es gespeichert wird
-  const passphrase = "this.highscore.getCurrentScore()"; // Sicherstellen, dass der Schlüssel sicher ist
-  const { ciphertext, iv } = await encryptHighscore(data.highscore, passphrase);
-
   const gameData = {
-    highscore: Array.from(ciphertext), // Umwandeln in ein speicherbares Array
-    iv: Array.from(iv), // Umwandeln in ein speicherbares Array
+    highscore: data.highscore, // Bereits verschlüsselt vom Client
+    iv: data.iv,              // Bereits verschlüsselt vom Client
     username: data.username,
     jumpTimestamps: data.jumps,
   };
 
-  await kv.set(["gameData", data.highscore, gameID], gameData);
+  await kv.set(["gameData", gameID], gameData);
   return new Response(JSON.stringify({ response: "ok" }), {
     status: 200,
     headers: {
@@ -84,34 +44,27 @@ const saveGameData = async (request) => {
   });
 };
 
-// Funktion zum Abrufen des Leaderboards
+// Leaderboard abrufen
 const getLeaderboard = async () => {
   try {
     const leaderboardEntries = [];
-    const passphrase = "this.highscore.getCurrentScore()"; // Sicherstellen, dass der Schlüssel sicher ist
+    const passphrase = "my_static_secure_passphrase"; // Übereinstimmung mit dem Client
 
-    for await (const entry of kv.list(
-      { prefix: ["gameData"] },
-      { limit: 10, reverse: true }
-    )) {
+    for await (const entry of kv.list({ prefix: ["gameData"] }, { limit: 10, reverse: true })) {
       const { username, highscore, iv } = entry.value;
-      const gameID = entry.key[2];
+      const gameID = entry.key[1];
 
-      // Highscore entschlüsseln, bevor es angezeigt wird
-      let decryptedHighscore;
-      try {
-        // Sicherstellen, dass highscore und iv als Uint8Array verarbeitet werden
-        decryptedHighscore = await decryptHighscore(
-          new Uint8Array(highscore), // Umwandlung in Uint8Array
-          new Uint8Array(iv),        // Umwandlung in Uint8Array
-          passphrase
-        );
-      } catch (decryptionError) {
-        console.error("Decryption failed for entry:", entry, decryptionError);
-        decryptedHighscore = "Error"; // Falls Entschlüsselung fehlschlägt
-      }
+      const decryptedHighscore = await decryptHighscore(
+        highscore,
+        iv,
+        passphrase
+      );
 
-      leaderboardEntries.push({ id: gameID, username, highscore: decryptedHighscore });
+      leaderboardEntries.push({
+        id: gameID,
+        username,
+        highscore: decryptedHighscore ?? "N/A", // Fehlerhafte Werte behandeln
+      });
     }
 
     return new Response(JSON.stringify(leaderboardEntries), {
@@ -123,7 +76,6 @@ const getLeaderboard = async () => {
     });
   } catch (error) {
     console.error("Error in getLeaderboard:", error);
-
     return new Response(
       JSON.stringify({ error: "Internal Server Error", details: error.message }),
       {
@@ -137,7 +89,7 @@ const getLeaderboard = async () => {
   }
 };
 
-// Funktion zum Löschen eines Eintrags
+// Eintrag löschen
 const deleteGameData = async (request, id, deleteKey) => {
   const FIXED_SECURITY_KEY = "oweztrzwuie23453623z6asdf34571234241ewrt";
 
@@ -152,7 +104,7 @@ const deleteGameData = async (request, id, deleteKey) => {
 
   try {
     for await (const entry of kv.list({ prefix: ["gameData"] })) {
-      if (entry.key[2] === id) {
+      if (entry.key[1] === id) {
         await kv.delete(entry.key);
         return new Response("Deleted successfully", {
           status: 200,
@@ -179,7 +131,7 @@ const deleteGameData = async (request, id, deleteKey) => {
   }
 };
 
-// Haupt-Handler für die API
+// Haupt-Handler
 const handler = async (request) => {
   const url = new URL(request.url);
   const segments = url.pathname.split("/");
@@ -200,10 +152,7 @@ const handler = async (request) => {
         : getLeaderboard();
 
     default:
-      if (
-        request.method === "DELETE" &&
-        url.pathname.startsWith("/api/leaderboard/") 
-      ) {
+      if (request.method === "DELETE" && url.pathname.startsWith("/api/leaderboard/")) {
         const key = segments[4];
         const id = segments[3];
         return deleteGameData(request, id, key);
