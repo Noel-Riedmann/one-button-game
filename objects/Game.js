@@ -83,6 +83,7 @@ class Game {
 
     onTouchStart = (event) => {
         this.buttonPressed = true;
+        this.playerJump();
     };
 
     onKeyup = (event) => {
