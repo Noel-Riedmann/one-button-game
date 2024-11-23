@@ -96,6 +96,10 @@ body {
     .qrcode {
         display: none !important;
     }    
+
+    .lovelyIcon{
+        display: none !important;
+    }
 }
 
 .qrcode {
@@ -188,4 +192,23 @@ body {
 .returnButton{
     margin-top: 10rem;
     justify-self: center;
+}
+
+.lovelyIcon{
+    position: fixed;
+    left: 20px;
+    bottom: 10px;
+    display: flex;
+    flex-direction: column;
+    text-align: center;
+    color: #0E2841;
+    font-weight: bold;
+    font-family: monospace;
+    font-size: 1rem;
+    align-items: center;
+}
+
+.imageSizing{
+    display: flex;
+    width: 5rem;
 }
