@@ -64,6 +64,19 @@ const saveGameData = async (request) => {
     );
   }
 
+  if (data.jumps.length < data.highscore) {
+    return new Response(
+      JSON.stringify({ error: "High score is invalid or potentially cheated." }),
+      {
+        status: 400,
+        headers: {
+          "Content-Type": "application/json",
+          "Access-Control-Allow-Origin": "*",
+        },
+      }
+    );
+  }
+
   const passphrase = "secure_passphrase";
   const { ciphertext, iv } = await encryptHighscore(data.highscore, passphrase);
 
