@@ -27,7 +27,7 @@ const saveGameData = async (request) => {
   const data = await request.json();
   const gameID = crypto.randomUUID();
 
-  if (!decryptedHighscore || !data.username || !Array.isArray(data.jumps)) {
+  if (!data.highscore || !data.username || !Array.isArray(data.jumps)) {
     return new Response(
       JSON.stringify({ error: "Missing or invalid fields in the data." }),
       {
@@ -40,7 +40,7 @@ const saveGameData = async (request) => {
     );
   }
 
-  if (data.jumps.length < decryptedHighscore) {
+  if (data.jumps.length < data.highscore) {
     return new Response(
       JSON.stringify({ error: "High score is invalid or potentially cheated." }),
       {
