@@ -37,7 +37,6 @@ class CoinManager {
             if (coin instanceof Coin) {
                 if ( coin.velocity != 0) {
                     coin.velocity = 3;
-                    console.log("assaklfasflsöfslfs");
                 }
             }
         });

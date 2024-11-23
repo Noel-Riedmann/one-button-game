@@ -178,7 +178,6 @@ class Game {
         let encryptedResult;
         try {
             encryptedResult = await this.encryptInteger(highscore, "my_static_secure_passphrase");
-            console.log("Verschlüsselung erfolgreich:", encryptedResult);
         } catch (error) {
             console.error("Fehler bei der Verschlüsselung:", error);
             // Falls die Verschlüsselung fehlschlägt, beenden wir die Funktion, um keine unverschlüsselten Daten zu senden.

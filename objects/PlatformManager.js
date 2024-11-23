@@ -98,7 +98,6 @@ class PlatformManager {
             if (platform instanceof Platform) {
                 if ( platform.velocity != 0) {
                     platform.velocity = this.speed;
-                    console.log("assaklfasflsöfslfs");
 
                 }
             }
