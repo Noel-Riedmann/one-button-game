@@ -176,7 +176,7 @@ class Game {
     
         const gameData = {
             username: localStorage.getItem("username"),
-            highscore: this.highscore.getCurrentScore(),
+            highscore: highscore,
             jumps: this.jumpTimestamps,
             seed: this.initialSeed,
         };
