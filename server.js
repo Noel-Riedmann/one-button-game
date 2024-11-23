@@ -22,30 +22,6 @@ async function decryptHighscore(ciphertext, iv, passphrase) {
   return new Uint8Array(plaintext)[0];
 }
 
-// Funktion zum Verschlüsseln des Highscores
-async function encryptHighscore(highscore, passphrase) {
-  const encoder = new TextEncoder();
-  const highscoreBytes = new Uint8Array([highscore]);
-
-  const keyMaterial = await crypto.subtle.digest("SHA-256", encoder.encode(passphrase));
-  const key = await crypto.subtle.importKey(
-    "raw",
-    keyMaterial,
-    { name: "AES-CBC" },
-    false,
-    ["encrypt"]
-  );
-
-  const iv = crypto.getRandomValues(new Uint8Array(16));
-  const ciphertext = await crypto.subtle.encrypt(
-    { name: "AES-CBC", iv },
-    key,
-    highscoreBytes
-  );
-
-  return { ciphertext: new Uint8Array(ciphertext), iv };
-}
-
 // Funktion zum Speichern der Spiel-Daten
 const saveGameData = async (request) => {
   const data = await request.json();
@@ -78,7 +54,6 @@ const saveGameData = async (request) => {
   }
 
   const passphrase = "secure_passphrase";
-  const { ciphertext, iv } = await encryptHighscore(data.highscore, passphrase);
 
   let decryptedHighscore;
   try {
@@ -102,7 +77,7 @@ const saveGameData = async (request) => {
     jumpTimestamps: data.jumps,
   };
 
-  await kv.set(["gameData", decryptedHighscore, gameID], gameData);
+  await kv.set(["gameDataSecure", decryptedHighscore, gameID], gameData);
 
   return new Response(JSON.stringify({ response: "ok" }), {
     status: 200,
