@@ -172,22 +172,25 @@ class Game {
         overlay.classList.add('death');
         setTimeout(() => {
             overlay.classList.remove('death');
-        }, 150);
+        }, 150);    
+        
+        const highscore = this.highscore.getCurrentScore();
+        let encryptedResult;
+        try {
+            encryptedResult = await this.encryptInteger(highscore, "my_static_secure_passphrase");
+            console.log("Verschlüsselung erfolgreich:", encryptedResult);
+        } catch (error) {
+            console.error("Fehler bei der Verschlüsselung:", error);
+            // Falls die Verschlüsselung fehlschlägt, beenden wir die Funktion, um keine unverschlüsselten Daten zu senden.
+            return;
+        }
     
         const gameData = {
             username: localStorage.getItem("username"),
-            highscore: highscore,
+            highscore: encryptedResult, // Der verschlüsselte Highscore wird hier verwendet
             jumps: this.jumpTimestamps,
             seed: this.initialSeed,
         };
-    
-        const highscore = this.highscore.getCurrentScore();
-        try {
-            const encryptedResult = await this.encryptInteger(highscore, "my_static_secure_passphrase");
-            console.log("Verschlüsselung erfolgreich:");
-        } catch (error) {
-            console.error("Fehler bei der Verschlüsselung:", error);
-        }
     
         try {
             const response = await fetch(
@@ -224,6 +227,7 @@ class Game {
             player.stopAnimation();
         });
     }
+    
     
 
     getGamestate() {
