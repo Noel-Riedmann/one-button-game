@@ -58,7 +58,7 @@ const saveGameData = async (request) => {
   } catch (error) {
     console.error("Entschlüsselung fehlgeschlagen:", error);
     return new Response(
-      JSON.stringify({ error: "Failed to decrypt highscore." }),
+      JSON.stringify({ error: `Failed to decrypt highscore: ${error.message}` }),
       {
         status: 500,
         headers: {
