@@ -219,7 +219,6 @@ class Game {
       seed: this.initialSeed,
     };
 
-    console.log("Game data:", gameData);
 
     try {
       const response = await fetch(
