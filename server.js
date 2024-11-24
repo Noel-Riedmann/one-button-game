@@ -1,24 +1,34 @@
 const kv = await Deno.openKv();
 
-// Funktion zum Entschlüsseln des Highscores
-async function decryptHighscore(ciphertext, iv, passphrase) {
+// Entschlüsseln eines Integers mit AES-GCM
+async function decryptHighscore(ciphertext, passphrase) {
   const encoder = new TextEncoder();
 
+  // Erstelle denselben SHA-256-Hash des Passworts
   const keyMaterial = await crypto.subtle.digest("SHA-256", encoder.encode(passphrase));
   const key = await crypto.subtle.importKey(
     "raw",
     keyMaterial,
-    { name: "AES-CBC" },
+    { name: "AES-GCM" },
     false,
     ["decrypt"]
   );
 
+  // Base64-decodiere den verschlüsselten Text
+  const encryptedBytes = Uint8Array.from(atob(ciphertext), (c) => c.charCodeAt(0));
+
+  // Extrahiere die IV (erste 12 Bytes) und die verschlüsselten Daten
+  const iv = encryptedBytes.slice(0, 12);
+  const encryptedData = encryptedBytes.slice(12);
+
+  // Entschlüssele die Daten
   const plaintext = await crypto.subtle.decrypt(
-    { name: "AES-CBC", iv: new Uint8Array(iv) },
+    { name: "AES-GCM", iv }, // GCM mit derselben IV
     key,
-    new Uint8Array(ciphertext)
+    encryptedData
   );
 
+  // Gib den entschlüsselten Integer zurück
   return new Uint8Array(plaintext)[0];
 }
 
@@ -40,11 +50,17 @@ const saveGameData = async (request) => {
     );
   }
 
-  if (data.jumps.length < data.highscore) {
+  const passphrase = "secure_passphrase";
+
+  let decryptedHighscore;
+  try {
+    decryptedHighscore = await decryptHighscore(data.highscore, passphrase);
+  } catch (error) {
+    console.error("Entschlüsselung fehlgeschlagen:", error);
     return new Response(
-      JSON.stringify({ error: "High score is invalid or potentially cheated." }),
+      JSON.stringify({ error: "Failed to decrypt highscore." }),
       {
-        status: 400,
+        status: 500,
         headers: {
           "Content-Type": "application/json",
           "Access-Control-Allow-Origin": "*",
@@ -53,16 +69,11 @@ const saveGameData = async (request) => {
     );
   }
 
-  const passphrase = "secure_passphrase";
-
-  let decryptedHighscore;
-  try {
-    decryptedHighscore = await decryptHighscore(ciphertext, iv, passphrase);
-  } catch (error) {
+  if (data.jumps.length < decryptedHighscore) {
     return new Response(
-      JSON.stringify({ error: "Failed to encrypt or decrypt highscore." }),
+      JSON.stringify({ error: "High score is invalid or potentially cheated." }),
       {
-        status: 500,
+        status: 400,
         headers: {
           "Content-Type": "application/json",
           "Access-Control-Allow-Origin": "*",
@@ -94,7 +105,7 @@ const getLeaderboard = async () => {
     const leaderboardEntries = [];
 
     for await (const entry of kv.list(
-      { prefix: ["gameData"] },
+      { prefix: ["gameDataSecure"] }, // Anpassung: "gameDataSecure" statt "gameData"
       { limit: 10, reverse: true }
     )) {
       const { username, highscore } = entry.value;
@@ -140,7 +151,7 @@ const deleteGameData = async (request, id, deleteKey) => {
   }
 
   try {
-    for await (const entry of kv.list({ prefix: ["gameData"] })) {
+    for await (const entry of kv.list({ prefix: ["gameDataSecure"] })) { // Anpassung: "gameDataSecure"
       if (entry.key[2] === id) {
         await kv.delete(entry.key);
         return new Response("Deleted successfully", {
