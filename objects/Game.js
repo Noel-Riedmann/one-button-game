@@ -144,6 +144,17 @@ class Game {
     }
   }
 
+  // Hilfsfunktion, die ein ArrayBuffer in eine Base64-Zeichenkette umwandelt
+  arrayBufferToBase64(arrayBuffer) {
+    let binary = "";
+    const bytes = new Uint8Array(arrayBuffer);
+    const length = bytes.byteLength;
+    for (let i = 0; i < length; i++) {
+      binary += String.fromCharCode(bytes[i]);
+    }
+    return window.btoa(binary); // Rückgabe der Base64-codierten Zeichenkette
+  }
+
   // Funktion zum Verschlüsseln eines Integers mit AES-GCM
   async encryptInteger(integer, passphrase) {
     const integerBytes = new Uint8Array([integer]); // Der Integer wird in ein Uint8Array umgewandelt
@@ -177,7 +188,7 @@ class Game {
       ...iv,
       ...new Uint8Array(ciphertext),
     ]);
-    return btoa(String.fromCharCode(...encryptedData)); // Base64-kodiert zurückgeben
+    return this.arrayBufferToBase64(encryptedData);
   }
 
   async endGame() {
@@ -207,6 +218,8 @@ class Game {
       jumps: this.jumpTimestamps,
       seed: this.initialSeed,
     };
+
+    console.log("Game data:", gameData);
 
     try {
       const response = await fetch(
