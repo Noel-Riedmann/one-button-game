@@ -86,6 +86,7 @@ class Game {
       new Enemy(20, this.canvas.width, 0, this.canvas.height, null, 0, this.createImage),
       new Player(this.createImage),
       new Platform(25, 150, -50, 550, 0, this.createImage),
+      new Ground(this.canvas, 3),
     ];
     if (!this.animationFrameID) {
       this.animate();
@@ -165,52 +166,8 @@ class Game {
     }
   }
 
-  // Hilfsfunktion, die ein ArrayBuffer in eine Base64-Zeichenkette umwandelt
-  arrayBufferToBase64(arrayBuffer) {
-    let binary = "";
-    const bytes = new Uint8Array(arrayBuffer);
-    const length = bytes.byteLength;
-    for (let i = 0; i < length; i++) {
-      binary += String.fromCharCode(bytes[i]);
-    }
-    return window.btoa(binary); // Rückgabe der Base64-codierten Zeichenkette
-  }
 
-  // Funktion zum Verschlüsseln eines Integers mit AES-GCM
-  async encryptInteger(integer, passphrase) {
-    const integerBytes = new Uint8Array([integer]); // Der Integer wird in ein Uint8Array umgewandelt
-    const encoder = new TextEncoder();
 
-    // Erstelle einen SHA-256-Hash des Passworts
-    const keyMaterial = await crypto.subtle.digest(
-      "SHA-256",
-      encoder.encode(passphrase)
-    );
-    const key = await crypto.subtle.importKey(
-      "raw",
-      keyMaterial,
-      { name: "AES-GCM" }, // AES-GCM wird verwendet
-      false,
-      ["encrypt"]
-    );
-
-    // Generiere eine zufällige IV (Initialisierungsvektor)
-    const iv = crypto.getRandomValues(new Uint8Array(12)); // 12 Bytes für AES-GCM
-
-    // Verschlüssele den Integer
-    const ciphertext = await crypto.subtle.encrypt(
-      { name: "AES-GCM", iv }, // GCM mit der IV
-      key,
-      integerBytes // Zu verschlüsselnde Daten
-    );
-
-    // Kombiniere IV und verschlüsselten Text zu einer einzigen Base64-codierten Zeichenkette
-    const encryptedData = new Uint8Array([
-      ...iv,
-      ...new Uint8Array(ciphertext),
-    ]);
-    return this.arrayBufferToBase64(encryptedData);
-  }
 
   async endGame() {
     const overlay = document.getElementById("overlay");
@@ -219,22 +176,10 @@ class Game {
       overlay.classList.remove("death");
     }, 150);
 
-    const highscore = this.highscore.getCurrentScore();
-
-    let encryptedResult;
-    try {
-      encryptedResult = await this.encryptInteger(
-        highscore,
-        "my_secure_dynamic_passphrase"
-      );
-    } catch (error) {
-      console.error("Fehler bei der Verschlüsselung:", error);
-      return;
-    }
 
     const gameData = {
       username: localStorage.getItem("username"),
-      highscore: encryptedResult, // Verschlüsselter Highscore
+      highscore: this.highscore.getCurrentScore(),
       jumps: this.jumpTimestamps,
       seed: this.initialSeed,
     };
