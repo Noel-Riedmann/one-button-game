@@ -2,6 +2,7 @@ import Enemy from "./Enemy.js";
 import Platform from "./Platform.js";
 import Highscore from "./Highscore.js";
 import Coin from "./Coin.js";
+import Ground from "./Ground.js";
 
 class Player {
     constructor(createImage) {
@@ -120,30 +121,31 @@ class Player {
 
     update(game) {
         this.position.y += this.velocity.y;
+    
         if (this.position.y + this.height + this.velocity.y <= game.canvas.height) {
             this.velocity.y += this.gravity;
             this.isJumping = true;
         } else {
-            game.gameOver = true;
-            this.isDead = true; 
-            game.endGame();
+            this.velocity.y = 0;
+            this.isJumping = false;
+            this.canJump = true; 
         }
-
+    
         this.position.x += this.velocity.x;
         if (this.position.x + this.width >= game.canvas.width) {
             this.position.x = 0;
         }
-
-
+    
         this.updateCollisionPoints();
         this.collisionDetectionPlatforms(game);
         this.collisionDetectionEnemies(game);
         this.collisionDetectionCoins(game);
+        this.collisionDetectionGround(game);
         this.checkDead(game);
-
-        if (this.canJump && this.velocity.y === 0 && game.buttonPressed) {
+    
+        if (this.canJump && game.buttonPressed) {
             this.canJump = false;
-            this.velocity.y -= 15;
+            this.velocity.y = -15;
             this.isJumping = true;
         }        
     }
@@ -151,7 +153,7 @@ class Player {
     collisionDetectionPlatforms(game) {
         game.objects.forEach(platform => {
             if (!(platform instanceof Platform)) return;
-
+    
             if (
                 this.collisionPointBelow.y >= platform.position.y &&
                 this.collisionPointBelow.y < platform.position.y + platform.height &&
@@ -161,10 +163,10 @@ class Player {
             ) {
                 this.velocity.y = 0;
                 this.position.y = platform.position.y - this.height;
-                this.canJump = true;
+                this.canJump = true; 
                 this.isJumping = false;
             }
-
+    
             if (
                 this.collisionPointAbove.y <= platform.position.y + platform.height &&
                 this.collisionPointAbove.y > platform.position.y &&
@@ -174,7 +176,6 @@ class Player {
             ) {
                 this.velocity.y = 0;
             }
-
         });
     }
 
@@ -216,6 +217,29 @@ class Player {
             }
         });
     }
+
+
+    
+        collisionDetectionGround(game) {
+            const ground = game.objects.find(object => object instanceof Ground);
+            if (!ground) return;
+        
+            const isColliding = ground.checkCollision(this);
+        
+            if (isColliding) {
+                this.isOnGround = true;
+                this.canJump = true;
+                this.isJumping = false;
+        
+                // Spieler auf die Bodenhöhe setzen
+                this.position.y = game.canvas.height - ground.segmentHeight - this.height;
+            } else {
+                this.isOnGround = false;
+            }
+        }
+    
+    
+    
 
     checkDead(game) {
         if (game.gameOver) {

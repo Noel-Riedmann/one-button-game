@@ -7,6 +7,7 @@ import Background from "./Background.js";
 import Coin from "./Coin.js";
 import CoinManager from "./CoinManager.js";
 import SeedGenerator from "./SeedGenerator.js";
+import Ground from "./Ground.js";
 
 class Game {
   constructor(canvas, getSeed = Math.random) {
