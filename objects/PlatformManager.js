@@ -15,6 +15,7 @@ class PlatformManager {
         this.groundArea = false;
         this.groundAreaStage = 0;
         this.speed = 3;
+        this.deleteMovingPlatforms();
     }
     createPlatform() {
         let lastPlatformX = 0;
@@ -38,8 +39,24 @@ class PlatformManager {
             this.width = 250;
         }
 
+        // if (this.groundAreaStage === 0 && shiftedSeed <= 5) {
+        //     this.groundArea = false; //w.i.p.
+        //     this.groundAreaStage = 6
+        // }
 
-        if (this.speed <= 7) { this.speed += 0.02; }
+        // if (this.groundAreaStage == 1) {
+        //     this.groundArea = false;
+        //     this.groundAreaStage = 0;
+        //     this.height = 25;
+        // }
+
+        // if (this.groundArea === true) {
+        //     positionY = this.game.canvas.height - 100;
+        //     this.height = 100
+        //     this.groundAreaStage -= 1;
+        // }
+
+        if (this.speed <= 5.5) { this.speed += 0.05; }
 
 
 
@@ -48,7 +65,7 @@ class PlatformManager {
     }
     
 
-    update() {
+    update() {        
         if (!this.game.gameStarted) {
             return;
         }
@@ -74,6 +91,17 @@ class PlatformManager {
                 }
             }
             return true;
+        });
+    }
+
+    deleteMovingPlatforms(){
+        this.game.objects.forEach(platform => {
+            if (platform instanceof Platform) {
+                if ( platform.velocity != 0) {
+                    platform.velocity = this.speed;
+
+                }
+            }
         });
     }
 }

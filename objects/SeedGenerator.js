@@ -2,8 +2,8 @@ class SeedGenerator {
     constructor() {
     }
 
-    *randomNumbers() {
-        let state =  Math.floor(Math.random() * 10000);
+    *randomNumbers(seed) {
+        let state =  Math.floor(seed * 10000);
 
         const a = 1103515245;
         const c = 12345;

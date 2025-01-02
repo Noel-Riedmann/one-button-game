@@ -147,7 +147,7 @@ class Player {
             this.canJump = false;
             this.velocity.y = -15;
             this.isJumping = true;
-        }
+        }        
     }
 
     collisionDetectionPlatforms(game) {
@@ -159,7 +159,7 @@ class Player {
                 this.collisionPointBelow.y < platform.position.y + platform.height &&
                 this.position.x + this.width > platform.position.x &&
                 this.position.x < platform.position.x + platform.width &&
-                this.velocity.y >= 0
+                this.velocity.y >= 0 && this.position.y 
             ) {
                 this.velocity.y = 0;
                 this.position.y = platform.position.y - this.height;
@@ -182,15 +182,19 @@ class Player {
     collisionDetectionEnemies(game) {
         game.objects.forEach(enemy => {
             if (!(enemy instanceof Enemy)) return;
-
+    
+            // Prüfen, ob der Spieler mit einem Enemy kollidiert (inklusive Boden-Enemy)
             if (
                 this.position.x < enemy.position.x + enemy.width &&
                 this.position.x + this.width > enemy.position.x &&
-                this.position.y + 20 < enemy.position.y + enemy.height &&
-                this.position.y + this.height > enemy.position.y
+                this.position.y + this.height > enemy.position.y &&
+                this.position.y < enemy.position.y + enemy.height
             ) {
-                game.gameOver = true;
-                game.endGame();
+                if (!this.isDead) {
+                    game.gameOver = true; // Spiel sofort beenden
+                    this.isDead = true;  // Spieler ist tot, weitere Aktionen verhindern
+                    game.endGame();
+                }
             }
         });
     }

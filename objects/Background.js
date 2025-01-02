@@ -10,7 +10,6 @@ class Background {
 
         this.image.onload = () => {
             this.x2 = this.image.width; 
-            console.log('Image loaded:', this.image.width, this.image.height);
         };
 
         this.image.onerror = () => {
@@ -36,7 +35,6 @@ class Background {
         if (this.x2 <= -this.image.width) {
             this.x2 = this.x1 + this.image.width;
         }
-
         if (this.x2 - this.x1 > this.image.width) {
             this.x1 = this.x2 - this.image.width;
         }
