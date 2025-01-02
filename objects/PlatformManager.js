@@ -60,7 +60,7 @@ class PlatformManager {
 
 
 
-        const platform = new Platform(this.height, this.width, positionX, positionY, this.speed);
+        const platform = new Platform(this.height, this.width, positionX, positionY, this.speed, this.game.createImage);
         this.game.objects.push(platform);
     }
 

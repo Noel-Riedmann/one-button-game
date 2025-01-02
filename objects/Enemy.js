@@ -1,5 +1,5 @@
 class Enemy {
-    constructor(height, width, positionX, positionY, color, velocity) {
+    constructor(height, width, positionX, positionY, color, velocity, createImage) {
         this.height = height;
         this.width = width;
         this.position = {
@@ -9,7 +9,7 @@ class Enemy {
         this.color = color;
         this.velocity = velocity
 
-        this.spriteSheetEnemy = new Image();
+        this.spriteSheetEnemy = createImage();
         this.spriteSheetEnemy.src = './objects/graphics/enemy2.png';
         this.spriteSheetEnemyLoaded = false;
 

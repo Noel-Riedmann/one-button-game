@@ -9,18 +9,14 @@ import CoinManager from "./CoinManager.js";
 import SeedGenerator from "./SeedGenerator.js";
 
 class Game {
-  constructor(canvas) {
+  constructor(canvas, getSeed = Math.random) {
     this.canvas = canvas;
-    this.canvas.width = 1200;
-    this.canvas.height = 700;
-    this.c = this.canvas.getContext("2d");
+    this.initialCanvas();
+    this.addEventListener();
     this.platfformanager = new PlatformManager(this);
     this.coinmanager = new CoinManager(this);
 
-    this.offScreenCanvas = document.createElement("canvas");
-    this.offScreenCanvas.width = 1200;
-    this.offScreenCanvas.height = 700;
-    this.offScreenC = this.offScreenCanvas.getContext("2d");
+
 
     this.latButtonPressedState = false;
 
@@ -31,7 +27,7 @@ class Game {
 
     this.highscore = new Highscore();
     this.generator = new SeedGenerator();
-    this.initialSeed = Math.random();
+    this.initialSeed = getSeed();
     this.randomGen = this.generator.randomNumbers(this.initialSeed);
     this.seed = this.initialSeed;
 
@@ -46,25 +42,49 @@ class Game {
 
     this.animate = this.animate.bind(this);
 
+
+  }
+
+  addEventListener() {
     document.addEventListener("keydown", this.onKeydown);
     document.addEventListener("keyup", this.onKeyup);
     document.addEventListener("touchstart", this.onTouchStart);
     document.addEventListener("touchend", this.onTouchEnd);
   }
 
+
+
+  initialCanvas() {
+    this.canvas.width = 1200;
+    this.canvas.height = 700;
+    this.c = this.canvas.getContext("2d");
+    this.offScreenCanvas = document.createElement("canvas");
+    this.offScreenCanvas.width = 1200;
+    this.offScreenCanvas.height = 700;
+    this.offScreenC = this.offScreenCanvas.getContext("2d");
+  }
+
+  createBackgrounds() {
+    return [
+    new Background("./objects/graphics/clouds.png", 2),
+    new Background("./objects/graphics/mountains.png", 1),]
+  }
+
+  createImage(){
+    return new Image();
+  }
+
   init() {
     this.gameOver = false;
     this.gameStarted = false;
     this.objects = [
-      new Background("./objects/graphics/clouds.png", 2),
-      new Background("./objects/graphics/mountains.png", 1),
-
-      new Platform(100, this.canvas.width, 0, this.canvas.height - 100, 0),
-      new Coin(32, 48, this.canvas.width, 0, this.canvas.height - 100, 0),
-      new Enemy(31, 32, -100, 300, "blue", 5),
-      new Enemy(20, this.canvas.width, 0, this.canvas.height, null, 0),
-      new Player(),
-      new Platform(25, 150, -50, 550, 0),
+      ...this.createBackgrounds(),
+      new Platform(100, this.canvas.width, 0, this.canvas.height - 100, 0, this.createImage),
+      new Coin(32, 48, this.canvas.width, 0, this.canvas.height - 100, this.createImage),
+      new Enemy(31, 32, -100, 300, "blue", 5, this.createImage),
+      new Enemy(20, this.canvas.width, 0, this.canvas.height, null, 0, this.createImage),
+      new Player(this.createImage),
+      new Platform(25, 150, -50, 550, 0, this.createImage),
     ];
     if (!this.animationFrameID) {
       this.animate();
@@ -202,7 +222,6 @@ class Game {
 
     let encryptedResult;
     try {
-      // Verwende die aktualisierte encryptInteger-Methode
       encryptedResult = await this.encryptInteger(
         highscore,
         "my_secure_dynamic_passphrase"
@@ -257,6 +276,7 @@ class Game {
     player.forEach((player) => {
       player.stopAnimation();
     });
+    console.log("spiel vorbei");
   }
 
   getGamestate() {
@@ -349,39 +369,53 @@ class Game {
 
 export default Game;
 
-class virtualGame extends Game {
+export class VirtualGame extends Game {
   constructor(gameData) {
-    super(null);
+    super(null, ()=> gameData.seed);
     this.gameData = gameData;
-    this.generator = new SeedGenerator();
-    this.randomGen = this.generator.randomNumbers(gameData.seed);
     this.expectedJumps = gameData.jumps;
     this.highscoreValidated = false;
-
-    this.removeInputListeners();
 
     this.init();
     this.gameStarted = true;
   }
 
-  removeInputListeners() {
-    document.removeEventListener("keydown", this.onKeydown);
-    document.removeEventListener("keyup", this.onKeyup);
-    document.removeEventListener("touchstart", this.onTouchStart);
-    document.removeEventListener("touchend", this.onTouchEnd);
+  initialCanvas() {
+    this.canvas = {
+      width: 1200,
+      height: 700,
+    };
   }
 
-  onKeydown = () => {};
-  onKeyup = () => {};
-  onTouchStart = () => {};
-  onTouchEnd = () => {};
+  createImage(){
+    return {};
+  }
 
-  calculateFPS() {}
+  addEventListener() {
 
-  draw() {}
+  }
+
+  createBackgrounds(){
+    return [];
+  }
+
+  calculateFPS() { }
+
+  draw() { }
+
+  animate(){
+    while (!this.gameOver) {
+      this.update();
+      if (this.gameStarted === true) {
+        this.tickCount++;
+      }
+    }
+  }
 
   update() {
+    
     this.buttonPressed = this.expectedJumps.includes(this.tickCount);
+    console.log(this.tickCount, this.buttonPressed, this.gameStarted);
     if (this.buttonPressed) {
       this.playerJump();
     }
@@ -391,9 +425,21 @@ class virtualGame extends Game {
     if (this.tickCount > this.expectedJumps[this.expectedJumps.length - 1]) {
       this.validateGameState();
     }
+    
+    
+
+  }
+
+  startGame(){
+    this.gameStarted = true;
+  }
+
+  endGame(){
+    
   }
 
   validateGameState() {
+    console.log(this.jumpTimestamps, this.initialSeed);
     const serverCalculatedHighscore = this.highscore.getCurrentScore();
     if (serverCalculatedHighscore !== this.gameData.highscore) {
       throw new Error(

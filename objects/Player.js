@@ -4,7 +4,7 @@ import Highscore from "./Highscore.js";
 import Coin from "./Coin.js";
 
 class Player {
-    constructor() {
+    constructor(createImage) {
         this.position = {
             x: 50,
             y: 500
@@ -22,7 +22,7 @@ class Player {
         this.updateCollisionPoints();
 
         this.isDead = true;
-        this.spriteSheet = new Image();
+        this.spriteSheet = createImage();
         this.spriteSheet.src = './objects/graphics/dudecolor.png';
         this.spriteSheetLoaded = false;
 
@@ -211,6 +211,7 @@ class Player {
                 ) {
                     coin.collected = true;
                     game.highscore.increment();
+                    console.log("coin coin coin");
                 }
             }
         });

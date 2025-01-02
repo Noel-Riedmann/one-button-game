@@ -1,5 +1,5 @@
 class Coin {
-    constructor(width, height, positionX, positionY, velocity) {
+    constructor(width, height, positionX, positionY, velocity, createImage) {
         this.position = {
             x: positionX,
             y: positionY
@@ -8,7 +8,7 @@ class Coin {
         this.height = height;
         this.velocity = velocity;
         this.collected = false;
-        this.spriteSheetCoin = new Image();
+        this.spriteSheetCoin = createImage();
         this.spriteSheetCoin.src = './objects/graphics/coin-spritesheet.png';
         this.spriteSheetCoinLoaded = false;
 
@@ -73,10 +73,13 @@ class Coin {
 
     update(game) {
         this.position.x -= this.velocity;
-
+        console.log(this.position);
         if (this.position.x + this.width < 0) {
             this.collected = true;
+            console.log("collected");
         }
+
+        
     };
 }
 

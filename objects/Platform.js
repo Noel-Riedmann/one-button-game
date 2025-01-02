@@ -1,5 +1,5 @@
 class Platform {
-    constructor(height, width, positionX, positionY, velocity) {
+    constructor(height, width, positionX, positionY, velocity, createImage) {
         this.height = height;
         this.width = width;
         this.position = {
@@ -9,7 +9,7 @@ class Platform {
         this.velocity = velocity;
         this.coinSpawned = false;
 
-        this.image = new Image();
+        this.image = createImage();
         if (this.width <= 150) {
             this.image.src = './objects/graphics/plat_150.png';
         } else if (this.width <= 200) {

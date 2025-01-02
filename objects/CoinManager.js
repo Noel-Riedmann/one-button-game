@@ -13,7 +13,7 @@ class CoinManager {
         const positionY = platform.position.y - this.coinHeight - 10;
         const velocity = platform.velocity;
 
-        const coin = new Coin(this.coinWidth, this.coinHeight, positionX, positionY, velocity);
+        const coin = new Coin(this.coinWidth, this.coinHeight, positionX, positionY, velocity, this.game.createImage);
         this.game.objects.push(coin);
         platform.coinSpawned = true;
     }

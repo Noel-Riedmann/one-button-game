@@ -1,36 +1,15 @@
+import { VirtualGame } from "./objects/Game.js";
+
+
+const virtualGame = new VirtualGame({ "username": "luca", "highscore": 2, "jumps": [0, 147, 359], "seed": 0.43715677674989584 })
+
+
+virtualGame.init();
+Deno.exit();
+
+
 const kv = await Deno.openKv();
 
-// Entschlüsseln eines Integers mit AES-GCM
-async function decryptHighscore(ciphertext, passphrase) {
-  const encoder = new TextEncoder();
-
-  // Erstelle denselben SHA-256-Hash des Passworts
-  const keyMaterial = await crypto.subtle.digest("SHA-256", encoder.encode(passphrase));
-  const key = await crypto.subtle.importKey(
-    "raw",
-    keyMaterial,
-    { name: "AES-GCM" },
-    false,
-    ["decrypt"]
-  );
-
-  // Base64-decodiere den verschlüsselten Text
-  const encryptedBytes = Uint8Array.from(atob(ciphertext), (c) => c.charCodeAt(0));
-
-  // Extrahiere die IV (erste 12 Bytes) und die verschlüsselten Daten
-  const iv = encryptedBytes.slice(0, 12);
-  const encryptedData = encryptedBytes.slice(12);
-
-  // Entschlüssele die Daten
-  const plaintext = await crypto.subtle.decrypt(
-    { name: "AES-GCM", iv }, // GCM mit derselben IV
-    key,
-    encryptedData
-  );
-
-  // Gib den entschlüsselten Integer zurück
-  return new Uint8Array(plaintext)[0];
-}
 
 // Funktion zum Speichern der Spiel-Daten
 const saveGameData = async (request) => {
@@ -50,26 +29,9 @@ const saveGameData = async (request) => {
     );
   }
 
-  const passphrase = "secure_passphrase";
 
-  let decryptedHighscore;
-  try {
-    decryptedHighscore = await decryptHighscore(data.highscore, passphrase);
-  } catch (error) {
-    console.error("Entschlüsselung fehlgeschlagen:", error);
-    return new Response(
-      JSON.stringify({ error: `Failed to decrypt highscore: ${error.message}` }),
-      {
-        status: 500,
-        headers: {
-          "Content-Type": "application/json",
-          "Access-Control-Allow-Origin": "*",
-        },
-      }
-    );
-  }
 
-  if (data.jumps.length < decryptedHighscore) {
+  if (data.jumps.length < data.highscore) {
     return new Response(
       JSON.stringify({ error: "High score is invalid or potentially cheated." }),
       {
@@ -83,12 +45,12 @@ const saveGameData = async (request) => {
   }
 
   const gameData = {
-    highscore: decryptedHighscore,
+    highscore: data.highscore,
     username: data.username,
     jumpTimestamps: data.jumps,
   };
 
-  await kv.set(["gameDataSecure", decryptedHighscore, gameID], gameData);
+  await kv.set(["gameDataSecure", data.highscore, gameID], gameData);
 
   return new Response(JSON.stringify({ response: "ok" }), {
     status: 200,
@@ -137,7 +99,7 @@ const getLeaderboard = async () => {
   }
 };
 
-// Funktion zum Löschen eines Eintrags
+
 const deleteGameData = async (request, id, deleteKey) => {
   const FIXED_SECURITY_KEY = "oweztrzwuie23453623z6asdf34571234241ewrt";
 
