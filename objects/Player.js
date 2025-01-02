@@ -213,35 +213,26 @@ class Player {
         });
     }
 
-    collisionDetectionGround(game) {
-        game.objects.forEach(object => {
-            if (object instanceof Ground) {
-                const ground = object;
+
     
-                const isOnFirstGround = (
-                    this.position.x < ground.x1 + ground.image.width &&
-                    this.position.x + this.width > ground.x1 &&
-                    this.position.y + this.height >= game.canvas.height - ground.image.height
-                );
-    
-                const isOnSecondGround = (
-                    this.position.x < ground.x2 + ground.image.width &&
-                    this.position.x + this.width > ground.x2 &&
-                    this.position.y + this.height >= game.canvas.height - ground.image.height
-                );
-    
-                if (isOnFirstGround || isOnSecondGround) {
-                    this.isOnGround = true;
-                    this.canJump = true; 
-                    this.isJumping = false;
-    
-                    this.position.y = game.canvas.height - ground.image.height - this.height;
-                } else {
-                    this.isOnGround = false;
-                }
+        collisionDetectionGround(game) {
+            const ground = game.objects.find(object => object instanceof Ground);
+            if (!ground) return;
+        
+            const isColliding = ground.checkCollision(this);
+        
+            if (isColliding) {
+                this.isOnGround = true;
+                this.canJump = true;
+                this.isJumping = false;
+        
+                // Spieler auf die Bodenhöhe setzen
+                this.position.y = game.canvas.height - ground.segmentHeight - this.height;
+            } else {
+                this.isOnGround = false;
             }
-        });
-    }
+        }
+    
     
     
 

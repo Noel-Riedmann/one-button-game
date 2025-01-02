@@ -63,7 +63,7 @@ class Game {
             new Enemy(20, this.canvas.width, 0, this.canvas.height, null, 0),
             new Player(),
             new Platform(25, 150, -50, 550, 0),
-            new Ground("./objects/graphics/ground_1200.png", 2, this)
+            new Ground(this.canvas, 3),
         ];
         if (!this.animationFrameID) {
             this.animate();
