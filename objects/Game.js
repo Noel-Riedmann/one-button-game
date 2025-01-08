@@ -156,7 +156,7 @@ class Game {
 
       this.highscore.resetCurrentScore();
       this.jumpTimestamps = [];
-      this.tickCount = 0;
+      // this.tickCount = 0;
 
       const player = this.objects.filter((obj) => obj instanceof Player);
 
@@ -213,7 +213,7 @@ class Game {
     this.platfformanager.resetValues();
     this.coinmanager.deleteMovingCoins();
     this.highscore.update();
-    this.highscore.resetCurrentScore();
+    //this.highscore.resetCurrentScore();
     this.gameStarted = false;
     this.frameCount = 0;
     this.fps = 60;
@@ -235,6 +235,7 @@ class Game {
 
   playerJump() {
     this.jumpTimestamps.push(this.tickCount);
+    console.log("PlayerJumpTickCountfunction: ",this.tickCount);
   }
 
   draw() {
@@ -282,6 +283,7 @@ class Game {
       this.startGame();
     }
     this.seed = this.randomGen.next().value;
+    console.log("TickCount: ", this.tickCount);
   }
 
   animate() {
@@ -295,9 +297,9 @@ class Game {
     while (this.accumulator >= this.timeStep) {
       this.update();
       this.accumulator -= this.timeStep;
-      if (this.gameStarted === true) {
-        this.tickCount++;
-      }
+      // if (this.gameStarted === true) {
+      //   this.tickCount++;
+      // }
     }
 
     this.draw();
@@ -352,23 +354,21 @@ export class VirtualGame extends Game {
   animate(){
     while (!this.gameOver) {
       this.update();
-      if (this.gameStarted === true) {
-        this.tickCount++;
-      }
+      // if (this.gameStarted === true) {
+      //   this.tickCount++;
+      // }
     }
   }
 
-  update() {
-    
+  update() {   
     this.buttonPressed = this.expectedJumps.includes(this.tickCount);
-    console.log(this.tickCount, this.buttonPressed, this.gameStarted);
     if (this.buttonPressed) {
       this.playerJump();
     }
 
     super.update();
 
-    if (this.tickCount > this.expectedJumps[this.expectedJumps.length - 1]) {
+    if (this.tickCount >= this.expectedJumps[this.expectedJumps.length - 1] + 300) {
       this.validateGameState();
     }
     
@@ -385,7 +385,6 @@ export class VirtualGame extends Game {
   }
 
   validateGameState() {
-    console.log(this.jumpTimestamps, this.initialSeed);
     const serverCalculatedHighscore = this.highscore.getCurrentScore();
     if (serverCalculatedHighscore !== this.gameData.highscore) {
       throw new Error(

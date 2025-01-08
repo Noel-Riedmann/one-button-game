@@ -62,6 +62,9 @@ class PlatformManager {
 
         const platform = new Platform(this.height, this.width, positionX, positionY, this.speed, this.game.createImage);
         this.game.objects.push(platform);
+
+        console.log("Platform X, Y, Width, Speed:", platform.position.x, platform.position.y, platform.width, platform.velocity);
+
     }
     
 
