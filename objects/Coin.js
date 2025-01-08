@@ -73,10 +73,8 @@ class Coin {
 
     update(game) {
         this.position.x -= this.velocity;
-        console.log(this.position);
         if (this.position.x + this.width < 0) {
             this.collected = true;
-            console.log("collected");
         }
 
         

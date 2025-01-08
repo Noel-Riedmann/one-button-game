@@ -1,7 +1,7 @@
 import { VirtualGame } from "./objects/Game.js";
 
 
-const virtualGame = new VirtualGame({ "username": "luca", "highscore": 2, "jumps": [0, 147, 359], "seed": 0.43715677674989584 })
+const virtualGame = new VirtualGame({ "username": "luca", "highscore": 2, "jumps": [96], "seed": 0.7462700657385806})
 
 
 virtualGame.init();

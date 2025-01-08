@@ -146,7 +146,9 @@ class Player {
             this.canJump = false;
             this.velocity.y = -15;
             this.isJumping = true;
-        }        
+        }
+        
+        console.log("Player position: " + this.position.x, this.position.y)
     }
 
     collisionDetectionPlatforms(game) {
@@ -164,6 +166,7 @@ class Player {
                 this.position.y = platform.position.y - this.height;
                 this.canJump = true; 
                 this.isJumping = false;
+                console.log("Player Plattform collision");
             }
     
             if (
@@ -174,6 +177,7 @@ class Player {
                 this.velocity.y < 0
             ) {
                 this.velocity.y = 0;
+                console.log("Player Plattform collision");
             }
         });
     }
