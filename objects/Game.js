@@ -39,7 +39,6 @@ class Game {
     this.tickCount = 0;
     this.jumpTimestamps = [];
 
-    this.encoder = new TextEncoder();
 
     this.animate = this.animate.bind(this);
 
@@ -235,7 +234,7 @@ class Game {
 
   playerJump() {
     this.jumpTimestamps.push(this.tickCount);
-    console.log("PlayerJumpTickCountfunction: ",this.tickCount);
+    //console.log("PlayerJumpTickCountfunction: ",this.tickCount);
   }
 
   draw() {
@@ -373,7 +372,8 @@ export class VirtualGame extends Game {
       this.validateGameState();
     }
 
-
+    // console.log("Server Seed:", this.gameData.seed);
+    // console.log("Game Seed:", this.initialSeed);
 
   }
 
