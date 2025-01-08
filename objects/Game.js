@@ -67,11 +67,11 @@ class Game {
 
   createBackgrounds() {
     return [
-    new Background("./objects/graphics/clouds.png", 2),
-    new Background("./objects/graphics/mountains.png", 1),]
+      new Background("./objects/graphics/clouds.png", 2),
+      new Background("./objects/graphics/mountains.png", 1),]
   }
 
-  createImage(){
+  createImage() {
     return new Image();
   }
 
@@ -262,6 +262,7 @@ class Game {
       object.update(this);
 
       if (object instanceof Coin && object.collected) {
+          
         return false;
       }
       return true;
@@ -317,7 +318,7 @@ export default Game;
 
 export class VirtualGame extends Game {
   constructor(gameData) {
-    super(null, ()=> gameData.seed);
+    super(null, () => gameData.seed);
     this.gameData = gameData;
     this.expectedJumps = gameData.jumps;
     this.highscoreValidated = false;
@@ -333,7 +334,7 @@ export class VirtualGame extends Game {
     };
   }
 
-  createImage(){
+  createImage() {
     return {};
   }
 
@@ -341,7 +342,7 @@ export class VirtualGame extends Game {
 
   }
 
-  createBackgrounds(){
+  createBackgrounds() {
     return [];
   }
 
@@ -349,7 +350,7 @@ export class VirtualGame extends Game {
 
   draw() { }
 
-  animate(){
+  animate() {
     while (!this.gameOver) {
       this.update();
       if (this.gameStarted === true) {
@@ -359,9 +360,13 @@ export class VirtualGame extends Game {
   }
 
   update() {
-    
+
     this.buttonPressed = this.expectedJumps.includes(this.tickCount);
-    console.log(this.tickCount, this.buttonPressed, this.gameStarted);
+    console.log("Tick:", this.tickCount);
+    console.log("Expected Jumps:", this.expectedJumps);
+    console.log("Jump Timestamps:", this.jumpTimestamps);
+    console.log("Highscore:", this.highscore.getCurrentScore());
+
     if (this.buttonPressed) {
       this.playerJump();
     }
@@ -371,21 +376,21 @@ export class VirtualGame extends Game {
     if (this.tickCount > this.expectedJumps[this.expectedJumps.length - 1]) {
       this.validateGameState();
     }
-    
-    
+
+
 
   }
 
-  startGame(){
+  startGame() {
     this.gameStarted = true;
   }
 
-  endGame(){
-    
+  endGame() {
+
   }
 
   validateGameState() {
-    console.log(this.jumpTimestamps, this.initialSeed);
+    //console.log(this.jumpTimestamps, this.initialSeed);
     const serverCalculatedHighscore = this.highscore.getCurrentScore();
     if (serverCalculatedHighscore !== this.gameData.highscore) {
       throw new Error(

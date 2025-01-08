@@ -18,7 +18,6 @@ class Player {
         };
         this.gravity = 0.5;
 
-        this.highscore = new Highscore();
         this.gameOver = false;
         this.updateCollisionPoints();
 
@@ -243,8 +242,8 @@ class Player {
 
     checkDead(game) {
         if (game.gameOver) {
-            this.highscore.update();
-            this.highscore.resetCurrentScore();
+            game.highscore.update();
+            game.highscore.resetCurrentScore();
         }
     }
 
