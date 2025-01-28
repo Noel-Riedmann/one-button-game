@@ -14,23 +14,19 @@ class Game {
     this.canvas = canvas;
     this.initialCanvas();
     this.addEventListener();
-    this.platfformanager = new PlatformManager(this);
-    this.coinmanager = new CoinManager(this);
+    
 
 
 
     this.latButtonPressedState = false;
+    this.getSeed = getSeed;
 
     this.lastUpdateTime = performance.now();
     this.accumulator = 0;
     this.timeStep = 1000 / 60;
     this.animationFrameID;
-
     this.highscore = new Highscore();
-    this.generator = new SeedGenerator();
-    this.initialSeed = getSeed();
-    this.randomGen = this.generator.randomNumbers(this.initialSeed);
-    this.seed = this.initialSeed;
+
 
     this.fps = 60;
     this.frameCount = 0;
@@ -77,15 +73,22 @@ class Game {
   init() {
     this.gameOver = false;
     this.gameStarted = false;
+    this.generator = new SeedGenerator();
+    this.initialSeed = this.getSeed();   
+    this.randomGen = this.generator.randomNumbers(this.initialSeed);     
+    this.seed = this.initialSeed;
     this.objects = [
       ...this.createBackgrounds(),
+      new PlatformManager(this),
+      new CoinManager(this),
       new Platform(100, this.canvas.width, 0, this.canvas.height - 100, 0, this.createImage),
       new Coin(32, 48, this.canvas.width, 0, this.canvas.height - 100, this.createImage),
       new Enemy(31, 32, -100, 300, "blue", 5, this.createImage),
       new Enemy(20, this.canvas.width, 0, this.canvas.height, null, 0, this.createImage),
       new Player(this.createImage),
       new Platform(25, 150, -50, 550, 0, this.createImage),
-      new Ground(this.canvas, 3),
+      //new Ground(this.canvas, 3),
+      
     ];
     if (!this.animationFrameID) {
       this.animate();
@@ -152,10 +155,16 @@ class Game {
       if (startText) {
         startText.classList.add("hide");
       }
+      this.generator = new SeedGenerator();
+      this.initialSeed = this.getSeed();   
+      this.randomGen = this.generator.randomNumbers(this.initialSeed);     
+      this.seed = this.initialSeed;
+      //this.initialSeed = 0.4403660297393799//this.seed;
+      //this.seed = 0.4403660297393799;
 
       this.highscore.resetCurrentScore();
-      this.jumpTimestamps = [];
-      // this.tickCount = 0;
+      //this.jumpTimestamps = [];
+      //this.tickCount = 0;
 
       const player = this.objects.filter((obj) => obj instanceof Player);
 
@@ -209,18 +218,22 @@ class Game {
       console.error("Error posting game data:", error);
     }
 
-    this.platfformanager.resetValues();
-    this.coinmanager.deleteMovingCoins();
+    this.objects.forEach((obj)=>{
+      if (obj instanceof PlatformManager) {
+        obj.resetValues();
+      }
+      else if (obj instanceof CoinManager){
+        obj.deleteMovingCoins();
+      }
+      else if (obj instanceof Player){
+        obj.stopAnimation();
+      }
+    })
     this.highscore.update();
     //this.highscore.resetCurrentScore();
     this.gameStarted = false;
     this.frameCount = 0;
     this.fps = 60;
-
-    const player = this.objects.filter((obj) => obj instanceof Player);
-    player.forEach((player) => {
-      player.stopAnimation();
-    });
     console.log("spiel vorbei");
   }
 
@@ -258,32 +271,33 @@ class Game {
   }
 
   update() {
-    this.objects = this.objects.filter((object) => {
-      object.update(this);
-
+    this.objects.forEach((object) => {
+      object.update(this);})
+      this.objects = this.objects.filter((object)=>{
+  
       if (object instanceof Coin && object.collected) {
           
         return false;
       }
       return true;
-    });
+    });    
 
     this.tickCount++;
-
-    this.platfformanager.update();
-    this.coinmanager.update();
 
     if (this.gameOver === true) {
       cancelAnimationFrame(this.animationFrameID);
       this.init();
       this.tickCount = 0;
     }
-
+    this.buttonPressed = [436, 526, 623, 721].includes(this.tickCount);
     if (this.gameStarted === false && this.buttonPressed === true) {
       this.startGame();
     }
     this.seed = this.randomGen.next().value;
-    console.log("TickCount: ", this.tickCount);
+    if (this.tickCount < 25) {
+      console.log("TickCount: ", this.tickCount, "Seed:",this.seed);
+    };
+    
   }
 
   animate() {
@@ -292,7 +306,7 @@ class Game {
     this.lastUpdateTime = now;
     this.accumulator += deltaTime;
 
-    this.calculateFPS(now);
+    //this.calculateFPS(now);
 
     while (this.accumulator >= this.timeStep) {
       this.update();

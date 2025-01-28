@@ -8,7 +8,7 @@ function init() {
     window.location.href = "username.html"
   }
 
-  game = new Game(canvas);
+  game = new Game(canvas, ()=>0.4403660297393799);
   game.init()
 }
 

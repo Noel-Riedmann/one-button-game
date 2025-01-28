@@ -83,6 +83,7 @@ class PlatformManager {
         if (needNewPlatform) {
             this.createPlatform();
         }
+        console.log("platform platform platform")
 
         this.game.objects = this.game.objects.filter(object => {
             if (object instanceof Platform) {
@@ -95,6 +96,10 @@ class PlatformManager {
             }
             return true;
         });
+    }
+
+    draw(){
+
     }
 
     deleteMovingPlatforms(){

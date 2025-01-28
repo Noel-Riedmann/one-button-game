@@ -41,6 +41,9 @@ class CoinManager {
             }
         });
     }
+    draw(){
+        
+    }
 }
 
 export default CoinManager;
