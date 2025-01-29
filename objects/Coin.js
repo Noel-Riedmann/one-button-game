@@ -75,9 +75,7 @@ class Coin {
         this.position.x -= this.velocity;
         if (this.position.x + this.width < 0) {
             this.collected = true;
-        }
-
-        
+        }        
     };
 }
 

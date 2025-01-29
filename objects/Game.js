@@ -14,9 +14,6 @@ class Game {
     this.canvas = canvas;
     this.initialCanvas();
     this.addEventListener();
-    
-
-
 
     this.latButtonPressedState = false;
     this.getSeed = getSeed;
@@ -27,7 +24,6 @@ class Game {
     this.animationFrameID;
     this.highscore = new Highscore();
 
-
     this.fps = 60;
     this.frameCount = 0;
     this.lastFPSUpdate = performance.now();
@@ -35,10 +31,7 @@ class Game {
     this.tickCount = 0;
     this.jumpTimestamps = [];
 
-
     this.animate = this.animate.bind(this);
-
-
   }
 
   addEventListener() {
@@ -47,8 +40,6 @@ class Game {
     document.addEventListener("touchstart", this.onTouchStart);
     document.addEventListener("touchend", this.onTouchEnd);
   }
-
-
 
   initialCanvas() {
     this.canvas.width = 1200;
@@ -63,7 +54,8 @@ class Game {
   createBackgrounds() {
     return [
       new Background("./objects/graphics/clouds.png", 2),
-      new Background("./objects/graphics/mountains.png", 1),]
+      new Background("./objects/graphics/mountains.png", 1),
+    ];
   }
 
   createImage() {
@@ -74,21 +66,42 @@ class Game {
     this.gameOver = false;
     this.gameStarted = false;
     this.generator = new SeedGenerator();
-    this.initialSeed = this.getSeed();   
-    this.randomGen = this.generator.randomNumbers(this.initialSeed);     
+    this.initialSeed = this.getSeed();
+    this.randomGen = this.generator.randomNumbers(this.initialSeed);
     this.seed = this.initialSeed;
     this.objects = [
       ...this.createBackgrounds(),
       new PlatformManager(this),
       new CoinManager(this),
-      new Platform(100, this.canvas.width, 0, this.canvas.height - 100, 0, this.createImage),
-      new Coin(32, 48, this.canvas.width, 0, this.canvas.height - 100, this.createImage),
+      new Platform(
+        100,
+        this.canvas.width,
+        0,
+        this.canvas.height - 100,
+        0,
+        this.createImage
+      ),
+      new Coin(
+        32,
+        48,
+        this.canvas.width,
+        0,
+        this.canvas.height - 100,
+        this.createImage
+      ),
       new Enemy(31, 32, -100, 300, "blue", 5, this.createImage),
-      new Enemy(20, this.canvas.width, 0, this.canvas.height, null, 0, this.createImage),
+      new Enemy(
+        20,
+        this.canvas.width,
+        0,
+        this.canvas.height,
+        null,
+        0,
+        this.createImage
+      ),
       new Player(this.createImage),
       new Platform(25, 150, -50, 550, 0, this.createImage),
       //new Ground(this.canvas, 3),
-      
     ];
     if (!this.animationFrameID) {
       this.animate();
@@ -156,8 +169,8 @@ class Game {
         startText.classList.add("hide");
       }
       this.generator = new SeedGenerator();
-      this.initialSeed = this.getSeed();   
-      this.randomGen = this.generator.randomNumbers(this.initialSeed);     
+      this.initialSeed = this.getSeed();
+      this.randomGen = this.generator.randomNumbers(this.initialSeed);
       this.seed = this.initialSeed;
       //this.initialSeed = 0.4403660297393799//this.seed;
       //this.seed = 0.4403660297393799;
@@ -174,9 +187,6 @@ class Game {
     }
   }
 
-
-
-
   async endGame() {
     const overlay = document.getElementById("overlay");
     overlay.classList.add("death");
@@ -184,14 +194,12 @@ class Game {
       overlay.classList.remove("death");
     }, 150);
 
-
     const gameData = {
       username: localStorage.getItem("username"),
       highscore: this.highscore.getCurrentScore(),
       jumps: this.jumpTimestamps,
       seed: this.initialSeed,
     };
-
 
     try {
       const response = await fetch(
@@ -218,23 +226,20 @@ class Game {
       console.error("Error posting game data:", error);
     }
 
-    this.objects.forEach((obj)=>{
+    this.objects.forEach((obj) => {
       if (obj instanceof PlatformManager) {
         obj.resetValues();
-      }
-      else if (obj instanceof CoinManager){
+      } else if (obj instanceof CoinManager) {
         obj.deleteMovingCoins();
-      }
-      else if (obj instanceof Player){
+      } else if (obj instanceof Player) {
         obj.stopAnimation();
       }
-    })
+    });
     this.highscore.update();
     //this.highscore.resetCurrentScore();
     this.gameStarted = false;
     this.frameCount = 0;
     this.fps = 60;
-    console.log("spiel vorbei");
   }
 
   getGamestate() {
@@ -272,16 +277,15 @@ class Game {
 
   update() {
     this.objects.forEach((object) => {
-      object.update(this);})
-      this.objects = this.objects.filter((object)=>{
-  
+      object.update(this);
+    });
+    this.objects = this.objects.filter((object) => {
       if (object instanceof Coin && object.collected) {
-          
         return false;
       }
       return true;
-    });    
-
+    });
+    this.seed = this.randomGen.next().value;
     this.tickCount++;
 
     if (this.gameOver === true) {
@@ -289,15 +293,10 @@ class Game {
       this.init();
       this.tickCount = 0;
     }
-    this.buttonPressed = [436, 526, 623, 721].includes(this.tickCount);
+    //this.buttonPressed = [52, 145, 241].includes(this.tickCount);
     if (this.gameStarted === false && this.buttonPressed === true) {
       this.startGame();
     }
-    this.seed = this.randomGen.next().value;
-    if (this.tickCount < 25) {
-      console.log("TickCount: ", this.tickCount, "Seed:",this.seed);
-    };
-    
   }
 
   animate() {
@@ -337,7 +336,6 @@ export class VirtualGame extends Game {
     this.gameData = gameData;
     this.expectedJumps = gameData.jumps;
     this.highscoreValidated = false;
-
     this.init();
     this.gameStarted = true;
   }
@@ -353,51 +351,56 @@ export class VirtualGame extends Game {
     return {};
   }
 
-  addEventListener() {
-
-  }
+  addEventListener() {}
 
   createBackgrounds() {
     return [];
   }
 
-  calculateFPS() { }
+  calculateFPS() {}
 
-  draw() { }
+  draw() {}
 
   animate() {
+    const timeStep = 1000 / 60;
+    let lastUpdate = Date.now();
+
     while (!this.gameOver) {
-      this.update();
-      // if (this.gameStarted === true) {
-      //   this.tickCount++;
-      // }
+      const now = Date.now();
+      const delta = now - lastUpdate;
+
+      if (delta >= timeStep) {
+        this.update();
+        lastUpdate = now;
+      }
     }
   }
 
-  update() {   
+  update() {
     this.buttonPressed = this.expectedJumps.includes(this.tickCount);
     if (this.buttonPressed) {
       this.playerJump();
     }
-
     super.update();
 
-    if (this.tickCount >= this.expectedJumps[this.expectedJumps.length - 1] + 300) {
+    if (this.tickCount >= this.expectedJumps[this.expectedJumps.length - 1] + 200) {
       this.validateGameState();
     }
 
     // console.log("Server Seed:", this.gameData.seed);
     // console.log("Game Seed:", this.initialSeed);
-
   }
 
   startGame() {
     this.gameStarted = true;
+    this.generator = new SeedGenerator();
+    this.initialSeed = this.gameData.seed
+    this.randomGen = this.generator.randomNumbers(this.initialSeed);
+    this.seed = this.initialSeed;
+    this.randomGen.next();
   }
 
-  endGame() {
-
-  }
+  endGame() {}
 
   validateGameState() {
     const serverCalculatedHighscore = this.highscore.getCurrentScore();

@@ -1,17 +1,7 @@
 import { VirtualGame } from "./objects/Game.js";
 
-
-const virtualGame = new VirtualGame({ "username": "luca", "highscore": 3, "jumps": [0, 119, 238, 327, 416, 446, 448], "seed": 0.12738706846363113})
-
-
-virtualGame.init();
-Deno.exit();
-
-
 const kv = await Deno.openKv();
 
-
-// Funktion zum Speichern der Spiel-Daten
 const saveGameData = async (request) => {
   const data = await request.json();
   const gameID = crypto.randomUUID();
@@ -29,8 +19,6 @@ const saveGameData = async (request) => {
     );
   }
 
-
-
   if (data.jumps.length < data.highscore) {
     return new Response(
       JSON.stringify({ error: "High score is invalid or potentially cheated." }),
@@ -43,6 +31,9 @@ const saveGameData = async (request) => {
       }
     );
   }
+
+  const virtualGame = new VirtualGame(data);
+  virtualGame.init();
 
   const gameData = {
     highscore: data.highscore,
@@ -61,13 +52,12 @@ const saveGameData = async (request) => {
   });
 };
 
-// Funktion zum Abrufen des Leaderboards
 const getLeaderboard = async () => {
   try {
     const leaderboardEntries = [];
 
     for await (const entry of kv.list(
-      { prefix: ["gameDataSecure"] }, // Anpassung: "gameDataSecure" statt "gameData"
+      { prefix: ["gameDataSecure"] },
       { limit: 10, reverse: true }
     )) {
       const { username, highscore } = entry.value;
@@ -99,7 +89,6 @@ const getLeaderboard = async () => {
   }
 };
 
-
 const deleteGameData = async (request, id, deleteKey) => {
   const FIXED_SECURITY_KEY = "oweztrzwuie23453623z6asdf34571234241ewrt";
 
@@ -113,7 +102,7 @@ const deleteGameData = async (request, id, deleteKey) => {
   }
 
   try {
-    for await (const entry of kv.list({ prefix: ["gameDataSecure"] })) { // Anpassung: "gameDataSecure"
+    for await (const entry of kv.list({ prefix: ["gameDataSecure"] })) {
       if (entry.key[2] === id) {
         await kv.delete(entry.key);
         return new Response("Deleted successfully", {
@@ -141,7 +130,6 @@ const deleteGameData = async (request, id, deleteKey) => {
   }
 };
 
-// Haupt-Handler für die API
 const handler = async (request) => {
   const url = new URL(request.url);
   const segments = url.pathname.split("/");
@@ -158,10 +146,7 @@ const handler = async (request) => {
 
   switch (url.pathname) {
     case "/api/leaderboard":
-      return request.method === "POST"
-        ? saveGameData(request)
-        : getLeaderboard();
-
+      return request.method === "POST" ? saveGameData(request) : getLeaderboard();
     default:
       if (
         request.method === "DELETE" &&
@@ -180,5 +165,4 @@ const handler = async (request) => {
   }
 };
 
-// Server starten
 Deno.serve(handler);
