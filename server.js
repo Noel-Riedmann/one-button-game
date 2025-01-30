@@ -20,7 +20,8 @@ const saveGameData = async (request) => {
   return new Response(JSON.stringify({ response: "ok" }), {
     status: 200,
     headers: {
-      "Access-Control-Allow-Origin": "https://noel-riedmann.github.io",
+      "Content-Type": "application/json",
+      "Access-Control-Allow-Origin": "*",
       "Access-Control-Allow-Methods": "GET, POST, DELETE, OPTIONS",
       "Access-Control-Allow-Headers": "Content-Type"
     },
@@ -44,7 +45,8 @@ const getLeaderboard = async () => {
     return new Response(JSON.stringify(leaderboardEntries), {
       status: 200,
       headers: {
-        "Access-Control-Allow-Origin": "https://noel-riedmann.github.io",
+        "Content-Type": "application/json",
+        "Access-Control-Allow-Origin": "*",
         "Access-Control-Allow-Methods": "GET, POST, DELETE, OPTIONS",
         "Access-Control-Allow-Headers": "Content-Type"
       },
@@ -57,7 +59,8 @@ const getLeaderboard = async () => {
       {
         status: 500,
         headers: {
-          "Access-Control-Allow-Origin": "https://noel-riedmann.github.io",
+          "Content-Type": "application/json",
+          "Access-Control-Allow-Origin": "*",
           "Access-Control-Allow-Methods": "GET, POST, DELETE, OPTIONS",
           "Access-Control-Allow-Headers": "Content-Type"
         },
@@ -73,7 +76,8 @@ const deleteGameData = async (request, id, deleteKey) => {
     return new Response("Invalid security key", {
       status: 403,
       headers: {
-        "Access-Control-Allow-Origin": "https://noel-riedmann.github.io",
+        "Content-Type": "application/json",
+        "Access-Control-Allow-Origin": "*",
         "Access-Control-Allow-Methods": "GET, POST, DELETE, OPTIONS",
         "Access-Control-Allow-Headers": "Content-Type"
       },
@@ -87,7 +91,8 @@ const deleteGameData = async (request, id, deleteKey) => {
         return new Response("Deleted successfully", {
           status: 200,
           headers: {
-            "Access-Control-Allow-Origin": "https://noel-riedmann.github.io",
+            "Content-Type": "application/json",
+            "Access-Control-Allow-Origin": "*",
             "Access-Control-Allow-Methods": "GET, POST, DELETE, OPTIONS",
             "Access-Control-Allow-Headers": "Content-Type"
           },
@@ -98,7 +103,8 @@ const deleteGameData = async (request, id, deleteKey) => {
     return new Response("Entry not found", {
       status: 404,
       headers: {
-        "Access-Control-Allow-Origin": "https://noel-riedmann.github.io",
+        "Content-Type": "application/json",
+        "Access-Control-Allow-Origin": "*",
         "Access-Control-Allow-Methods": "GET, POST, DELETE, OPTIONS",
         "Access-Control-Allow-Headers": "Content-Type"
       },
@@ -107,7 +113,8 @@ const deleteGameData = async (request, id, deleteKey) => {
     return new Response("Error deleting entry", {
       status: 500,
       headers: {
-        "Access-Control-Allow-Origin": "https://noel-riedmann.github.io",
+        "Content-Type": "application/json",
+        "Access-Control-Allow-Origin": "*",
         "Access-Control-Allow-Methods": "GET, POST, DELETE, OPTIONS",
         "Access-Control-Allow-Headers": "Content-Type"
       },
@@ -122,7 +129,8 @@ const handler = async (request) => {
   if (request.method === "OPTIONS") {
     return new Response(null, {
       headers: {
-        "Access-Control-Allow-Origin": "https://noel-riedmann.github.io",
+        "Content-Type": "application/json",
+        "Access-Control-Allow-Origin": "*",
         "Access-Control-Allow-Methods": "GET, POST, DELETE, OPTIONS",
         "Access-Control-Allow-Headers": "Content-Type"
       },
@@ -144,7 +152,8 @@ const handler = async (request) => {
       return new Response("Endpoint not found", {
         status: 404,
         headers: {
-          "Access-Control-Allow-Origin": "https://noel-riedmann.github.io",
+          "Content-Type": "application/json",
+          "Access-Control-Allow-Origin": "*",
           "Access-Control-Allow-Methods": "GET, POST, DELETE, OPTIONS",
           "Access-Control-Allow-Headers": "Content-Type"
         },
