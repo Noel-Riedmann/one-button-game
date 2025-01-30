@@ -128,6 +128,7 @@ const handler = async (request) => {
 
   if (request.method === "OPTIONS") {
     return new Response(null, {
+      status: 204,
       headers: {
         "Content-Type": "application/json",
         "Access-Control-Allow-Origin": "*",

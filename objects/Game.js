@@ -206,6 +206,7 @@ class Game {
         "https://lovelyleap-onebutton.deno.dev/api/leaderboard",
         {
           method: "POST",
+          mode: "cors",
           headers: {
             "Content-Type": "application/json",
           },
