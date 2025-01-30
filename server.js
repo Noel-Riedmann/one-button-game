@@ -4,33 +4,7 @@ const kv = await Deno.openKv();
 
 const saveGameData = async (request) => {
   const data = await request.json();
-  const gameID = crypto.randomUUID();
-
-  if (!data.highscore || !data.username || !Array.isArray(data.jumps)) {
-    return new Response(
-      JSON.stringify({ error: "Missing or invalid fields in the data." }),
-      {
-        status: 400,
-        headers: {
-          "Content-Type": "application/json",
-          "Access-Control-Allow-Origin": "*",
-        },
-      }
-    );
-  }
-
-  if (data.jumps.length < data.highscore) {
-    return new Response(
-      JSON.stringify({ error: "High score is invalid or potentially cheated." }),
-      {
-        status: 400,
-        headers: {
-          "Content-Type": "application/json",
-          "Access-Control-Allow-Origin": "*",
-        },
-      }
-    );
-  }
+  const gameID = crypto.randomUUID();  
 
   const virtualGame = new VirtualGame(data);
   virtualGame.init();
