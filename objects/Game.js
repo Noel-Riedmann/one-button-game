@@ -193,40 +193,41 @@ class Game {
     setTimeout(() => {
       overlay.classList.remove("death");
     }, 150);
-
+  
     const gameData = {
       username: localStorage.getItem("username"),
       highscore: this.highscore.getCurrentScore(),
       jumps: this.jumpTimestamps,
       seed: this.initialSeed,
     };
-
+  
     try {
       const response = await fetch(
         "https://lovelyleap-onebutton.deno.dev/api/leaderboard",
         {
           method: "POST",
-          mode: "cors",
           headers: {
             "Content-Type": "application/json",
           },
           body: JSON.stringify(gameData),
         }
       );
-
+  
+      // Logge die Fehlerantworten detailliert, falls der Request fehlschlägt
       if (response.ok) {
         console.log("Game data successfully posted.");
       } else {
+        // Detailliertere Fehlerausgabe
+        const errorData = await response.json();
         console.error(
-          "Failed to post game data:",
-          response.status,
-          response.statusText
+          `Failed to post game data: ${response.status} ${response.statusText}`,
+          errorData
         );
       }
     } catch (error) {
       console.error("Error posting game data:", error);
     }
-
+  
     this.objects.forEach((obj) => {
       if (obj instanceof PlatformManager) {
         obj.resetValues();
@@ -237,11 +238,11 @@ class Game {
       }
     });
     this.highscore.update();
-    //this.highscore.resetCurrentScore();
     this.gameStarted = false;
     this.frameCount = 0;
     this.fps = 60;
   }
+  
 
   getGamestate() {
     return this.gameStarted;
