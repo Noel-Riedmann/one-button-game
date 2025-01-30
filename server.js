@@ -3,30 +3,58 @@ import { VirtualGame } from "./objects/Game.js";
 const kv = await Deno.openKv();
 
 const saveGameData = async (request) => {
-  const data = await request.json();
-  const gameID = crypto.randomUUID();  
+  try {
+    const data = await request.json();
+    
+    const virtualGame = new VirtualGame(data);
+    
+    // Falls der Anti-Cheat fehlschlägt, fange den Fehler ab
+    try {
+      virtualGame.init();
+    } catch (error) {
+      return new Response(JSON.stringify({ error: "Anti-Cheat validation failed" }), {
+        status: 403,
+        headers: {
+          "Content-Type": "application/json",
+          "Access-Control-Allow-Origin": "*",  
+          "Access-Control-Allow-Methods": "GET, POST, DELETE, OPTIONS",
+          "Access-Control-Allow-Headers": "Content-Type",
+        },
+      });
+    }
 
-  const virtualGame = new VirtualGame(data);
-  virtualGame.init();
+    // Falls der Spieler bestanden hat → Daten speichern
+    const gameID = crypto.randomUUID();  
+    const gameData = {
+      highscore: data.highscore,
+      username: data.username,
+      jumpTimestamps: data.jumps,
+    };
 
-  const gameData = {
-    highscore: data.highscore,
-    username: data.username,
-    jumpTimestamps: data.jumps,
-  };
+    await kv.set(["gameDataSecure", data.highscore, gameID], gameData);
 
-  await kv.set(["gameDataSecure", data.highscore, gameID], gameData);
-
-  return new Response(JSON.stringify({ response: "ok" }), {
-    status: 200,
-    headers: {
-      "Content-Type": "application/json",
-      "Access-Control-Allow-Origin": "*",
-      "Access-Control-Allow-Methods": "GET, POST, DELETE, OPTIONS",
-      "Access-Control-Allow-Headers": "Content-Type"
-    },
-  });
+    return new Response(JSON.stringify({ response: "ok" }), {
+      status: 200,
+      headers: {
+        "Content-Type": "application/json",
+        "Access-Control-Allow-Origin": "*",  
+        "Access-Control-Allow-Methods": "GET, POST, DELETE, OPTIONS",
+        "Access-Control-Allow-Headers": "Content-Type",
+      },
+    });
+  } catch (error) {
+    return new Response(JSON.stringify({ error: "Internal Server Error", details: error.message }), {
+      status: 500,
+      headers: {
+        "Content-Type": "application/json",
+        "Access-Control-Allow-Origin": "*",  
+        "Access-Control-Allow-Methods": "GET, POST, DELETE, OPTIONS",
+        "Access-Control-Allow-Headers": "Content-Type",
+      },
+    });
+  }
 };
+
 
 const getLeaderboard = async () => {
   try {
@@ -130,7 +158,6 @@ const handler = async (request) => {
     return new Response(null, {
       status: 204,
       headers: {
-        "Content-Type": "application/json",
         "Access-Control-Allow-Origin": "*",
         "Access-Control-Allow-Methods": "GET, POST, DELETE, OPTIONS",
         "Access-Control-Allow-Headers": "Content-Type"
