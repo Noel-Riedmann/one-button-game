@@ -5,12 +5,14 @@ const kv = await Deno.openKv();
 const saveGameData = async (request) => {
   try {
     const data = await request.json();
-    
+    console.log("Empfangene Daten:", data);
     const virtualGame = new VirtualGame(data);
     
     // Falls der Anti-Cheat fehlschlägt, fange den Fehler ab
     try {
+      console.log("Empfangene Daten Davor:", data);
       virtualGame.init();
+      console.log("Empfangene Daten Virtual Game:", data);
     } catch (error) {
       return new Response(JSON.stringify({ error: "Anti-Cheat validation failed" }), {
         status: 403,
@@ -22,7 +24,7 @@ const saveGameData = async (request) => {
         },
       });
     }
-    console.log("Empfangene Daten:", data);
+    
 
     // Falls der Spieler bestanden hat → Daten speichern
     const gameID = crypto.randomUUID();  
