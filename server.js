@@ -6,13 +6,18 @@ const saveGameData = async (request) => {
   try {
     const data = await request.json();
     console.log("Empfangene Daten:", data);
+    if (!data || typeof data !== "object") {
+      throw new Error("Datenformat ungültig oder leer!");
+    }
+    console.log("Erstelle VirtualGame...");
     const virtualGame = new VirtualGame(data);
+    console.log("VirtualGame erfolgreich erstellt!");
     
     // Falls der Anti-Cheat fehlschlägt, fange den Fehler ab
     try {
-      console.log("Empfangene Daten Davor:", data);
+      console.log("Starte antiCheat");
       virtualGame.init();
-      console.log("Empfangene Daten Virtual Game:", data);
+      console.log("Anti Cheat bestanden");
     } catch (error) {
       return new Response(JSON.stringify({ error: "Anti-Cheat validation failed" }), {
         status: 403,
