@@ -5,7 +5,6 @@ const kv = await Deno.openKv();
 const saveGameData = async (request) => {
   try {
     const data = await request.json();
-    console.log("Empfangene Daten:", data);
     
     const virtualGame = new VirtualGame(data);
     
@@ -23,6 +22,7 @@ const saveGameData = async (request) => {
         },
       });
     }
+    console.log("Empfangene Daten:", data);
 
     // Falls der Spieler bestanden hat → Daten speichern
     const gameID = crypto.randomUUID();  
