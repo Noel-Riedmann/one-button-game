@@ -335,10 +335,25 @@ export default Game;
 export class VirtualGame extends Game {
   constructor(gameData) {
     super(null, () => gameData.seed);
+    
+    // Logge gameData und überprüfe, ob alle benötigten Felder vorhanden sind
+    console.log("GameData im Konstruktor:", gameData);
+    
+    if (!gameData || !gameData.jumps || !gameData.highscore || !gameData.seed) {
+      throw new Error("Fehlende oder ungültige Daten im gameData.");
+    }
+
     this.gameData = gameData;
     this.expectedJumps = gameData.jumps;
     this.highscoreValidated = false;
-    this.init();
+    
+    try {
+      this.init();  // Init-Methodenaufruf
+    } catch (error) {
+      console.error("Fehler bei init():", error);
+      throw new Error("Fehler bei der Initialisierung des Spiels.");
+    }
+
     this.gameStarted = true;
   }
 
