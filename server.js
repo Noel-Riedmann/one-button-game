@@ -5,6 +5,7 @@ const kv = await Deno.openKv();
 const saveGameData = async (request) => {
   try {
     const data = await request.json();
+    console.log("Empfangene Daten:", data);
     
     const virtualGame = new VirtualGame(data);
     
