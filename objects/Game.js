@@ -195,7 +195,7 @@ class Game {
     }, 150);
   
     const gameData = {
-      username: localStorage.getItem("username"),
+      username: localStorage.getItem("username") || "nameNotFound",
       highscore: this.highscore.getCurrentScore(),
       jumps: this.jumpTimestamps,
       seed: this.initialSeed,
