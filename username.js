@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
     const usernameInput = document.getElementById('usernameInput');
-    const savedUsername = localStorage.getItem('username');
+    //const savedUsername = localStorage.getItem('username');
     
     if (savedUsername) {
         usernameInput.value = savedUsername;
@@ -13,7 +13,7 @@ document.addEventListener('DOMContentLoaded', () => {
         
         const username = usernameInput.value;
         if (username) {
-            localStorage.setItem('username', username);
+            //localStorage.setItem('username', username);
             window.location.href = 'index.html';
         }
     });
