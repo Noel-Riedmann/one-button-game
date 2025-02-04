@@ -5,11 +5,11 @@ const kv = await Deno.openKv();
 const saveGameData = async (request) => {
   try {
     const data = await request.json();
-    console.log("Empfangene Daten:", data);
+    console.log("Raw input data:", JSON.stringify(data, null, 2));
     if (!data || typeof data !== "object") {
       throw new Error("Datenformat ungültig oder leer!");
     }
-    console.log("Erstelle VirtualGame...");
+    console.log("Creating VirtualGame with seed:", data.seed);
     const virtualGame = new VirtualGame(data);
     console.log("VirtualGame erfolgreich erstellt!");
     
@@ -23,7 +23,7 @@ const saveGameData = async (request) => {
         status: 403,
         headers: {
           "Content-Type": "application/json",
-          "Access-Control-Allow-Origin": "*",  
+          "Access-Control-Allow-Origin": "https://noel-riedmann.github.io",  
           "Access-Control-Allow-Methods": "GET, POST, DELETE, OPTIONS",
           "Access-Control-Allow-Headers": "Content-Type",
         },
@@ -45,7 +45,7 @@ const saveGameData = async (request) => {
       status: 200,
       headers: {
         "Content-Type": "application/json",
-        "Access-Control-Allow-Origin": "*",  
+        "Access-Control-Allow-Origin": "https://noel-riedmann.github.io",  
         "Access-Control-Allow-Methods": "GET, POST, DELETE, OPTIONS",
         "Access-Control-Allow-Headers": "Content-Type",
       },
@@ -55,7 +55,7 @@ const saveGameData = async (request) => {
       status: 500,
       headers: {
         "Content-Type": "application/json",
-        "Access-Control-Allow-Origin": "*",  
+        "Access-Control-Allow-Origin": "https://noel-riedmann.github.io",  
         "Access-Control-Allow-Methods": "GET, POST, DELETE, OPTIONS",
         "Access-Control-Allow-Headers": "Content-Type",
       },
@@ -82,7 +82,7 @@ const getLeaderboard = async () => {
       status: 200,
       headers: {
         "Content-Type": "application/json",
-        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Origin": "https://noel-riedmann.github.io",
         "Access-Control-Allow-Methods": "GET, POST, DELETE, OPTIONS",
         "Access-Control-Allow-Headers": "Content-Type"
       },
@@ -96,7 +96,7 @@ const getLeaderboard = async () => {
         status: 500,
         headers: {
           "Content-Type": "application/json",
-          "Access-Control-Allow-Origin": "*",
+          "Access-Control-Allow-Origin": "https://noel-riedmann.github.io",
           "Access-Control-Allow-Methods": "GET, POST, DELETE, OPTIONS",
           "Access-Control-Allow-Headers": "Content-Type"
         },
@@ -113,7 +113,7 @@ const deleteGameData = async (request, id, deleteKey) => {
       status: 403,
       headers: {
         "Content-Type": "application/json",
-        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Origin": "https://noel-riedmann.github.io",
         "Access-Control-Allow-Methods": "GET, POST, DELETE, OPTIONS",
         "Access-Control-Allow-Headers": "Content-Type"
       },
@@ -128,7 +128,7 @@ const deleteGameData = async (request, id, deleteKey) => {
           status: 200,
           headers: {
             "Content-Type": "application/json",
-            "Access-Control-Allow-Origin": "*",
+            "Access-Control-Allow-Origin": "https://noel-riedmann.github.io",
             "Access-Control-Allow-Methods": "GET, POST, DELETE, OPTIONS",
             "Access-Control-Allow-Headers": "Content-Type"
           },
@@ -140,7 +140,7 @@ const deleteGameData = async (request, id, deleteKey) => {
       status: 404,
       headers: {
         "Content-Type": "application/json",
-        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Origin": "https://noel-riedmann.github.io",
         "Access-Control-Allow-Methods": "GET, POST, DELETE, OPTIONS",
         "Access-Control-Allow-Headers": "Content-Type"
       },
@@ -150,7 +150,7 @@ const deleteGameData = async (request, id, deleteKey) => {
       status: 500,
       headers: {
         "Content-Type": "application/json",
-        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Origin": "https://noel-riedmann.github.io",
         "Access-Control-Allow-Methods": "GET, POST, DELETE, OPTIONS",
         "Access-Control-Allow-Headers": "Content-Type"
       },
@@ -166,7 +166,7 @@ const handler = async (request) => {
     return new Response(null, {
       status: 204,
       headers: {
-        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Origin": "https://noel-riedmann.github.io",
         "Access-Control-Allow-Methods": "GET, POST, DELETE, OPTIONS",
         "Access-Control-Allow-Headers": "Content-Type"
       },
@@ -189,7 +189,7 @@ const handler = async (request) => {
         status: 404,
         headers: {
           "Content-Type": "application/json",
-          "Access-Control-Allow-Origin": "*",
+          "Access-Control-Allow-Origin": "https://noel-riedmann.github.io",
           "Access-Control-Allow-Methods": "GET, POST, DELETE, OPTIONS",
           "Access-Control-Allow-Headers": "Content-Type"
         },
