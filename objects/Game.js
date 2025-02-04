@@ -334,6 +334,7 @@ export default Game;
 
 export class VirtualGame extends Game {
   constructor(gameData) {
+    console.log("VirtualGame-Konstruktor aufgerufen mit:", gameData);
     super(null, () => gameData.seed);
     
     // Logge gameData und überprüfe, ob alle benötigten Felder vorhanden sind
