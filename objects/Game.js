@@ -163,7 +163,7 @@ class Game {
   startGame() {
     if (!this.gameStarted) {
       this.gameStarted = true;
-      localStorage.setItem("gameSeed", this.seed);
+      //localStorage.setItem("gameSeed", this.seed);
       const startText = document.getElementById("startText");
       if (startText) {
         startText.classList.add("hide");
@@ -195,7 +195,7 @@ class Game {
     }, 150);
   
     const gameData = {
-      username: typeof localStorage !== "undefined" ? localStorage.getItem("username") : "defaultUsername", 
+      username: "defaultUsername", 
       highscore: this.highscore.getCurrentScore(),
       jumps: this.jumpTimestamps,
       seed: this.initialSeed,

@@ -1,13 +1,14 @@
 class Highscore {
     constructor() {
-        this.highScore = parseInt(localStorage.getItem('highScore')) || 0;
+        this.highScore =  3;
+        //parseInt(localStorage.getItem('highScore'))
         this.currentScore = 0;
     }
 
     update() {
         if (this.currentScore > this.highScore) {
             this.highScore = this.currentScore;
-            localStorage.setItem('highScore', this.highScore);
+            //localStorage.setItem('highScore', this.highScore);
         }
     }
 
