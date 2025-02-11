@@ -290,15 +290,11 @@ class Game {
       this.init();
       this.tickCount = 0;
     }
-    this.buttonPressed = [436, 526, 623, 721].includes(this.tickCount);
+    //this.buttonPressed = [436, 526, 623, 721].includes(this.tickCount);
     if (this.gameStarted === false && this.buttonPressed === true) {
       this.startGame();
     }
     this.seed = this.randomGen.next().value;
-    if (this.tickCount < 25) {
-      console.log("TickCount: ", this.tickCount, "Seed:", this.seed);
-    };
-
   }
 
   animate() {
