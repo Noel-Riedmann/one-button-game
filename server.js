@@ -4,6 +4,9 @@ const kv = await Deno.openKv();
 
 const saveGameData = async (request) => {
   try {
+    console.log("saveGameData gestartet");
+    console.log("Request-Method:", request.method);
+    console.log("Header:", JSON.stringify([...request.headers], null, 2));
     const data = await request.json();
     console.log("Raw input data:", JSON.stringify(data, null, 2));
     if (!data || typeof data !== "object") {
