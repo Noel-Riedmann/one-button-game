@@ -14,8 +14,8 @@ const saveGameData = async (request) => {
     console.log("VirtualGame erfolgreich erstellt!");
     
     // Falls der Anti-Cheat fehlschlägt, fange den Fehler ab
-    try {
-      console.log("Starte antiCheat");
+    console.log("Starte antiCheat");
+    try {      
       virtualGame.init();
       console.log("Anti Cheat bestanden");
     } catch (error) {
