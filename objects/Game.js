@@ -386,11 +386,7 @@ export class VirtualGame extends Game {
       // if (this.gameStarted === true) {
       //   this.tickCount++;
       // }
-      if (this.tickCount >= this.expectedJumps[this.expectedJumps.length - 1] + 200) {
-        this.gameOver = true;
-        console.log("Spiel beendet. Finaler Highscore:", this.highscore.getCurrentScore());
-        return;
-      }
+      
     }
 
     // Beende das Spiel, wenn alle Sprünge verarbeitet sind
@@ -419,8 +415,6 @@ export class VirtualGame extends Game {
     this.seed = this.initialSeed;
     this.randomGen.next();
 
-    // Highscore initialisieren
-    this.highscore.reset();
     console.log("Highscore initialisiert:", this.highscore.getCurrentScore());
   }
 
