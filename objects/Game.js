@@ -336,10 +336,10 @@ export class VirtualGame extends Game {
   constructor(gameData) {
     console.log("VirtualGame-Konstruktor aufgerufen mit:", gameData);
     super(null, () => gameData.seed);
-    
+
     // Logge gameData und überprüfe, ob alle benötigten Felder vorhanden sind
     console.log("GameData im Konstruktor:", gameData);
-    
+
     if (!gameData || !gameData.jumps || !gameData.highscore || !gameData.seed) {
       throw new Error("Fehlende oder ungültige Daten im gameData.");
     }
@@ -347,7 +347,8 @@ export class VirtualGame extends Game {
     this.gameData = gameData;
     this.expectedJumps = gameData.jumps;
     this.highscoreValidated = false;
-    
+    this.gameOver = false;  // Spielstatus initialisieren
+
     try {
       this.init();  // Init-Methodenaufruf
     } catch (error) {
@@ -383,7 +384,9 @@ export class VirtualGame extends Game {
     const timeStep = 1000 / 60;
     let lastUpdate = Date.now();
 
-    while (!this.gameOver) {
+    const loop = () => {
+      if (this.gameOver) return;  // Beende die Schleife, wenn das Spiel vorbei ist
+
       const now = Date.now();
       const delta = now - lastUpdate;
 
@@ -391,7 +394,18 @@ export class VirtualGame extends Game {
         this.update();
         lastUpdate = now;
       }
-    }
+
+      // Beende das Spiel, wenn alle Sprünge verarbeitet sind
+      if (this.tickCount >= this.expectedJumps[this.expectedJumps.length - 1] + 200) {
+        this.gameOver = true;
+        console.log("Spiel beendet.");
+        return;
+      }
+
+      requestAnimationFrame(loop);  // Nächster Frame
+    };
+
+    requestAnimationFrame(loop);  // Starte die Schleife
   }
 
   update() {
@@ -404,15 +418,12 @@ export class VirtualGame extends Game {
     if (this.tickCount >= this.expectedJumps[this.expectedJumps.length - 1] + 200) {
       this.validateGameState();
     }
-
-    // console.log("Server Seed:", this.gameData.seed);
-    // console.log("Game Seed:", this.initialSeed);
   }
 
   startGame() {
     this.gameStarted = true;
     this.generator = new SeedGenerator();
-    this.initialSeed = this.gameData.seed
+    this.initialSeed = this.gameData.seed;
     this.randomGen = this.generator.randomNumbers(this.initialSeed);
     this.seed = this.initialSeed;
     this.randomGen.next();
@@ -429,5 +440,7 @@ export class VirtualGame extends Game {
     }
 
     this.highscoreValidated = true;
+    this.gameOver = true;  // Spiel beenden
+    console.log("Spiel validiert und beendet.");
   }
 }
