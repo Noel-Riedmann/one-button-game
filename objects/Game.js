@@ -14,7 +14,7 @@ class Game {
     this.canvas = canvas;
     this.initialCanvas();
     this.addEventListener();
-    
+
 
 
 
@@ -74,8 +74,8 @@ class Game {
     this.gameOver = false;
     this.gameStarted = false;
     this.generator = new SeedGenerator();
-    this.initialSeed = this.getSeed();   
-    this.randomGen = this.generator.randomNumbers(this.initialSeed);     
+    this.initialSeed = this.getSeed();
+    this.randomGen = this.generator.randomNumbers(this.initialSeed);
     this.seed = this.initialSeed;
     this.objects = [
       ...this.createBackgrounds(),
@@ -88,7 +88,7 @@ class Game {
       new Player(this.createImage),
       new Platform(25, 150, -50, 550, 0, this.createImage),
       //new Ground(this.canvas, 3),
-      
+
     ];
     if (!this.animationFrameID) {
       this.animate();
@@ -156,8 +156,8 @@ class Game {
         startText.classList.add("hide");
       }
       this.generator = new SeedGenerator();
-      this.initialSeed = this.getSeed();   
-      this.randomGen = this.generator.randomNumbers(this.initialSeed);     
+      this.initialSeed = this.getSeed();
+      this.randomGen = this.generator.randomNumbers(this.initialSeed);
       this.seed = this.initialSeed;
       //this.initialSeed = 0.4403660297393799//this.seed;
       //this.seed = 0.4403660297393799;
@@ -218,14 +218,14 @@ class Game {
       console.error("Error posting game data:", error);
     }
 
-    this.objects.forEach((obj)=>{
+    this.objects.forEach((obj) => {
       if (obj instanceof PlatformManager) {
         obj.resetValues();
       }
-      else if (obj instanceof CoinManager){
+      else if (obj instanceof CoinManager) {
         obj.deleteMovingCoins();
       }
-      else if (obj instanceof Player){
+      else if (obj instanceof Player) {
         obj.stopAnimation();
       }
     })
@@ -272,15 +272,16 @@ class Game {
 
   update() {
     this.objects.forEach((object) => {
-      object.update(this);})
-      this.objects = this.objects.filter((object)=>{
-  
+      object.update(this);
+    })
+    this.objects = this.objects.filter((object) => {
+
       if (object instanceof Coin && object.collected) {
-          
+
         return false;
       }
       return true;
-    });    
+    });
 
     this.tickCount++;
 
@@ -295,9 +296,9 @@ class Game {
     }
     this.seed = this.randomGen.next().value;
     if (this.tickCount < 25) {
-      console.log("TickCount: ", this.tickCount, "Seed:",this.seed);
+      console.log("TickCount: ", this.tickCount, "Seed:", this.seed);
     };
-    
+
   }
 
   animate() {
@@ -346,7 +347,7 @@ export class VirtualGame extends Game {
     this.gameData = gameData;
     this.expectedJumps = gameData.jumps;
     this.highscoreValidated = false;
-    this.gameOver = false;  // Spielstatus initialisieren
+    this.gameOver = false;
 
     try {
       this.init();  // Init-Methodenaufruf
@@ -369,15 +370,15 @@ export class VirtualGame extends Game {
     return {};
   }
 
-  addEventListener() {}
+  addEventListener() { }
 
   createBackgrounds() {
     return [];
   }
 
-  calculateFPS() {}
+  calculateFPS() { }
 
-  draw() {}
+  draw() { }
 
   animate() {
     while (!this.gameOver) {
@@ -385,13 +386,23 @@ export class VirtualGame extends Game {
       // if (this.gameStarted === true) {
       //   this.tickCount++;
       // }
+      if (this.tickCount >= this.expectedJumps[this.expectedJumps.length - 1] + 200) {
+        this.gameOver = true;
+        console.log("Spiel beendet. Finaler Highscore:", this.highscore.getCurrentScore());
+        return;
+      }
+    }
+
+    // Beende das Spiel, wenn alle Sprünge verarbeitet sind
+    
+
   }
-}
 
   update() {
     this.buttonPressed = this.expectedJumps.includes(this.tickCount);
     if (this.buttonPressed) {
       this.playerJump();
+      console.log("Spieler gesprungen. Aktueller Highscore:", this.highscore.getCurrentScore());
     }
     super.update();
 
@@ -407,12 +418,19 @@ export class VirtualGame extends Game {
     this.randomGen = this.generator.randomNumbers(this.initialSeed);
     this.seed = this.initialSeed;
     this.randomGen.next();
+
+    // Highscore initialisieren
+    this.highscore.reset();
+    console.log("Highscore initialisiert:", this.highscore.getCurrentScore());
   }
 
-  endGame() {}
+  endGame() { }
 
   validateGameState() {
     const serverCalculatedHighscore = this.highscore.getCurrentScore();
+    console.log("Validierung gestartet. Erwarteter Highscore:", this.gameData.highscore);
+    console.log("Berechneter Highscore:", serverCalculatedHighscore);
+
     if (serverCalculatedHighscore !== this.gameData.highscore) {
       throw new Error(
         `Highscore mismatch! Expected: ${this.gameData.highscore}, Got: ${serverCalculatedHighscore}`
@@ -420,7 +438,7 @@ export class VirtualGame extends Game {
     }
 
     this.highscoreValidated = true;
-    this.gameOver = true;  // Spiel beenden
+    this.gameOver = true;
     console.log("Spiel validiert und beendet.");
   }
 }
