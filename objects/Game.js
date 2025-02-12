@@ -15,18 +15,14 @@ class Game {
     this.initialCanvas();
     this.addEventListener();
 
-
-
-
-    this.latButtonPressedState = false;
+    this.buttonPressed = false;
     this.getSeed = getSeed;
 
     this.lastUpdateTime = performance.now();
     this.accumulator = 0;
     this.timeStep = 1000 / 60;
-    this.animationFrameID;
+    this.animationFrameID = null;
     this.highscore = new Highscore();
-
 
     this.fps = 60;
     this.frameCount = 0;
@@ -35,10 +31,7 @@ class Game {
     this.tickCount = 0;
     this.jumpTimestamps = [];
 
-
     this.animate = this.animate.bind(this);
-
-
   }
 
   addEventListener() {
@@ -47,8 +40,6 @@ class Game {
     document.addEventListener("touchstart", this.onTouchStart);
     document.addEventListener("touchend", this.onTouchEnd);
   }
-
-
 
   initialCanvas() {
     this.canvas.width = 1200;
@@ -63,7 +54,8 @@ class Game {
   createBackgrounds() {
     return [
       new Background("./objects/graphics/clouds.png", 2),
-      new Background("./objects/graphics/mountains.png", 1),]
+      new Background("./objects/graphics/mountains.png", 1),
+    ];
   }
 
   createImage() {
@@ -77,6 +69,13 @@ class Game {
     this.initialSeed = this.getSeed();
     this.randomGen = this.generator.randomNumbers(this.initialSeed);
     this.seed = this.initialSeed;
+
+    // Reset des Zustands
+    this.tickCount = 0;
+    this.jumpTimestamps = [];
+    this.highscore.resetCurrentScore();
+
+    // Initialisiere alle Game-Objekte
     this.objects = [
       ...this.createBackgrounds(),
       new PlatformManager(this),
@@ -87,14 +86,12 @@ class Game {
       new Enemy(20, this.canvas.width, 0, this.canvas.height, null, 0, this.createImage),
       new Player(this.createImage),
       new Platform(25, 150, -50, 550, 0, this.createImage),
-      //new Ground(this.canvas, 3),
-
+      // new Ground(this.canvas, 3),
     ];
+
     if (!this.animationFrameID) {
       this.animate();
     }
-    //const startText = document.getElementById("startText");
-    //startText.classList.remove("hide");
   }
 
   onKeydown = (event) => {
@@ -122,27 +119,20 @@ class Game {
   calculateFPS(now) {
     this.frameCount++;
     const elapsed = now - this.lastFPSUpdate;
-
     if (elapsed >= 1000) {
       this.fps = (this.frameCount / (elapsed / 1000)) | 0;
       this.frameCount = 0;
       this.lastFPSUpdate = now;
 
-      switch (true) {
-        case (this.fps > 70 && this.fps <= 85) ||
-          (this.fps > 125 && this.fps <= 150):
-          this.fps = 75;
-          break;
-        case this.fps > 85 && this.fps <= 100:
-          this.fps = 90;
-          break;
-        case (this.fps > 100 && this.fps <= 125) ||
-          (this.fps > 150 && this.fps <= 250):
-          this.fps = 60;
-          break;
-        default:
-          this.fps = 60;
-          break;
+      // Optional: Anpassung der fps-Werte, falls benötigt
+      if ((this.fps > 70 && this.fps <= 85) || (this.fps > 125 && this.fps <= 150)) {
+        this.fps = 75;
+      } else if (this.fps > 85 && this.fps <= 100) {
+        this.fps = 90;
+      } else if ((this.fps > 100 && this.fps <= 125) || (this.fps > 150 && this.fps <= 250)) {
+        this.fps = 60;
+      } else {
+        this.fps = 60;
       }
     }
   }
@@ -155,35 +145,30 @@ class Game {
       if (startText) {
         startText.classList.add("hide");
       }
+      // Erneut initialisieren, um den Zufallszahlengenerator exakt zu synchronisieren
       this.generator = new SeedGenerator();
       this.initialSeed = this.getSeed();
       this.randomGen = this.generator.randomNumbers(this.initialSeed);
       this.seed = this.initialSeed;
-      //this.initialSeed = 0.4403660297393799//this.seed;
-      //this.seed = 0.4403660297393799;
-
       this.highscore.resetCurrentScore();
-      //this.jumpTimestamps = [];
-      //this.tickCount = 0;
 
-      const player = this.objects.filter((obj) => obj instanceof Player);
-
-      player.forEach((player) => {
-        player.startAnimation();
+      // Starte alle Spieler-Animationen (falls definiert)
+      this.objects.forEach((obj) => {
+        if (obj instanceof Player && typeof obj.startAnimation === "function") {
+          obj.startAnimation();
+        }
       });
     }
   }
 
-
-
-
   async endGame() {
     const overlay = document.getElementById("overlay");
-    overlay.classList.add("death");
-    setTimeout(() => {
-      overlay.classList.remove("death");
-    }, 150);
-
+    if (overlay) {
+      overlay.classList.add("death");
+      setTimeout(() => {
+        overlay.classList.remove("death");
+      }, 150);
+    }
 
     const gameData = {
       username: localStorage.getItem("username"),
@@ -192,79 +177,57 @@ class Game {
       seed: this.initialSeed,
     };
 
-
     try {
-      const response = await fetch(
-        "https://lovelyleap-onebutton.deno.dev/api/leaderboard",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(gameData),
-        }
-      );
+      const response = await fetch("https://lovelyleap-onebutton.deno.dev/api/leaderboard", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(gameData),
+      });
 
       if (response.ok) {
         console.log("Game data successfully posted.");
       } else {
-        console.error(
-          "Failed to post game data:",
-          response.status,
-          response.statusText
-        );
+        console.error("Failed to post game data:", response.status, response.statusText);
       }
     } catch (error) {
       console.error("Error posting game data:", error);
     }
 
+    // Setze bei Bedarf einzelne Objekte zurück
     this.objects.forEach((obj) => {
-      if (obj instanceof PlatformManager) {
+      if (obj instanceof PlatformManager && typeof obj.resetValues === "function") {
         obj.resetValues();
-      }
-      else if (obj instanceof CoinManager) {
+      } else if (obj instanceof CoinManager && typeof obj.deleteMovingCoins === "function") {
         obj.deleteMovingCoins();
-      }
-      else if (obj instanceof Player) {
+      } else if (obj instanceof Player && typeof obj.stopAnimation === "function") {
         obj.stopAnimation();
       }
-    })
+    });
+
     this.highscore.update();
-    //this.highscore.resetCurrentScore();
     this.gameStarted = false;
     this.frameCount = 0;
     this.fps = 60;
-    console.log("spiel vorbei");
+    console.log("Spiel vorbei");
   }
 
   getGamestate() {
     return this.gameStarted;
   }
 
-  playerCanJump() {
-    return (this.canJump = true);
-  }
-
   playerJump() {
     this.jumpTimestamps.push(this.tickCount);
-    //console.log("PlayerJumpTickCountfunction: ",this.tickCount);
   }
 
   draw() {
-    this.offScreenC.clearRect(
-      0,
-      0,
-      this.offScreenCanvas.width,
-      this.offScreenCanvas.height
-    );
-    this.c.clearRect(
-      0,
-      0,
-      this.offScreenCanvas.width,
-      this.offScreenCanvas.height
-    );
+    this.offScreenC.clearRect(0, 0, this.offScreenCanvas.width, this.offScreenCanvas.height);
+    this.c.clearRect(0, 0, this.offScreenCanvas.width, this.offScreenCanvas.height);
     this.objects.forEach((object) => {
-      object.draw(this.offScreenC);
+      if (typeof object.draw === "function") {
+        object.draw(this.offScreenC);
+      }
     });
     this.c.drawImage(this.offScreenCanvas, 0, 0);
     this.updateHighscoreDisplay();
@@ -272,12 +235,14 @@ class Game {
 
   update() {
     this.objects.forEach((object) => {
-      object.update(this);
-    })
+      if (typeof object.update === "function") {
+        object.update(this);
+      }
+    });
+
+    // Entferne gesammelte Coins
     this.objects = this.objects.filter((object) => {
-
       if (object instanceof Coin && object.collected) {
-
         return false;
       }
       return true;
@@ -288,12 +253,12 @@ class Game {
     if (this.gameOver === true) {
       cancelAnimationFrame(this.animationFrameID);
       this.init();
-      this.tickCount = 0;
+      return;
     }
-    //this.buttonPressed = [436, 526, 623, 721].includes(this.tickCount);
     if (this.gameStarted === false && this.buttonPressed === true) {
       this.startGame();
     }
+    // Ziehe bei jedem Update den nächsten Zufallswert
     this.seed = this.randomGen.next().value;
   }
 
@@ -303,14 +268,11 @@ class Game {
     this.lastUpdateTime = now;
     this.accumulator += deltaTime;
 
-    //this.calculateFPS(now);
+    // Optional: this.calculateFPS(now);
 
     while (this.accumulator >= this.timeStep) {
       this.update();
       this.accumulator -= this.timeStep;
-      // if (this.gameStarted === true) {
-      //   this.tickCount++;
-      // }
     }
 
     this.draw();
@@ -331,90 +293,117 @@ export default Game;
 export class VirtualGame extends Game {
   constructor(gameData) {
     console.log("VirtualGame-Konstruktor aufgerufen mit:", gameData);
-    super(null, () => gameData.seed);
-
-    // Logge gameData und überprüfe, ob alle benötigten Felder vorhanden sind
-    console.log("GameData im Konstruktor:", gameData);
-
     if (!gameData || !gameData.jumps || !gameData.highscore || !gameData.seed) {
       throw new Error("Fehlende oder ungültige Daten im gameData.");
     }
+    // Verwende den Seed aus gameData, um deterministisch zu bleiben
+    super({ width: 1200, height: 700 }, () => gameData.seed);
 
     this.gameData = gameData;
     this.expectedJumps = gameData.jumps;
     this.highscoreValidated = false;
     this.gameOver = false;
 
-    try {
-      this.init();  // Init-Methodenaufruf
-    } catch (error) {
-      console.error("Fehler bei init():", error);
-      throw new Error("Fehler bei der Initialisierung des Spiels.");
-    }
+    // Setze den initialen Zustand exakt zurück
+    this.tickCount = 0;
+    this.jumpTimestamps = [];
+    this.highscore.resetCurrentScore();
 
-    this.gameStarted = true;
+    // Überschreibe die Canvas mit einem Dummy-Objekt (kein echtes Rendering)
+    this.canvas = { width: 1200, height: 700 };
+    this.initialCanvas();
+
+    // Initialisiere alle Game-Objekte identisch wie im echten Spiel
+    this.init();
+
+    // Starte das Spiel, um den RNG und weitere Zustände zu synchronisieren
+    this.startGame();
+  }
+
+  // DOM- und Rendering-abhängige Methoden werden überschrieben
+
+  addEventListener() {
+    // Keine Event Listener im VirtualGame
   }
 
   initialCanvas() {
-    this.canvas = {
-      width: 1200,
-      height: 700,
+    // Dummy-Canvas und -Kontext zur Simulation
+    this.canvas.width = 1200;
+    this.canvas.height = 700;
+    this.offScreenCanvas = { width: 1200, height: 700 };
+    this.offScreenC = {
+      clearRect: () => {},
+      drawImage: () => {},
     };
   }
 
   createImage() {
-    return {};
+    return {}; // Dummy-Image-Objekt
   }
-
-  addEventListener() { }
 
   createBackgrounds() {
-    return [];
+    return []; // Keine Hintergründe im VirtualGame
   }
 
-  calculateFPS() { }
+  calculateFPS() {
+    // Nicht benötigt im VirtualGame
+  }
 
-  draw() { }
+  draw() {
+    // Kein Rendering im VirtualGame
+  }
 
   animate() {
-    while (!this.gameOver) {
+    // Simuliere die Spielupdates in einer Schleife ohne echtes Rendering
+    const maxTicks = this.expectedJumps[this.expectedJumps.length - 1] + 300;
+    while (!this.gameOver && this.tickCount < maxTicks) {
       this.update();
-      // if (this.gameStarted === true) {
-      //   this.tickCount++;
-      // }
-      
     }
-
-    // Beende das Spiel, wenn alle Sprünge verarbeitet sind
-    
-
   }
 
   update() {
-    this.buttonPressed = this.expectedJumps.includes(this.tickCount);
-    if (this.buttonPressed) {
+    // Simuliere die Sprung-Inputs anhand der erwarteten Sprung-Ticks:
+    if (this.expectedJumps.includes(this.tickCount)) {
+      this.buttonPressed = true;
       this.playerJump();
-      console.log("Spieler gesprungen. Aktueller Highscore:", this.highscore.getCurrentScore());
+      console.log(
+        "Spieler gesprungen bei Tick",
+        this.tickCount,
+        "Current Highscore:",
+        this.highscore.getCurrentScore()
+      );
+    } else {
+      this.buttonPressed = false;
     }
+
     super.update();
 
+    // Sobald eine gewisse Tick-Grenze überschritten wurde, erfolgt die Validierung
     if (this.tickCount >= this.expectedJumps[this.expectedJumps.length - 1] + 200) {
       this.validateGameState();
     }
   }
 
   startGame() {
+    // Verwende exakt die gleiche Logik wie im echten Spiel
     this.gameStarted = true;
     this.generator = new SeedGenerator();
     this.initialSeed = this.gameData.seed;
     this.randomGen = this.generator.randomNumbers(this.initialSeed);
     this.seed = this.initialSeed;
-    this.randomGen.next();
+    this.highscore.resetCurrentScore();
 
-    console.log("Highscore initialisiert:", this.highscore.getCurrentScore());
+    // Starte alle Spieler-Animationen, falls vorhanden
+    this.objects.forEach((obj) => {
+      if (obj instanceof Player && typeof obj.startAnimation === "function") {
+        obj.startAnimation();
+      }
+    });
   }
 
-  endGame() { }
+  endGame() {
+    // Kein DOM-Handling im VirtualGame
+  }
 
   validateGameState() {
     const serverCalculatedHighscore = this.highscore.getCurrentScore();
@@ -432,3 +421,5 @@ export class VirtualGame extends Game {
     console.log("Spiel validiert und beendet.");
   }
 }
+
+export { VirtualGame };
