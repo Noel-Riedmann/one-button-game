@@ -403,6 +403,7 @@ export class VirtualGame extends Game {
     if (this.tickCount >= this.expectedJumps[this.expectedJumps.length - 1] + 400) {
         this.validateGameState();
     }
+    this.tickCount++;
 }
 
 
