@@ -343,7 +343,7 @@ export class VirtualGame extends Game {
   animate() {
     const maxTicks = this.expectedJumps[this.expectedJumps.length - 1] + 300;
     while (!this.gameOver && this.tickCount < maxTicks) {
-      this.update();
+      this.update(1000 / 60);
     }
   }
 
