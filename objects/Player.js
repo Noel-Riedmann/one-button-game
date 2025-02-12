@@ -206,33 +206,31 @@ class Player {
         game.objects.forEach(object => {
             if (object instanceof Coin) {
                 const coin = object;
-                if (coin.collected === true) {
-                    console.log("Prüfe Coin-Kollision:", {
-                        playerX: this.position.x,
-                        playerY: this.position.y,
-                        playerW: this.width,
-                        playerH: this.height,
-                        coinX: coin.position.x,
-                        coinY: coin.position.y,
-                        coinW: coin.width,
-                        coinH: coin.height,
-                    });
-                }
-                
-    
-                if (
-                    this.position.x < coin.position.x + coin.width &&
-                    this.position.x + this.width > coin.position.x &&
-                    this.position.y < coin.position.y + coin.height &&
-                    this.position.y + this.height > coin.position.y
-                ) {
-                    coin.collected = true;
-                    game.highscore.increment();
-                    console.log("Coin eingesammelt!");
+                if (!coin.collected) {
+                    if (
+                        this.position.x < coin.position.x + coin.width &&
+                        this.position.x + this.width > coin.position.x &&
+                        this.position.y < coin.position.y + coin.height &&
+                        this.position.y + this.height > coin.position.y
+                    ) {
+                        coin.collected = true;
+                        game.highscore.increment();
+                        console.log("Coin eingesammelt!", {
+                            playerX: this.position.x,
+                            playerY: this.position.y,
+                            playerW: this.width,
+                            playerH: this.height,
+                            coinX: coin.position.x,
+                            coinY: coin.position.y,
+                            coinW: coin.width,
+                            coinH: coin.height,
+                        });
+                    }
                 }
             }
         });
     }
+    
     
 
 
