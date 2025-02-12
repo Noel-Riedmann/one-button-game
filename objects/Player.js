@@ -206,7 +206,7 @@ class Player {
         game.objects.forEach(object => {
             if (object instanceof Coin) {
                 const coin = object;
-                if (coin.collected = true) {
+                if (coin.collected === true) {
                     console.log("Prüfe Coin-Kollision:", {
                         playerX: this.position.x,
                         playerY: this.position.y,
