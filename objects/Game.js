@@ -418,5 +418,3 @@ export class VirtualGame extends Game {
     console.log("Spiel validiert und beendet.");
   }
 }
-
-export { VirtualGame };
