@@ -391,21 +391,17 @@ export class VirtualGame extends Game {
   }
 
   update() {
-    if (this.expectedJumps.includes(this.tickCount) && !this.buttonPressed) {
-        this.buttonPressed = true; // Setze auf true, um mehrfaches Auslösen zu verhindern
-        this.playerJump();
-        console.log("Spieler gesprungen. Aktueller Highscore:", this.highscore.getCurrentScore());
-    } else {
-        this.buttonPressed = false; // Zurücksetzen für den nächsten Tick
+    this.buttonPressed = this.expectedJumps.includes(this.tickCount);
+    if (this.buttonPressed) {
+      this.playerJump();
+      console.log("Spieler gesprungen. Aktueller Highscore:", this.highscore.getCurrentScore());
     }
     super.update();
 
-    if (this.tickCount >= this.expectedJumps[this.expectedJumps.length - 1] + 400) {
-        this.validateGameState();
+    if (this.tickCount >= this.expectedJumps[this.expectedJumps.length - 1] + 200) {
+      this.validateGameState();
     }
-    this.tickCount++;
-}
-
+  }
 
   startGame() {
     this.gameStarted = true;
