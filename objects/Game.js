@@ -396,7 +396,6 @@ export class VirtualGame extends Game {
       this.playerJump();
       console.log("Spieler gesprungen. Aktueller Highscore:", this.highscore.getCurrentScore());
     }
-    super.update();
 
     if (this.tickCount >= this.expectedJumps[this.expectedJumps.length - 1] + 400) {
       this.validateGameState();
