@@ -70,7 +70,7 @@ class Game {
     this.randomGen = this.generator.randomNumbers(this.initialSeed);
     this.seed = this.initialSeed;
 
-    // Reset des Zustands
+    // Zustand zurücksetzen
     this.tickCount = 0;
     this.jumpTimestamps = [];
     this.highscore.resetCurrentScore();
@@ -124,7 +124,6 @@ class Game {
       this.frameCount = 0;
       this.lastFPSUpdate = now;
 
-      // Optional: Anpassung der fps-Werte, falls benötigt
       if ((this.fps > 70 && this.fps <= 85) || (this.fps > 125 && this.fps <= 150)) {
         this.fps = 75;
       } else if (this.fps > 85 && this.fps <= 100) {
@@ -145,14 +144,12 @@ class Game {
       if (startText) {
         startText.classList.add("hide");
       }
-      // Erneut initialisieren, um den Zufallszahlengenerator exakt zu synchronisieren
       this.generator = new SeedGenerator();
       this.initialSeed = this.getSeed();
       this.randomGen = this.generator.randomNumbers(this.initialSeed);
       this.seed = this.initialSeed;
       this.highscore.resetCurrentScore();
 
-      // Starte alle Spieler-Animationen (falls definiert)
       this.objects.forEach((obj) => {
         if (obj instanceof Player && typeof obj.startAnimation === "function") {
           obj.startAnimation();
@@ -195,7 +192,6 @@ class Game {
       console.error("Error posting game data:", error);
     }
 
-    // Setze bei Bedarf einzelne Objekte zurück
     this.objects.forEach((obj) => {
       if (obj instanceof PlatformManager && typeof obj.resetValues === "function") {
         obj.resetValues();
@@ -240,7 +236,6 @@ class Game {
       }
     });
 
-    // Entferne gesammelte Coins
     this.objects = this.objects.filter((object) => {
       if (object instanceof Coin && object.collected) {
         return false;
@@ -251,14 +246,16 @@ class Game {
     this.tickCount++;
 
     if (this.gameOver === true) {
-      cancelAnimationFrame(this.animationFrameID);
+      // Prüfe hier, ob cancelAnimationFrame existiert (z. B. im Browser)
+      if (typeof cancelAnimationFrame === "function") {
+        cancelAnimationFrame(this.animationFrameID);
+      }
       this.init();
       return;
     }
     if (this.gameStarted === false && this.buttonPressed === true) {
       this.startGame();
     }
-    // Ziehe bei jedem Update den nächsten Zufallswert
     this.seed = this.randomGen.next().value;
   }
 
@@ -268,15 +265,12 @@ class Game {
     this.lastUpdateTime = now;
     this.accumulator += deltaTime;
 
-    // Optional: this.calculateFPS(now);
-
     while (this.accumulator >= this.timeStep) {
       this.update();
       this.accumulator -= this.timeStep;
     }
 
     this.draw();
-
     this.animationFrameID = requestAnimationFrame(this.animate);
   }
 
@@ -296,7 +290,7 @@ export class VirtualGame extends Game {
     if (!gameData || !gameData.jumps || !gameData.highscore || !gameData.seed) {
       throw new Error("Fehlende oder ungültige Daten im gameData.");
     }
-    // Verwende den Seed aus gameData, um deterministisch zu bleiben
+    // Übergib einen Dummy-Canvas, da im VirtualGame kein echtes Rendering stattfindet
     super({ width: 1200, height: 700 }, () => gameData.seed);
 
     this.gameData = gameData;
@@ -304,30 +298,23 @@ export class VirtualGame extends Game {
     this.highscoreValidated = false;
     this.gameOver = false;
 
-    // Setze den initialen Zustand exakt zurück
     this.tickCount = 0;
     this.jumpTimestamps = [];
     this.highscore.resetCurrentScore();
 
-    // Überschreibe die Canvas mit einem Dummy-Objekt (kein echtes Rendering)
+    // Dummy-Canvas initialisieren
     this.canvas = { width: 1200, height: 700 };
     this.initialCanvas();
 
-    // Initialisiere alle Game-Objekte identisch wie im echten Spiel
+    // Initialisiere Spielobjekte und synchronisiere den RNG
     this.init();
-
-    // Starte das Spiel, um den RNG und weitere Zustände zu synchronisieren
     this.startGame();
   }
 
-  // DOM- und Rendering-abhängige Methoden werden überschrieben
-
-  addEventListener() {
-    // Keine Event Listener im VirtualGame
-  }
+  // Im VirtualGame werden keine Event Listener benötigt
+  addEventListener() {}
 
   initialCanvas() {
-    // Dummy-Canvas und -Kontext zur Simulation
     this.canvas.width = 1200;
     this.canvas.height = 700;
     this.offScreenCanvas = { width: 1200, height: 700 };
@@ -338,7 +325,7 @@ export class VirtualGame extends Game {
   }
 
   createImage() {
-    return {}; // Dummy-Image-Objekt
+    return {}; // Dummy-Image
   }
 
   createBackgrounds() {
@@ -354,7 +341,6 @@ export class VirtualGame extends Game {
   }
 
   animate() {
-    // Simuliere die Spielupdates in einer Schleife ohne echtes Rendering
     const maxTicks = this.expectedJumps[this.expectedJumps.length - 1] + 300;
     while (!this.gameOver && this.tickCount < maxTicks) {
       this.update();
@@ -362,7 +348,6 @@ export class VirtualGame extends Game {
   }
 
   update() {
-    // Simuliere die Sprung-Inputs anhand der erwarteten Sprung-Ticks:
     if (this.expectedJumps.includes(this.tickCount)) {
       this.buttonPressed = true;
       this.playerJump();
@@ -376,16 +361,29 @@ export class VirtualGame extends Game {
       this.buttonPressed = false;
     }
 
-    super.update();
+    // Aktualisiere die Objekte manuell (ohne Animation-Frame-Logik)
+    this.objects.forEach((object) => {
+      if (typeof object.update === "function") {
+        object.update(this);
+      }
+    });
 
-    // Sobald eine gewisse Tick-Grenze überschritten wurde, erfolgt die Validierung
+    this.objects = this.objects.filter((object) => {
+      if (object instanceof Coin && object.collected) {
+        return false;
+      }
+      return true;
+    });
+
+    this.tickCount++;
+    this.seed = this.randomGen.next().value;
+
     if (this.tickCount >= this.expectedJumps[this.expectedJumps.length - 1] + 200) {
       this.validateGameState();
     }
   }
 
   startGame() {
-    // Verwende exakt die gleiche Logik wie im echten Spiel
     this.gameStarted = true;
     this.generator = new SeedGenerator();
     this.initialSeed = this.gameData.seed;
@@ -393,7 +391,6 @@ export class VirtualGame extends Game {
     this.seed = this.initialSeed;
     this.highscore.resetCurrentScore();
 
-    // Starte alle Spieler-Animationen, falls vorhanden
     this.objects.forEach((obj) => {
       if (obj instanceof Player && typeof obj.startAnimation === "function") {
         obj.startAnimation();
@@ -421,3 +418,5 @@ export class VirtualGame extends Game {
     console.log("Spiel validiert und beendet.");
   }
 }
+
+export { VirtualGame };
