@@ -93,8 +93,8 @@ class Game {
     if (!this.animationFrameID) {
       this.animate();
     }
-    const startText = document.getElementById("startText");
-    startText.classList.remove("hide");
+    //const startText = document.getElementById("startText");
+    //startText.classList.remove("hide");
   }
 
   onKeydown = (event) => {
