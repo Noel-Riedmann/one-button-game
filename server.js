@@ -11,12 +11,7 @@ const CORS_HEADERS = {
 
 const saveGameData = async (request) => {
   try {
-    console.log("saveGameData gestartet");
-    console.log("Request-Method:", request.method);
-    console.log("Header:", JSON.stringify([...request.headers], null, 2));
-
     const data = await request.json();
-    console.log("Raw input data:", JSON.stringify(data, null, 2));
 
     if (!data || typeof data !== "object") {
       throw new Error("Datenformat ungültig oder leer!");
@@ -25,20 +20,16 @@ const saveGameData = async (request) => {
       throw new Error("Fehlende erforderliche Felder in den Daten!");
     }
 
-    console.log("Creating VirtualGame with seed:", data.seed);
     let virtualGame;
     try {
       virtualGame = new VirtualGame(data);
-      console.log("VirtualGame erfolgreich erstellt!");
     } catch (error) {
       console.error("Fehler beim Erstellen von VirtualGame:", error);
       throw new Error("Fehler beim Erstellen des Spiels: " + error.message);
     }
 
-    console.log("Starte antiCheat-Simulation");
     try {
       virtualGame.animate();
-      console.log("Anti Cheat bestanden");
     } catch (error) {
       return new Response(
         JSON.stringify({ error: "Anti-Cheat validation failed", details: error.message }),

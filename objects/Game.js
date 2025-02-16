@@ -246,7 +246,6 @@ class Game {
     this.tickCount++;
 
     if (this.gameOver === true) {
-      // Prüfe hier, ob cancelAnimationFrame existiert (z. B. im Browser)
       if (typeof cancelAnimationFrame === "function") {
         cancelAnimationFrame(this.animationFrameID);
       }
@@ -286,11 +285,9 @@ export default Game;
 
 export class VirtualGame extends Game {
   constructor(gameData) {
-    console.log("VirtualGame-Konstruktor aufgerufen mit:", gameData);
     if (!gameData || !gameData.jumps || !gameData.highscore || !gameData.seed) {
       throw new Error("Fehlende oder ungültige Daten im gameData.");
     }
-    // Dummy-Canvas wird übergeben, da kein Rendering nötig ist
     super({ width: 1200, height: 700 }, () => gameData.seed);
 
     this.gameData = gameData;
@@ -302,17 +299,13 @@ export class VirtualGame extends Game {
     this.jumpTimestamps = [];
     this.highscore.resetCurrentScore();
 
-    // Dummy-Canvas initialisieren
     this.canvas = { width: 1200, height: 700 };
     this.initialCanvas();
 
-    // Objekte erstellen (wie im echten Spiel)
     this.init();
-    // Spiel starten
     this.startGame();
   }
 
-  // In der Simulation brauchen wir keine Event Listener
   addEventListener() {}
 
   initialCanvas() {
@@ -326,22 +319,17 @@ export class VirtualGame extends Game {
   }
 
   createImage() {
-    return {}; // Dummy-Image
+    return {};
   }
 
   createBackgrounds() {
-    return []; // Keine Hintergründe in der Simulation
+    return [];
   }
 
-  calculateFPS() {
-    // Nicht benötigt in der Simulation
-  }
+  calculateFPS() {}
 
-  draw() {
-    // Kein Rendering in der Simulation
-  }
+  draw() {}
 
-  // Hier simulieren wir das "Abspielen" des Spiels in einer Schleife
   animate() {
     const maxTicks = this.expectedJumps[this.expectedJumps.length - 1] + 300;
     while (!this.gameOver && this.tickCount < maxTicks) {
@@ -350,28 +338,19 @@ export class VirtualGame extends Game {
   }
 
   update() {
-    // Updates nur ausführen, wenn das Spiel gestartet wurde
     if (!this.gameStarted) {
       this.tickCount++;
       this.seed = this.randomGen.next().value;
       return;
     }
-  
-    // Sprung-Logik
+
     if (this.expectedJumps.includes(this.tickCount)) {
       this.buttonPressed = true;
       this.playerJump();
-      console.log(
-        "Spieler gesprungen bei Tick",
-        this.tickCount,
-        "Current Highscore:",
-        this.highscore.getCurrentScore()
-      );
     } else {
       this.buttonPressed = false;
     }
-  
-    // Update aller Objekte
+
     this.objects.forEach((object) => {
       if (typeof object.update === "function") {
         object.update(this);
@@ -380,40 +359,31 @@ export class VirtualGame extends Game {
         object.position.x -= object.velocity;
       }
     });
-  
-    // Aktualisiere die Geschwindigkeit aller Plattformen anhand des PlatformManagers
+
     const platformManager = this.objects.find((o) => o instanceof PlatformManager);
     if (platformManager) {
       this.objects.forEach((obj) => {
         if (obj instanceof Platform) {
           obj.velocity = platformManager.speed;
-          console.log(
-            `Tick ${this.tickCount}: Plattform an x=${obj.position.x.toFixed(2)} hat aktualisierte velocity=${obj.velocity.toFixed(2)}`
-          );
         }
       });
     }
-  
-    // Entferne eingesammelte Münzen
+
     this.objects = this.objects.filter((object) => {
       if (object instanceof Coin && object.collected) {
         return false;
       }
       return true;
     });
-  
+
     this.tickCount++;
     this.seed = this.randomGen.next().value;
-  
+
     if (this.tickCount >= this.expectedJumps[this.expectedJumps.length - 1] + 200) {
       this.validateGameState();
     }
   }
-  
-  
 
-  // In startGame setzen wir zusätzlich für Plattformen und Münzen einen festen Speed,
-  // falls dieser nicht bereits gesetzt wurde.
   startGame() {
     this.gameStarted = true;
     this.generator = new SeedGenerator();
@@ -424,14 +394,13 @@ export class VirtualGame extends Game {
 
     this.objects.forEach((obj) => {
       if (obj instanceof Platform) {
-        // Falls velocity 0 oder nicht gesetzt, lege einen Standardwert fest
         if (!obj.velocity || obj.velocity === 0) {
-          obj.velocity = 3; // Beispielgeschwindigkeit
+          obj.velocity = 3;
         }
       }
       if (obj instanceof Coin) {
         if (!obj.velocity || obj.velocity === 0) {
-          obj.velocity = 3; // Beispielgeschwindigkeit
+          obj.velocity = 3;
         }
       }
       if (obj instanceof Player && typeof obj.startAnimation === "function") {
@@ -440,14 +409,10 @@ export class VirtualGame extends Game {
     });
   }
 
-  endGame() {
-    // Kein DOM-Handling in der Simulation
-  }
+  endGame() {}
 
   validateGameState() {
     const serverCalculatedHighscore = this.highscore.getCurrentScore();
-    console.log("Validierung gestartet. Erwarteter Highscore:", this.gameData.highscore);
-    console.log("Berechneter Highscore:", serverCalculatedHighscore);
 
     if (serverCalculatedHighscore !== this.gameData.highscore) {
       throw new Error(
@@ -457,6 +422,5 @@ export class VirtualGame extends Game {
 
     this.highscoreValidated = true;
     this.gameOver = true;
-    console.log("Spiel validiert und beendet.");
   }
 }
