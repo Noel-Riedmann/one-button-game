@@ -1,6 +1,11 @@
+const storage = typeof localStorage !== "undefined" ? localStorage : {
+    getItem: () => null,
+    setItem: () => {},
+  };
+
 class Highscore {
     constructor() {
-        this.highScore = parseInt(localStorage.getItem('highScore')) || 0;
+        this.highScore = parseInt(storage.getItem('highScore')) || 0;
         this.currentScore = 0;
     }
 
