@@ -363,8 +363,8 @@ export class VirtualGame extends Game {
     } else {
       this.buttonPressed = false;
     }
-
-    // Update aller Objekte (Player, Plattformen, Münzen etc.)
+  
+    // Update aller Objekte (Player, Plattformen, Münzen, etc.)
     this.objects.forEach((object) => {
       if (typeof object.update === "function") {
         object.update(this);
@@ -372,18 +372,26 @@ export class VirtualGame extends Game {
       // Simuliere horizontale Bewegung, wie im echten Spiel:
       if (object.position && typeof object.velocity === "number") {
         object.position.x -= object.velocity;
-        
-        // Debug-Ausgabe: Zeige, ob und wie sich Plattformen bewegen
-        if (object instanceof Platform) {
-          console.log(
-            `Tick ${this.tickCount}: Platform at x=${object.position.x.toFixed(
-              2
-            )} with velocity=${object.velocity}`
-          );
-        }
       }
     });
-
+  
+    // **Wichtig:** Aktualisiere die Geschwindigkeit (velocity) aller Plattformen
+    // anhand des aktuellen Speed-Werts des PlatformManagers.
+    const platformManager = this.objects.find((o) => o instanceof PlatformManager);
+    if (platformManager) {
+      this.objects.forEach((obj) => {
+        if (obj instanceof Platform) {
+          // Setze die aktuelle velocity der Plattform auf den aktuellen Wert des PlatformManagers
+          obj.velocity = platformManager.speed;
+          console.log(
+            `Tick ${this.tickCount}: Plattform an x=${obj.position.x.toFixed(
+              2
+            )} hat aktualisierte velocity=${obj.velocity.toFixed(2)}`
+          );
+        }
+      });
+    }
+  
     // Entferne eingesammelte Münzen
     this.objects = this.objects.filter((object) => {
       if (object instanceof Coin && object.collected) {
@@ -391,15 +399,16 @@ export class VirtualGame extends Game {
       }
       return true;
     });
-
+  
     this.tickCount++;
     this.seed = this.randomGen.next().value;
-
+  
     // Nach einer gewissen Anzahl Ticks erfolgt die Validierung
     if (this.tickCount >= this.expectedJumps[this.expectedJumps.length - 1] + 200) {
       this.validateGameState();
     }
   }
+  
 
   // In startGame setzen wir zusätzlich für Plattformen und Münzen einen festen Speed,
   // falls dieser nicht bereits gesetzt wurde.
