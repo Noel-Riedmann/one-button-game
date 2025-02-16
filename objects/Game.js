@@ -350,7 +350,14 @@ export class VirtualGame extends Game {
   }
 
   update() {
-    // Sprung-Logik: Falls an diesem Tick ein Sprung erwartet wird
+    // Updates nur ausführen, wenn das Spiel gestartet wurde
+    if (!this.gameStarted) {
+      this.tickCount++;
+      this.seed = this.randomGen.next().value;
+      return;
+    }
+  
+    // Sprung-Logik
     if (this.expectedJumps.includes(this.tickCount)) {
       this.buttonPressed = true;
       this.playerJump();
@@ -364,29 +371,24 @@ export class VirtualGame extends Game {
       this.buttonPressed = false;
     }
   
-    // Update aller Objekte (Player, Plattformen, Münzen, etc.)
+    // Update aller Objekte
     this.objects.forEach((object) => {
       if (typeof object.update === "function") {
         object.update(this);
       }
-      // Simuliere horizontale Bewegung, wie im echten Spiel:
       if (object.position && typeof object.velocity === "number") {
         object.position.x -= object.velocity;
       }
     });
   
-    // **Wichtig:** Aktualisiere die Geschwindigkeit (velocity) aller Plattformen
-    // anhand des aktuellen Speed-Werts des PlatformManagers.
+    // Aktualisiere die Geschwindigkeit aller Plattformen anhand des PlatformManagers
     const platformManager = this.objects.find((o) => o instanceof PlatformManager);
     if (platformManager) {
       this.objects.forEach((obj) => {
         if (obj instanceof Platform) {
-          // Setze die aktuelle velocity der Plattform auf den aktuellen Wert des PlatformManagers
           obj.velocity = platformManager.speed;
           console.log(
-            `Tick ${this.tickCount}: Plattform an x=${obj.position.x.toFixed(
-              2
-            )} hat aktualisierte velocity=${obj.velocity.toFixed(2)}`
+            `Tick ${this.tickCount}: Plattform an x=${obj.position.x.toFixed(2)} hat aktualisierte velocity=${obj.velocity.toFixed(2)}`
           );
         }
       });
@@ -403,11 +405,11 @@ export class VirtualGame extends Game {
     this.tickCount++;
     this.seed = this.randomGen.next().value;
   
-    // Nach einer gewissen Anzahl Ticks erfolgt die Validierung
     if (this.tickCount >= this.expectedJumps[this.expectedJumps.length - 1] + 200) {
       this.validateGameState();
     }
   }
+  
   
 
   // In startGame setzen wir zusätzlich für Plattformen und Münzen einen festen Speed,
