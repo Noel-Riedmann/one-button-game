@@ -290,7 +290,7 @@ export class VirtualGame extends Game {
     if (!gameData || !gameData.jumps || !gameData.highscore || !gameData.seed) {
       throw new Error("Fehlende oder ungültige Daten im gameData.");
     }
-    // Übergib einen Dummy-Canvas, da im VirtualGame kein echtes Rendering stattfindet
+    // Dummy-Canvas wird übergeben, da kein Rendering nötig ist
     super({ width: 1200, height: 700 }, () => gameData.seed);
 
     this.gameData = gameData;
@@ -306,12 +306,13 @@ export class VirtualGame extends Game {
     this.canvas = { width: 1200, height: 700 };
     this.initialCanvas();
 
-    // Initialisiere Spielobjekte und synchronisiere den RNG
+    // Objekte erstellen (wie im echten Spiel)
     this.init();
+    // Spiel starten
     this.startGame();
   }
 
-  // Im VirtualGame werden keine Event Listener benötigt
+  // In der Simulation brauchen wir keine Event Listener
   addEventListener() {}
 
   initialCanvas() {
@@ -329,25 +330,27 @@ export class VirtualGame extends Game {
   }
 
   createBackgrounds() {
-    return []; // Keine Hintergründe im VirtualGame
+    return []; // Keine Hintergründe in der Simulation
   }
 
   calculateFPS() {
-    // Nicht benötigt im VirtualGame
+    // Nicht benötigt in der Simulation
   }
 
   draw() {
-    // Kein Rendering im VirtualGame
+    // Kein Rendering in der Simulation
   }
 
+  // Hier simulieren wir das "Abspielen" des Spiels in einer Schleife
   animate() {
     const maxTicks = this.expectedJumps[this.expectedJumps.length - 1] + 300;
     while (!this.gameOver && this.tickCount < maxTicks) {
-      this.update(1000 / 60);
+      this.update();
     }
   }
 
   update() {
+    // Sprung-Logik: Falls an diesem Tick ein Sprung erwartet wird
     if (this.expectedJumps.includes(this.tickCount)) {
       this.buttonPressed = true;
       this.playerJump();
@@ -361,13 +364,27 @@ export class VirtualGame extends Game {
       this.buttonPressed = false;
     }
 
-    // Aktualisiere die Objekte manuell (ohne Animation-Frame-Logik)
+    // Update aller Objekte (Player, Plattformen, Münzen etc.)
     this.objects.forEach((object) => {
       if (typeof object.update === "function") {
         object.update(this);
       }
+      // Simuliere horizontale Bewegung, wie im echten Spiel:
+      if (object.position && typeof object.velocity === "number") {
+        object.position.x -= object.velocity;
+        
+        // Debug-Ausgabe: Zeige, ob und wie sich Plattformen bewegen
+        if (object instanceof Platform) {
+          console.log(
+            `Tick ${this.tickCount}: Platform at x=${object.position.x.toFixed(
+              2
+            )} with velocity=${object.velocity}`
+          );
+        }
+      }
     });
 
+    // Entferne eingesammelte Münzen
     this.objects = this.objects.filter((object) => {
       if (object instanceof Coin && object.collected) {
         return false;
@@ -378,11 +395,14 @@ export class VirtualGame extends Game {
     this.tickCount++;
     this.seed = this.randomGen.next().value;
 
+    // Nach einer gewissen Anzahl Ticks erfolgt die Validierung
     if (this.tickCount >= this.expectedJumps[this.expectedJumps.length - 1] + 200) {
       this.validateGameState();
     }
   }
 
+  // In startGame setzen wir zusätzlich für Plattformen und Münzen einen festen Speed,
+  // falls dieser nicht bereits gesetzt wurde.
   startGame() {
     this.gameStarted = true;
     this.generator = new SeedGenerator();
@@ -392,6 +412,17 @@ export class VirtualGame extends Game {
     this.highscore.resetCurrentScore();
 
     this.objects.forEach((obj) => {
+      if (obj instanceof Platform) {
+        // Falls velocity 0 oder nicht gesetzt, lege einen Standardwert fest
+        if (!obj.velocity || obj.velocity === 0) {
+          obj.velocity = 3; // Beispielgeschwindigkeit
+        }
+      }
+      if (obj instanceof Coin) {
+        if (!obj.velocity || obj.velocity === 0) {
+          obj.velocity = 3; // Beispielgeschwindigkeit
+        }
+      }
       if (obj instanceof Player && typeof obj.startAnimation === "function") {
         obj.startAnimation();
       }
@@ -399,7 +430,7 @@ export class VirtualGame extends Game {
   }
 
   endGame() {
-    // Kein DOM-Handling im VirtualGame
+    // Kein DOM-Handling in der Simulation
   }
 
   validateGameState() {
