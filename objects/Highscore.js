@@ -1,6 +1,6 @@
 class Highscore {
     constructor() {
-        this.highScore = parseInt(localStorage.getItem('highScore'))
+        this.highScore = parseInt(localStorage.getItem('highScore')) || 0;
         this.currentScore = 0;
     }
 
