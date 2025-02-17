@@ -142,7 +142,7 @@ class Player {
         this.collisionDetectionGround(game);
         this.checkDead(game);
     
-        if (this.canJump && game.buttonPressed) {
+        if (this.canJump && game.buttonPressed && this.velocity.y === 0) {
             this.canJump = false;
             this.velocity.y = -15;
             this.isJumping = true;

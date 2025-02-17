@@ -193,14 +193,14 @@ class Game {
     setTimeout(() => {
       overlay.classList.remove("death");
     }, 150);
-  
+
     const gameData = {
-      username: "defaultUsername", 
+      username: "defaultUsername",
       highscore: this.highscore.getCurrentScore(),
       jumps: this.jumpTimestamps,
       seed: this.initialSeed,
     };
-  
+
     try {
       const response = await fetch(
         "https://lovelyleap-onebutton.deno.dev/api/leaderboard",
@@ -212,7 +212,7 @@ class Game {
           body: JSON.stringify(gameData),
         }
       );
-  
+
       // Logge die Fehlerantworten detailliert, falls der Request fehlschlägt
       if (response.ok) {
         console.log("Game data successfully posted.");
@@ -227,7 +227,7 @@ class Game {
     } catch (error) {
       console.error("Error posting game data:", error);
     }
-  
+
     this.objects.forEach((obj) => {
       if (obj instanceof PlatformManager) {
         obj.resetValues();
@@ -242,7 +242,6 @@ class Game {
     this.frameCount = 0;
     this.fps = 60;
   }
-  
 
   getGamestate() {
     return this.gameStarted;
@@ -335,10 +334,10 @@ export default Game;
 export class VirtualGame extends Game {
   constructor(gameData) {
     super(null, () => gameData.seed);
-    
+
     // Logge gameData und überprüfe, ob alle benötigten Felder vorhanden sind
     console.log("GameData im Konstruktor:", gameData);
-    
+
     if (!gameData || !gameData.jumps || !gameData.highscore || !gameData.seed) {
       throw new Error("Fehlende oder ungültige Daten im gameData.");
     }
@@ -346,9 +345,9 @@ export class VirtualGame extends Game {
     this.gameData = gameData;
     this.expectedJumps = gameData.jumps;
     this.highscoreValidated = false;
-    
+
     try {
-      this.init();  // Init-Methodenaufruf
+      this.init(); // Init-Methodenaufruf
     } catch (error) {
       console.error("Fehler bei init():", error);
       throw new Error("Fehler bei der Initialisierung des Spiels.");
@@ -400,7 +399,10 @@ export class VirtualGame extends Game {
     }
     super.update();
 
-    if (this.tickCount >= this.expectedJumps[this.expectedJumps.length - 1] + 200) {
+    if (
+      this.tickCount >=
+      this.expectedJumps[this.expectedJumps.length - 1] + 200
+    ) {
       this.validateGameState();
     }
 
@@ -411,7 +413,7 @@ export class VirtualGame extends Game {
   startGame() {
     this.gameStarted = true;
     this.generator = new SeedGenerator();
-    this.initialSeed = this.gameData.seed
+    this.initialSeed = this.gameData.seed;
     this.randomGen = this.generator.randomNumbers(this.initialSeed);
     this.seed = this.initialSeed;
     this.randomGen.next();
