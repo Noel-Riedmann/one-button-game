@@ -15,13 +15,13 @@ class Game {
     this.initialCanvas();
     this.addEventListener();
 
-    this.latButtonPressedState = false;
+    this.buttonPressed = false;
     this.getSeed = getSeed;
 
     this.lastUpdateTime = performance.now();
     this.accumulator = 0;
     this.timeStep = 1000 / 60;
-    this.animationFrameID;
+    this.animationFrameID = null;
     this.highscore = new Highscore();
 
     this.fps = 60;
@@ -69,45 +69,29 @@ class Game {
     this.initialSeed = this.getSeed();
     this.randomGen = this.generator.randomNumbers(this.initialSeed);
     this.seed = this.initialSeed;
+
+    // Zustand zurücksetzen
+    this.tickCount = 0;
+    this.jumpTimestamps = [];
+    this.highscore.resetCurrentScore();
+
+    // Initialisiere alle Game-Objekte
     this.objects = [
       ...this.createBackgrounds(),
       new PlatformManager(this),
       new CoinManager(this),
-      new Platform(
-        100,
-        this.canvas.width,
-        0,
-        this.canvas.height - 100,
-        0,
-        this.createImage
-      ),
-      new Coin(
-        32,
-        48,
-        this.canvas.width,
-        0,
-        this.canvas.height - 100,
-        this.createImage
-      ),
+      new Platform(100, this.canvas.width, 0, this.canvas.height - 100, 0, this.createImage),
+      new Coin(32, 48, this.canvas.width, 0, this.canvas.height - 100, this.createImage),
       new Enemy(31, 32, -100, 300, "blue", 5, this.createImage),
-      new Enemy(
-        20,
-        this.canvas.width,
-        0,
-        this.canvas.height,
-        null,
-        0,
-        this.createImage
-      ),
+      new Enemy(20, this.canvas.width, 0, this.canvas.height, null, 0, this.createImage),
       new Player(this.createImage),
       new Platform(25, 150, -50, 550, 0, this.createImage),
-      //new Ground(this.canvas, 3),
+      // new Ground(this.canvas, 3),
     ];
+
     if (!this.animationFrameID) {
       this.animate();
     }
-    const startText = document.getElementById("startText");
-    startText.classList.remove("hide");
   }
 
   onKeydown = (event) => {
@@ -135,27 +119,19 @@ class Game {
   calculateFPS(now) {
     this.frameCount++;
     const elapsed = now - this.lastFPSUpdate;
-
     if (elapsed >= 1000) {
       this.fps = (this.frameCount / (elapsed / 1000)) | 0;
       this.frameCount = 0;
       this.lastFPSUpdate = now;
 
-      switch (true) {
-        case (this.fps > 70 && this.fps <= 85) ||
-          (this.fps > 125 && this.fps <= 150):
-          this.fps = 75;
-          break;
-        case this.fps > 85 && this.fps <= 100:
-          this.fps = 90;
-          break;
-        case (this.fps > 100 && this.fps <= 125) ||
-          (this.fps > 150 && this.fps <= 250):
-          this.fps = 60;
-          break;
-        default:
-          this.fps = 60;
-          break;
+      if ((this.fps > 70 && this.fps <= 85) || (this.fps > 125 && this.fps <= 150)) {
+        this.fps = 75;
+      } else if (this.fps > 85 && this.fps <= 100) {
+        this.fps = 90;
+      } else if ((this.fps > 100 && this.fps <= 125) || (this.fps > 150 && this.fps <= 250)) {
+        this.fps = 60;
+      } else {
+        this.fps = 60;
       }
     }
   }
@@ -163,7 +139,7 @@ class Game {
   startGame() {
     if (!this.gameStarted) {
       this.gameStarted = true;
-      //localStorage.setItem("gameSeed", this.seed);
+      localStorage.setItem("gameSeed", this.seed);
       const startText = document.getElementById("startText");
       if (startText) {
         startText.classList.add("hide");
@@ -172,105 +148,82 @@ class Game {
       this.initialSeed = this.getSeed();
       this.randomGen = this.generator.randomNumbers(this.initialSeed);
       this.seed = this.initialSeed;
-      //this.initialSeed = 0.4403660297393799//this.seed;
-      //this.seed = 0.4403660297393799;
-
       this.highscore.resetCurrentScore();
-      //this.jumpTimestamps = [];
-      //this.tickCount = 0;
 
-      const player = this.objects.filter((obj) => obj instanceof Player);
-
-      player.forEach((player) => {
-        player.startAnimation();
+      this.objects.forEach((obj) => {
+        if (obj instanceof Player && typeof obj.startAnimation === "function") {
+          obj.startAnimation();
+        }
       });
     }
   }
 
   async endGame() {
     const overlay = document.getElementById("overlay");
-    overlay.classList.add("death");
-    setTimeout(() => {
-      overlay.classList.remove("death");
-    }, 150);
+    if (overlay) {
+      overlay.classList.add("death");
+      setTimeout(() => {
+        overlay.classList.remove("death");
+      }, 150);
+    }
 
     const gameData = {
-      username: "defaultUsername",
+      username: localStorage.getItem("username"),
       highscore: this.highscore.getCurrentScore(),
       jumps: this.jumpTimestamps,
       seed: this.initialSeed,
     };
 
     try {
-      const response = await fetch(
-        "https://lovelyleap-onebutton.deno.dev/api/leaderboard",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(gameData),
-        }
-      );
+      const response = await fetch("https://lovelyleap-onebutton.deno.dev/api/leaderboard", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(gameData),
+      });
 
-      // Logge die Fehlerantworten detailliert, falls der Request fehlschlägt
       if (response.ok) {
         console.log("Game data successfully posted.");
       } else {
-        // Detailliertere Fehlerausgabe
-        const errorData = await response.json();
-        console.error(
-          `Failed to post game data: ${response.status} ${response.statusText}`,
-          errorData
-        );
+        console.error("Failed to post game data:", response.status, response.statusText);
       }
     } catch (error) {
       console.error("Error posting game data:", error);
     }
 
     this.objects.forEach((obj) => {
-      if (obj instanceof PlatformManager) {
+      if (obj instanceof PlatformManager && typeof obj.resetValues === "function") {
         obj.resetValues();
-      } else if (obj instanceof CoinManager) {
+      } else if (obj instanceof CoinManager && typeof obj.deleteMovingCoins === "function") {
         obj.deleteMovingCoins();
-      } else if (obj instanceof Player) {
+      } else if (obj instanceof Player && typeof obj.stopAnimation === "function") {
         obj.stopAnimation();
       }
     });
+
     this.highscore.update();
     this.gameStarted = false;
     this.frameCount = 0;
     this.fps = 60;
+    console.log("Spiel vorbei");
   }
 
   getGamestate() {
     return this.gameStarted;
   }
 
-  playerCanJump() {
-    return (this.canJump = true);
-  }
-
   playerJump() {
     this.jumpTimestamps.push(this.tickCount);
-    //console.log("PlayerJumpTickCountfunction: ",this.tickCount);
   }
 
   draw() {
-    this.offScreenC.clearRect(
-      0,
-      0,
-      this.offScreenCanvas.width,
-      this.offScreenCanvas.height
-    );
-    this.c.clearRect(
-      0,
-      0,
-      this.offScreenCanvas.width,
-      this.offScreenCanvas.height
-    );
+    this.offScreenC.clearRect(0, 0, this.offScreenCanvas.width, this.offScreenCanvas.height);
+    this.c.clearRect(0, 0, this.offScreenCanvas.width, this.offScreenCanvas.height);
     this.objects.forEach((object) => {
-      object.draw(this.offScreenC);
+      if (typeof object.draw === "function") {
+        object.draw(this.offScreenC);
+      }
     });
     this.c.drawImage(this.offScreenCanvas, 0, 0);
     this.updateHighscoreDisplay();
@@ -278,26 +231,31 @@ class Game {
 
   update() {
     this.objects.forEach((object) => {
-      object.update(this);
+      if (typeof object.update === "function") {
+        object.update(this);
+      }
     });
+
     this.objects = this.objects.filter((object) => {
       if (object instanceof Coin && object.collected) {
         return false;
       }
       return true;
     });
-    this.seed = this.randomGen.next().value;
+
     this.tickCount++;
 
     if (this.gameOver === true) {
-      cancelAnimationFrame(this.animationFrameID);
+      if (typeof cancelAnimationFrame === "function") {
+        cancelAnimationFrame(this.animationFrameID);
+      }
       this.init();
-      this.tickCount = 0;
+      return;
     }
-    //this.buttonPressed = [52, 145, 241].includes(this.tickCount);
     if (this.gameStarted === false && this.buttonPressed === true) {
       this.startGame();
     }
+    this.seed = this.randomGen.next().value;
   }
 
   animate() {
@@ -306,18 +264,12 @@ class Game {
     this.lastUpdateTime = now;
     this.accumulator += deltaTime;
 
-    //this.calculateFPS(now);
-
     while (this.accumulator >= this.timeStep) {
       this.update();
       this.accumulator -= this.timeStep;
-      // if (this.gameStarted === true) {
-      //   this.tickCount++;
-      // }
     }
 
     this.draw();
-
     this.animationFrameID = requestAnimationFrame(this.animate);
   }
 
@@ -333,41 +285,42 @@ export default Game;
 
 export class VirtualGame extends Game {
   constructor(gameData) {
-    super(null, () => gameData.seed);
-
-    // Logge gameData und überprüfe, ob alle benötigten Felder vorhanden sind
-    console.log("GameData im Konstruktor:", gameData);
-
     if (!gameData || !gameData.jumps || !gameData.highscore || !gameData.seed) {
       throw new Error("Fehlende oder ungültige Daten im gameData.");
     }
+    super({ width: 1200, height: 700 }, () => gameData.seed);
 
     this.gameData = gameData;
     this.expectedJumps = gameData.jumps;
     this.highscoreValidated = false;
+    this.gameOver = false;
 
-    try {
-      this.init(); // Init-Methodenaufruf
-    } catch (error) {
-      console.error("Fehler bei init():", error);
-      throw new Error("Fehler bei der Initialisierung des Spiels.");
-    }
+    this.tickCount = 0;
+    this.jumpTimestamps = [];
+    this.highscore.resetCurrentScore();
 
-    this.gameStarted = true;
+    this.canvas = { width: 1200, height: 700 };
+    this.initialCanvas();
+
+    this.init();
+    this.startGame();
   }
 
+  addEventListener() {}
+
   initialCanvas() {
-    this.canvas = {
-      width: 1200,
-      height: 700,
+    this.canvas.width = 1200;
+    this.canvas.height = 700;
+    this.offScreenCanvas = { width: 1200, height: 700 };
+    this.offScreenC = {
+      clearRect: () => {},
+      drawImage: () => {},
     };
   }
 
   createImage() {
     return {};
   }
-
-  addEventListener() {}
 
   createBackgrounds() {
     return [];
@@ -378,26 +331,53 @@ export class VirtualGame extends Game {
   draw() {}
 
   animate() {
-    const timeStep = 1000 / 60;
-    let lastUpdate = Date.now();
-
-    while (!this.gameOver) {
-      const now = Date.now();
-      const delta = now - lastUpdate;
-
-      if (delta >= timeStep) {
-        this.update();
-        lastUpdate = now;
-      }
+    const maxTicks = this.expectedJumps[this.expectedJumps.length - 1] + 300;
+    while (!this.gameOver && this.tickCount < maxTicks) {
+      this.update();
     }
   }
 
   update() {
-    this.buttonPressed = this.expectedJumps.includes(this.tickCount);
-    if (this.buttonPressed) {
-      this.playerJump();
+    if (!this.gameStarted) {
+      this.tickCount++;
+      this.seed = this.randomGen.next().value;
+      return;
     }
-    super.update();
+
+    if (this.expectedJumps.includes(this.tickCount)) {
+      this.buttonPressed = true;
+      this.playerJump();
+    } else {
+      this.buttonPressed = false;
+    }
+
+    this.objects.forEach((object) => {
+      if (typeof object.update === "function") {
+        object.update(this);
+      }
+      if (object.position && typeof object.velocity === "number") {
+        object.position.x -= object.velocity;
+      }
+    });
+
+    const platformManager = this.objects.find((o) => o instanceof PlatformManager);
+    if (platformManager) {
+      this.objects.forEach((obj) => {
+        if (obj instanceof Platform) {
+          obj.velocity = platformManager.speed;
+        }
+      });
+    }
+
+    this.objects = this.objects.filter((object) => {
+      if (object instanceof Coin && object.collected) {
+        return false;
+      }
+      return true;
+    });
+
+    this.tickCount++;
+    this.seed = this.randomGen.next().value;
 
     if (
       this.tickCount >=
@@ -405,9 +385,6 @@ export class VirtualGame extends Game {
     ) {
       this.validateGameState();
     }
-
-    // console.log("Server Seed:", this.gameData.seed);
-    // console.log("Game Seed:", this.initialSeed);
   }
 
   startGame() {
@@ -416,13 +393,30 @@ export class VirtualGame extends Game {
     this.initialSeed = this.gameData.seed;
     this.randomGen = this.generator.randomNumbers(this.initialSeed);
     this.seed = this.initialSeed;
-    this.randomGen.next();
+    this.highscore.resetCurrentScore();
+
+    this.objects.forEach((obj) => {
+      if (obj instanceof Platform) {
+        if (!obj.velocity || obj.velocity === 0) {
+          obj.velocity = 3;
+        }
+      }
+      if (obj instanceof Coin) {
+        if (!obj.velocity || obj.velocity === 0) {
+          obj.velocity = 3;
+        }
+      }
+      if (obj instanceof Player && typeof obj.startAnimation === "function") {
+        obj.startAnimation();
+      }
+    });
   }
 
   endGame() {}
 
   validateGameState() {
     const serverCalculatedHighscore = this.highscore.getCurrentScore();
+
     if (serverCalculatedHighscore !== this.gameData.highscore) {
       throw new Error(
         `Highscore mismatch! Expected: ${this.gameData.highscore}, Got: ${serverCalculatedHighscore}`
@@ -430,5 +424,6 @@ export class VirtualGame extends Game {
     }
 
     this.highscoreValidated = true;
+    this.gameOver = true;
   }
 }
