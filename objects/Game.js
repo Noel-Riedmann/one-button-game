@@ -70,12 +70,10 @@ class Game {
     this.randomGen = this.generator.randomNumbers(this.initialSeed);
     this.seed = this.initialSeed;
 
-    // Zustand zurücksetzen
     this.tickCount = 0;
     this.jumpTimestamps = [];
     this.highscore.resetCurrentScore();
 
-    // Initialisiere alle Game-Objekte
     this.objects = [
       ...this.createBackgrounds(),
       new PlatformManager(this),
