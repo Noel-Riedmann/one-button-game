@@ -39,28 +39,7 @@ class Player {
     this.jumpRightFrame = 1;
 
     this.canJump = false;
-    this.spaceDown = false;
-    document.addEventListener("keydown", this.onKeydown);
-    document.addEventListener("keyup", this.onKeyup);
   }
-
-  onKeydown = (event) => {
-    if (event.code === "Space" && !this.spaceDown) {
-      this.spaceDown = true;
-      if (this.canJump) {
-        this.playerJump();
-        this.velocity.y = -15;
-        this.isJumping = true;
-        this.canJump = false;
-      }
-    }
-  };
-
-  onKeyup = (event) => {
-    if (event.code === "Space") {
-      this.spaceDown = false;
-    }
-  };
 
   updateCollisionPoints() {
     this.collisionPointBelow = {
